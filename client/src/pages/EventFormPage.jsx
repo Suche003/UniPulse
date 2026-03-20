@@ -1,118 +1,148 @@
 import { useState } from "react";
-import axios from "../api/axios"; // Make sure axios.js exists with baseURL
+import axios from "axios";
+import "./EventForm.css"; // we'll create this CSS file
 
-export default function EventFormPage() {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [date, setDate] = useState("");
-  const [location, setLocation] = useState("");
-  const [image, setImage] = useState(null);
-  const [submitting, setSubmitting] = useState(false);
+function EventForm() {
+  const [formData, setFormData] = useState({
+    eventid: "",
+    title: "",
+    description: "",
+    date: "",
+    location: "",
+    ispaid: false,
+    ticketPrice: 0,
+    image: null
+  });
 
-  async function onSubmit(e) {
-    e.preventDefault();
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
-    // simple validation
-    if (!title.trim() || !date) {
-      alert("Please enter title and date");
-      return;
+  const handleChange = (e) => {
+    const { name, value, type, checked, files } = e.target;
+    if (type === "file") {
+      setFormData({ ...formData, image: files[0] });
+    } else if (type === "checkbox") {
+      setFormData({ ...formData, [name]: checked });
+    } else {
+      setFormData({ ...formData, [name]: value });
     }
+  };
 
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("description", description);
-    formData.append("date", date);
-    formData.append("location", location);
-    if (image) formData.append("image", image);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
 
     try {
-      setSubmitting(true);
-      const res = await axios.post("/events", formData, {
+      const data = new FormData();
+      data.append("eventid", formData.eventid);
+      data.append("title", formData.title);
+      data.append("description", formData.description);
+      data.append("date", formData.date);
+      data.append("location", formData.location);
+      data.append("ispaid", formData.ispaid);
+      if (formData.ispaid) data.append("ticketPrice", formData.ticketPrice);
+      if (formData.image) data.append("image", formData.image);
+
+      const res = await axios.post("http://localhost:5000/api/events", data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      alert("Event created successfully!");
-      console.log("Backend response:", res.data);
-
-      // Optional: reset form
-      setTitle("");
-      setDescription("");
-      setDate("");
-      setLocation("");
-      setImage(null);
+      setSuccess(`Event Created! Event ID: ${res.data.eventid}`);
+      setFormData({
+        eventid: "",
+        title: "",
+        description: "",
+        date: "",
+        location: "",
+        ispaid: false,
+        ticketPrice: 0,
+        image: null
+      });
 
     } catch (err) {
-      console.error("Error creating event:", err);
-      alert("Error creating event. Check console for details.");
-    } finally {
-      setSubmitting(false);
+      setError(err.response?.data?.message || err.message);
     }
-  }
+  };
 
   return (
-    <form onSubmit={onSubmit} style={{ maxWidth: "500px", margin: "auto" }}>
-      <div>
-        <label htmlFor="event-title">Title *</label>
+    <div className="form-container">
+      <h2>Create Event (Admin)</h2>
+      {error && <p className="error">{error}</p>}
+      {success && <p className="success">{success}</p>}
+
+      <form onSubmit={handleSubmit} className="event-form">
+
         <input
-          id="event-title"
+          name="eventid"
+          placeholder="Event ID"
+          value={formData.eventid}
+          onChange={handleChange}
+          required
+        />
+
+        <input
           name="title"
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Enter event title"
+          placeholder="Title"
+          value={formData.title}
+          onChange={handleChange}
           required
         />
-      </div>
 
-      <div>
-        <label htmlFor="event-description">Description</label>
         <textarea
-          id="event-description"
           name="description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Enter event description"
+          placeholder="Description"
+          value={formData.description}
+          onChange={handleChange}
         />
-      </div>
 
-      <div>
-        <label htmlFor="event-date">Date *</label>
         <input
-          id="event-date"
-          name="date"
           type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
+          name="date"
+          value={formData.date}
+          onChange={handleChange}
           required
         />
-      </div>
 
-      <div>
-        <label htmlFor="event-location">Location</label>
         <input
-          id="event-location"
           name="location"
-          type="text"
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-          placeholder="Enter event location"
+          placeholder="Location"
+          value={formData.location}
+          onChange={handleChange}
         />
-      </div>
 
-      <div>
-        <label htmlFor="event-image">Image</label>
+        <label className="checkbox-label">
+          <input
+            type="checkbox"
+            name="ispaid"
+            checked={formData.ispaid}
+            onChange={handleChange}
+          />
+          Paid Event
+        </label>
+
+        {formData.ispaid && (
+          <input
+            type="number"
+            name="ticketPrice"
+            placeholder="Ticket Price"
+            value={formData.ticketPrice}
+            onChange={handleChange}
+            required
+          />
+        )}
+
         <input
-          id="event-image"
-          name="image"
           type="file"
+          name="image"
+          onChange={handleChange}
           accept="image/*"
-          onChange={(e) => setImage(e.target.files[0])}
         />
-      </div>
 
-      <button type="submit" disabled={submitting}>
-        {submitting ? "Creating..." : "Create Event"}
-      </button>
-    </form>
+        <button type="submit">Create Event</button>
+      </form>
+    </div>
   );
 }
+
+export default EventForm;
