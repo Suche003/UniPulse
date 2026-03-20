@@ -4,7 +4,11 @@ import dotenv from "dotenv";
 import { connectDB } from "./config/db.js";
 import studentRoutes from "./routes/studentRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import eventRoutes from "./routes/eventRoutes.js";
+
 import { errorHandler } from "./middleware/errorHandler.js";
+
+
 
 dotenv.config();
 
@@ -17,6 +21,9 @@ app.get("/", (req, res) => res.send("UniPulse API running ✅"));
 
 app.use("/api/students", studentRoutes);
 app.use("/api/auth", authRoutes);
+
+//Events
+app.use("/api/events", eventRoutes);
 
 app.use(errorHandler);
 

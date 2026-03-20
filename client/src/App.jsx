@@ -3,6 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
+import EventForm from "./pages/EventFormPage";
 
 import ProtectedRoute from "./auth/ProtectedRoute";
 import RoleRoute from "./auth/RoleRoute";
@@ -44,6 +45,8 @@ export default function App() {
         {/* Super Admin only */}
         <Route element={<RoleRoute allow={["superadmin"]} />}>
           <Route path="/superadmin/control-panel" element={<SuperAdminPanel />} />
+          <Route path="/superadmin/events" element={<EventForm />} />
+          
         </Route>
 
       </Route>
