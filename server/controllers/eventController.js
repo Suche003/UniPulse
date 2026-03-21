@@ -1,7 +1,7 @@
 // controllers/eventController.js
 import Event from "../models/Event.js";
 
-// CREATE EVENT
+// *CREATE EVENT
 export const createEvent = async (req, res) => {
   try {
     // Destructure form data
@@ -47,7 +47,7 @@ export const createEvent = async (req, res) => {
   }
 };
 
-// GET ALL EVENTS
+// *GET ALL EVENTS
 export const getEvents = async (req, res) => {
   try {
     const events = await Event.find().sort({ createdAt: -1 });

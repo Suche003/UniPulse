@@ -4,6 +4,7 @@ import Home from "./pages/Home";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import EventForm from "./pages/EventFormPage";
+import EventList from "./pages/EventList";
 
 import ProtectedRoute from "./auth/ProtectedRoute";
 import RoleRoute from "./auth/RoleRoute";
@@ -18,7 +19,50 @@ function ClubDashboard() {
 }
 
 function SuperAdminPanel() {
-  return <div>Super Admin Control Panel</div>;
+  return (<div>
+    <h2>Super Admin Control Panel</h2>
+    <button 
+    style={{
+          backgroundColor: "#4caf50", // green
+          color: "#fff", // text color white
+          padding: "12px 24px", // size
+          fontSize: "16px",
+          border: "none",
+          borderRadius: "8px",
+          cursor: "pointer",
+        }}
+    
+    onClick={()=>{
+      window.location.href="/superadmin/events";
+    }}>
+    Create Event
+    </button>
+
+
+    <button 
+    style={{
+          backgroundColor: "#4caf50", // green
+          color: "#fff", // text color white
+          padding: "12px 24px", // size
+          fontSize: "16px",
+          border: "none",
+          borderRadius: "8px",
+          cursor: "pointer",
+        }}
+    
+    onClick={()=>{
+      window.location.href="/superadmin/events-get";
+    }}>
+   ShowEvent
+    </button>
+    </div>
+
+    
+
+
+    )
+    ;
+  
 }
 
 export default function App() {
@@ -46,6 +90,8 @@ export default function App() {
         <Route element={<RoleRoute allow={["superadmin"]} />}>
           <Route path="/superadmin/control-panel" element={<SuperAdminPanel />} />
           <Route path="/superadmin/events" element={<EventForm />} />
+           <Route path="/superadmin/events-get" element={<EventList />} />
+          
           
         </Route>
 
