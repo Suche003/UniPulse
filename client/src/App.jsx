@@ -4,7 +4,7 @@ import Home from "./pages/Home";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import EventForm from "./pages/EventFormPage";
-import EventList from "./pages/EventList";
+import EventListAd from "./pages/EventListAd";
 
 import ProtectedRoute from "./auth/ProtectedRoute";
 import RoleRoute from "./auth/RoleRoute";
@@ -53,7 +53,7 @@ function SuperAdminPanel() {
     onClick={()=>{
       window.location.href="/superadmin/events-get";
     }}>
-   ShowEvent
+   Show Event
     </button>
     </div>
 
@@ -90,7 +90,7 @@ export default function App() {
         <Route element={<RoleRoute allow={["superadmin"]} />}>
           <Route path="/superadmin/control-panel" element={<SuperAdminPanel />} />
           <Route path="/superadmin/events" element={<EventForm />} />
-           <Route path="/superadmin/events-get" element={<EventList />} />
+           <Route path="/superadmin/events-get" element={<EventListAd />} />
           
           
         </Route>
