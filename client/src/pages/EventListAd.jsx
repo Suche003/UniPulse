@@ -16,10 +16,10 @@ const EventList = () => {
   }, []);
 
   // DELETE EVENT
-  const handleDelete = async (id) => {
+  const handleDelete = async (_id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/events/${id}`);
-      setEvents(events.filter((event) => event._id !== id));
+      await axios.delete(`http://localhost:5000/api/events/${_id}`);
+      setEvents(events.filter((event) => event._id !== _id));
       alert("Event deleted successfully!");
     } catch (err) {
       console.error(err);
@@ -43,14 +43,17 @@ const EventList = () => {
     <div className="event-component-container">
       <h2>Upcoming Events</h2>
 
-      {events.length === 0 ? (
+      {events.length === 0 ?
+       (
         <p>No events found.</p>
-      ) : (
+      ) 
+
+      : (
         <div className="events-grid">
           {events.map((event) => (
             <div className="event-card" key={event._id}>
               <img
-                src={event.imageUrl || "/placeholder.jpg"}
+                src={`http://localhost:5000/${event.imageUrl}` || "/placeholder.jpg"}
                 alt={event.title}
                 className="event-image"
               />

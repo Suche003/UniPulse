@@ -24,7 +24,7 @@ app.use("/api/auth", authRoutes);
 
 //Events
 app.use("/api/events", eventRoutes);
-app.use("/uploads", express.static("uploads"));
+app.use('/uploads', express.static('uploads'));
 
 
 
