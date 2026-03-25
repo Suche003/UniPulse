@@ -1,11 +1,9 @@
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/Logo.png";
-
 import { isLoggedIn, getRole, logout } from "../auth/auth";
 
 export default function Navbar() {
   const navigate = useNavigate();
-
   const logged = isLoggedIn();
   const role = getRole();
 
@@ -30,6 +28,8 @@ export default function Navbar() {
       ? "Club"
       : role === "superadmin"
       ? "Super Admin"
+      : role === "vendor"
+      ? "Vendor"
       : "";
 
   return (
@@ -45,7 +45,6 @@ export default function Navbar() {
               <Link className="btn btn--ghost" to="/login">
                 Login
               </Link>
-
               <Link className="btn btn--primary" to="/signup">
                 Sign Up
               </Link>
@@ -54,9 +53,33 @@ export default function Navbar() {
             <>
               <span className="roleBadge">{roleLabel}</span>
 
-              <Link className="btn btn--ghost" to={dashboardPath}>
-                Dashboard
-              </Link>
+              {role === "superadmin" && (
+                <>
+                  <Link className="btn btn--ghost" to="/sponsors">
+                    📦 Sponsors
+                  </Link>
+                  <Link className="btn btn--ghost" to="/vendors">
+                    🏪 Vendors
+                  </Link>
+                </>
+              )}
+
+              {role === "vendor" && (
+                <>
+                  <Link className="btn btn--ghost" to="/vendor/dashboard">
+                    📊 Dashboard
+                  </Link>
+                  <Link className="btn btn--ghost" to="/bookings">
+                    🎟️ My Bookings
+                  </Link>
+                </>
+              )}
+
+              {role !== "vendor" && (
+                <Link className="btn btn--ghost" to={dashboardPath}>
+                  Dashboard
+                </Link>
+              )}
 
               <button className="btn btn--primary" onClick={handleLogout}>
                 Logout

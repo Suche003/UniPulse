@@ -4,36 +4,53 @@ function getToken() {
   return localStorage.getItem("unipulse_token");
 }
 
-/**
- * Generic request helper with JWT
- */
-export async function apiRequest(path, { method = "GET", body, headers } = {}) {
+export async function apiRequest(path, { method = "GET", body, headers = {} } = {}) {
   const token = getToken();
 
-  const res = await fetch(`${API_BASE}${path}`, {
+  const options = {
     method,
     headers: {
-      "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(headers || {}),
+      ...headers,
     },
-    body: body ? JSON.stringify(body) : undefined,
-  });
+  };
 
-  // If backend returns empty body sometimes, this avoids crash
-  const text = await res.text();
-  const data = text ? JSON.parse(text) : null;
-
-  if (!res.ok) {
-    const msg =
-      data?.message ||
-      (data?.errors ? data.errors.map((e) => e.msg).join(", ") : "") ||
-      `Request failed (${res.status})`;
-    const err = new Error(msg);
-    err.status = res.status;
-    err.data = data;
-    throw err;
+  if (body instanceof FormData) {
+    options.body = body;
+    // remove content-type so browser sets boundary
+    if (options.headers['Content-Type']) delete options.headers['Content-Type'];
+  } else if (body) {
+    options.headers['Content-Type'] = 'application/json';
+    options.body = JSON.stringify(body);
   }
 
-  return data;
+  try {
+    const res = await fetch(`${API_BASE}${path}`, options);
+
+    let data = null;
+    const text = await res.text();
+    if (text) {
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        console.error('Failed to parse JSON:', text);
+      }
+    }
+
+    if (!res.ok) {
+      const msg = data?.message || `Request failed (${res.status})`;
+      const err = new Error(msg);
+      err.status = res.status;
+      err.data = data;
+      throw err;
+    }
+
+    return data;
+  } catch (err) {
+    // Log network errors
+    if (err.name === 'TypeError' && err.message === 'Failed to fetch') {
+      console.error('Network error: Server might be down or CORS issue.');
+    }
+    throw err;
+  }
 }
