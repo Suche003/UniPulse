@@ -1,11 +1,11 @@
 import Stall from "../models/Stall.js";
 import Event from "../models/Event.js";
 
-// *CREATE STALL for a specific event
+// CREATE STALL for a specific event
 export const createStall = async (req, res) => {
   try {
     const { eventid } = req.params;
-    const { type, price, location, availableStalls, image, description } = req.body;
+    const { stallId, category, price, location, availableStalls, image, description } = req.body;
 
     // Check if event exists
     const event = await Event.findOne({ eventid });
@@ -16,7 +16,8 @@ export const createStall = async (req, res) => {
     // Create new stall
     const newStall = new Stall({
       eventid,
-      type,
+      stallId,
+      category,
       price,
       location,
       availableStalls,
@@ -30,6 +31,12 @@ export const createStall = async (req, res) => {
   } catch (error) {
     console.error(error);
 
+    // Duplicate stallId error
+    if (error.code === 11000) {
+      return res.status(400).json({ message: "Stall ID must be unique." });
+    }
+
+    // Validation errors
     if (error.name === "ValidationError") {
       const messages = Object.values(error.errors).map(e => e.message);
       return res.status(400).json({ message: messages.join(", ") });
@@ -39,7 +46,7 @@ export const createStall = async (req, res) => {
   }
 };
 
-// *GET ALL STALLS for an event
+// GET ALL STALLS for an event
 export const getStalls = async (req, res) => {
   try {
     const { eventid } = req.params;
@@ -53,12 +60,12 @@ export const getStalls = async (req, res) => {
   }
 };
 
-// *GET SINGLE STALL by ID
+// GET SINGLE STALL by stallId
 export const getStallById = async (req, res) => {
   try {
-    const { eventid, id } = req.params;
+    const { eventid, id } = req.params; 
 
-    const stall = await Stall.findOne({ _id: id, eventid });
+    const stall = await Stall.findOne({ stallId: id, eventid });
     if (!stall) {
       return res.status(404).json({ message: "Stall not found." });
     }
@@ -71,14 +78,14 @@ export const getStallById = async (req, res) => {
   }
 };
 
-// *UPDATE STALL
+// UPDATE STALL 
 export const updateStall = async (req, res) => {
   try {
-    const { eventid, id } = req.params;
-    const { type, price, location, availableStalls, image, description, status } = req.body;
+    const { eventid, id } = req.params; 
+    const { category, price, location, availableStalls, image, description, status } = req.body;
 
     const updatedData = {
-      type,
+      category,
       price,
       location,
       availableStalls,
@@ -86,13 +93,10 @@ export const updateStall = async (req, res) => {
       status,
     };
 
-    // Only update image if provided
-    if (image) {
-      updatedData.image = image;
-    }
+    if (image) updatedData.image = image;
 
     const stall = await Stall.findOneAndUpdate(
-      { _id: id, eventid },
+      { stallId: id, eventid },
       updatedData,
       { new: true, runValidators: true }
     );
@@ -115,12 +119,12 @@ export const updateStall = async (req, res) => {
   }
 };
 
-// *DELETE STALL
+// DELETE STALL by stallId
 export const deleteStall = async (req, res) => {
   try {
-    const { eventid, id } = req.params;
+    const { eventid, id } = req.params; 
 
-    const stall = await Stall.findOneAndDelete({ _id: id, eventid });
+    const stall = await Stall.findOneAndDelete({ stallId: id, eventid });
 
     if (!stall) {
       return res.status(404).json({ message: "Stall not found." });
@@ -128,6 +132,17 @@ export const deleteStall = async (req, res) => {
 
     res.json({ message: "Stall deleted successfully." });
 
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// GET ALL STALLS 
+export const getAllStalls = async (req, res) => {
+  try {
+    const stalls = await Stall.find().sort({ createdAt: -1 });
+    res.json(stalls);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message });
