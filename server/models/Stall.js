@@ -2,8 +2,12 @@ import mongoose from "mongoose";
 
 const stallSchema = new mongoose.Schema(
   {
-    eventid: { type: String, required: true },         
-    type: { type: String, required: true },           
+    eventid: { type: String, required: true }, 
+    
+    stallId: { type: String, required: true, unique: true, immutable: true }, 
+
+    category: { type: String, required: true },        
+
     price: { type: Number, required: true },
 
     location: { type: String },        
