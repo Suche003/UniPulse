@@ -27,17 +27,7 @@ const EventList = () => {
     }
   };
 
-  // UPDATE EVENT (just demo alert - later connect form/page)
-  const handleUpdate = (event) => {
-    alert(`Update event: ${event.title}`);
-    // You can navigate to update page here
-  };
-
-  // MANAGE STALL
-  const handleManageStall = (event) => {
-    alert(`Manage stalls for: ${event.title}`);
-    // Navigate to stall management page
-  };
+  
 
   return (
     <div className="event-component-container">
@@ -53,7 +43,7 @@ const EventList = () => {
           {events.map((event) => (
             <div className="event-card" key={event._id}>
               <img
-                src={`http://localhost:5000/${event.imageUrl}` || "/placeholder.jpg"}
+                src={`http://localhost:5000/api/events/${event.image}` || "/placeholder.jpg"}
                 alt={event.title}
                 className="event-image"
               />
@@ -63,12 +53,7 @@ const EventList = () => {
               <p>Location: {event.location}</p>
 
               <div className="button-group">
-                <button
-                  className="update-btn"
-                  onClick={() => handleUpdate(event)}
-                >
-                  Update
-                </button>
+                
 
                 <button
                   className="delete-btn"
@@ -77,12 +62,7 @@ const EventList = () => {
                   Delete
                 </button>
 
-                <button
-                  className="stall-btn"
-                  onClick={() => handleManageStall(event)}
-                >
-                  Manage Stall
-                </button>
+                
               </div>
             </div>
           ))}

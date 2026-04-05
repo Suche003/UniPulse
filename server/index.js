@@ -5,9 +5,9 @@ import { connectDB } from "./config/db.js";
 import studentRoutes from "./routes/studentRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import eventRoutes from "./routes/eventRoutes.js";
+import clubRoutes from "./routes/clubRoute.js";
 
 import { errorHandler } from "./middleware/errorHandler.js";
-
 
 
 dotenv.config();
@@ -25,6 +25,10 @@ app.use("/api/auth", authRoutes);
 //Events
 app.use("/api/events", eventRoutes);
 app.use('/uploads', express.static('uploads'));
+
+//Clubs
+app.use("/api/clubs", clubRoutes);
+
 
 
 

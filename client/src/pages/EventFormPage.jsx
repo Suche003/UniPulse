@@ -1,17 +1,18 @@
 import { useState } from "react";
 import axios from "axios";
-import "./EventForm.css"; // we'll create this CSS file
+import "./EventForm.css";
 
-function EventForm() {
+export default function EventFormPage() {
   const [formData, setFormData] = useState({
-    eventid: "",
+    clubid: "",
     title: "",
     description: "",
     date: "",
     location: "",
     ispaid: false,
     ticketPrice: 0,
-    image: null
+    pdf: null,
+    image: null,
   });
 
   const [error, setError] = useState("");
@@ -19,12 +20,23 @@ function EventForm() {
 
   const handleChange = (e) => {
     const { name, value, type, checked, files } = e.target;
+
     if (type === "file") {
-      setFormData({ ...formData, image: files[0] });
+      const file = files[0];
+      if (!file) return;
+
+      if (name === "pdf" && file.type !== "application/pdf") {
+        return alert("Only PDF allowed!");
+      }
+      if (name === "image" && !file.type.startsWith("image/")) {
+        return alert("Only images allowed!");
+      }
+
+      setFormData((prev) => ({ ...prev, [name]: file }));
     } else if (type === "checkbox") {
-      setFormData({ ...formData, [name]: checked });
+      setFormData((prev) => ({ ...prev, [name]: checked }));
     } else {
-      setFormData({ ...formData, [name]: value });
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
@@ -33,33 +45,42 @@ function EventForm() {
     setError("");
     setSuccess("");
 
+    if (!formData.clubid.trim()) return setError("Club ID is required");
+    if (!formData.title.trim() || formData.title.length < 3)
+      return setError("Title must be at least 3 characters");
+    if (!formData.date) return setError("Date is required");
+    if (new Date(formData.date) < new Date())
+      return setError("Date must be in the future");
+    if (formData.ispaid && (!formData.ticketPrice || formData.ticketPrice <= 0))
+      return setError("Invalid ticket price");
+    if (!formData.pdf) return setError("PDF is required");
+    if (formData.pdf.size > 2 * 1024 * 1024)
+      return setError("PDF must be less than 2MB");
+    if (formData.image && formData.image.size > 3 * 1024 * 1024)
+      return setError("Image must be less than 3MB");
+
     try {
       const data = new FormData();
-      data.append("eventid", formData.eventid);
-      data.append("title", formData.title);
-      data.append("description", formData.description);
-      data.append("date", formData.date);
-      data.append("location", formData.location);
-      data.append("ispaid", formData.ispaid);
-      if (formData.ispaid) data.append("ticketPrice", formData.ticketPrice);
-      if (formData.image) data.append("image", formData.image);
+      Object.entries(formData).forEach(([key, val]) => {
+        if (val) data.append(key, val);
+      });
 
-      const res = await axios.post("http://localhost:5000/api/events", data, {
+      const res = await axios.post(`http://localhost:5000/api/events`, data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      setSuccess(`Event Created! Event ID: ${res.data.eventid}`);
+      setSuccess(`Event Created! ID: ${res.data.eventid}`);
       setFormData({
-        eventid: "",
+        clubid: "",
         title: "",
         description: "",
         date: "",
         location: "",
         ispaid: false,
         ticketPrice: 0,
-        image: null
+        pdf: null,
+        image: null,
       });
-
     } catch (err) {
       setError(err.response?.data?.message || err.message);
     }
@@ -67,43 +88,35 @@ function EventForm() {
 
   return (
     <div className="form-container">
-      <h2>Create Event (Admin)</h2>
+      <h2>Event Request</h2>
       {error && <p className="error">{error}</p>}
       {success && <p className="success">{success}</p>}
 
-      <form onSubmit={handleSubmit} className="event-form">
-
+      <form className="event-form" onSubmit={handleSubmit} noValidate>
         <input
-          name="eventid"
-          placeholder="Event ID"
-          value={formData.eventid}
+          name="clubid"
+          placeholder="Club ID"
+          value={formData.clubid}
           onChange={handleChange}
-          required
         />
-
         <input
           name="title"
           placeholder="Title"
           value={formData.title}
           onChange={handleChange}
-          required
         />
-
         <textarea
           name="description"
           placeholder="Description"
           value={formData.description}
           onChange={handleChange}
         />
-
         <input
           type="date"
           name="date"
           value={formData.date}
           onChange={handleChange}
-          required
         />
-
         <input
           name="location"
           placeholder="Location"
@@ -128,21 +141,31 @@ function EventForm() {
             placeholder="Ticket Price"
             value={formData.ticketPrice}
             onChange={handleChange}
-            required
           />
         )}
 
-        <input
-          type="file"
-          name="image"
-          onChange={handleChange}
-          accept="image/*"
-        />
+        <div className="file-upload">
+          <label>Event PDF (required)</label>
+          <input
+            type="file"
+            name="pdf"
+            accept="application/pdf"
+            onChange={handleChange}
+          />
+        </div>
 
-        <button type="submit">Create Event</button>
+        <div className="file-upload">
+          <label>Event Image (optional)</label>
+          <input
+            type="file"
+            name="image"
+            accept="image/*"
+            onChange={handleChange}
+          />
+        </div>
+
+        <button type="submit">Submit</button>
       </form>
     </div>
   );
 }
-
-export default EventForm;

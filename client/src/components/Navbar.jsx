@@ -52,7 +52,7 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <span className="roleBadge">{roleLabel}</span>
+              
 
               <Link className="btn btn--ghost" to={dashboardPath}>
                 Dashboard

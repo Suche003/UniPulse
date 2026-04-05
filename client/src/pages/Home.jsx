@@ -4,7 +4,7 @@ import Navbar from "../components/Navbar";
 export default function Home() {
   return (
     <div className="page">
-      <Navbar />
+      
 
       <main className="container">
         <section className="hero">
