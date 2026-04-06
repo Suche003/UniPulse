@@ -5,6 +5,7 @@ import { connectDB } from "./config/db.js";
 import studentRoutes from "./routes/studentRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import { errorHandler } from "./middleware/errorHandler.js";
+import studentProfileRoutes from "./routes/studentProfileRoutes.js";
 
 dotenv.config();
 
@@ -19,6 +20,8 @@ app.use("/api/students", studentRoutes);
 app.use("/api/auth", authRoutes);
 
 app.use(errorHandler);
+
+app.use("/api/students", studentProfileRoutes);
 
 const PORT = process.env.PORT || 5000;
 
