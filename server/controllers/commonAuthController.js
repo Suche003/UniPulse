@@ -35,7 +35,7 @@ export async function commonLogin(req, res) {
 
   // 2) Try Club by clubId OR email
   const club = await Club.findOne({
-    $or: [{ clubId: identifier }, { email: identifier }],
+    $or: [{ clubid: identifier }, { email: identifier }],
     isActive: true,
   });
 
@@ -54,7 +54,7 @@ export async function commonLogin(req, res) {
       role: "club",
       redirectTo: "/club/dashboard",
       token,
-      user: { id: club._id, clubId: club.clubId, clubName: club.clubName, email: club.email },
+      user: { id: club._id, clubid: club.clubid, clubName: club.clubName, email: club.email },
     });
   }
 

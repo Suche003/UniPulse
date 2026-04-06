@@ -29,9 +29,6 @@ app.use('/uploads', express.static('uploads'));
 //Clubs
 app.use("/api/clubs", clubRoutes);
 
-
-
-
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;

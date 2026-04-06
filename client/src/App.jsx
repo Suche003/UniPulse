@@ -12,6 +12,9 @@ import ClubDashboard from "./pages/ClubDashbord";
 import ClubEvent from "./pages/EventListCl";
 import UpdateEvent from "./pages/UpdateEvent";
 import ViewClub from "./pages/ViewClubs";
+import AllClubAd from "./pages/AllClubAd";
+
+
 
 import ProtectedRoute from "./auth/ProtectedRoute";
 import RoleRoute from "./auth/RoleRoute";
@@ -29,6 +32,7 @@ function SuperAdminPanel() {
     { title: "Create Club", color: "#9D4DFF", link: "/superadmin/createclub" }, // bright red
     { title: "Upcoming Events", color: "#4DD9FF", link: "/superadmin/alleventsadmin" }, // bright blue
     { title: "Pending Events", color: "#FFB84D", link: "/superadmin/pendingevents" }, // bright orange
+    { title: "All Events", color: "#944dff", link: "/superadmin/viewallclubs" }, 
     
   ];
 
@@ -154,6 +158,7 @@ export default function App() {
             <Route path="/superadmin/pendingevents" element={<PendingEvents />} />
             <Route path="/superadmin/alleventsadmin" element={<EventListAdmin />} />
             <Route path="/superadmin/createclub" element={<ClubForm />} />
+             <Route path="/superadmin/viewallclubs" element={<AllClubAd />} />
           </Route>
 
         </Route>

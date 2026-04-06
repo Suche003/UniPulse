@@ -8,7 +8,7 @@ export default function CreateClub() {
     email: "",
     password: "",
     faculty: "",
-    clubId: "", // Will be set after creation
+    clubid: "", // Will be set after creation
   });
 
   const [errors, setErrors] = useState({ email: "", password: "" });
@@ -65,7 +65,7 @@ export default function CreateClub() {
         email: "",
         password: "",
         faculty: "",
-        clubId: res.data.club.clubId, // Read-only field
+        clubid: res.data.club.clubid, // Read-only field
       });
 
       setErrors({ email: "", password: "" });
@@ -82,9 +82,9 @@ export default function CreateClub() {
           {/* Club ID (read-only) */}
           <input
             type="text"
-            name="clubId"
+            name="clubid"
             placeholder="Club ID (auto-generated)"
-            value={form.clubId}
+            value={form.clubid}
             readOnly
           />
 
