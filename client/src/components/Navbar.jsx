@@ -27,6 +27,11 @@ export default function Navbar() {
     } catch (err) {}
   };
 
+  const storedUser = localStorage.getItem("unipulse_user");
+  const user = storedUser ? JSON.parse(storedUser) : null;
+
+  const userName = user?.name || "";
+
   const dashboardPath =
     role === "student"
       ? "/student/dashboard"
@@ -73,10 +78,15 @@ export default function Navbar() {
               <Link className="btn btn--primary" to="/sponsor-signup">
                 Become a Sponsor
               </Link>
+
+              {/* Your Vendor Register button */}
+              <Link className="btn btn--primary" to="/register">
+                Register
+              </Link>
             </>
           ) : (
             <>
-              <span className="roleBadge">{roleLabel}</span>
+              
 
               {/* Notification bell */}
               <button
@@ -125,7 +135,19 @@ export default function Navbar() {
                   Dashboard
                 </Link>
               )}
+              {/* Dashboard */}
+              <Link className="btn btn--ghost" to={dashboardPath}>
+                Dashboard
+              </Link>
 
+              {/* Profile (only for students) */}
+              {role === "student" && (
+                <Link className="btn btn--ghost" to="/student/profile">
+                  My Profile
+                </Link>
+              )}
+
+              {/* Logout */}
               <button className="btn btn--primary" onClick={handleLogout}>
                 Logout
               </button>

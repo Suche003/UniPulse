@@ -1,0 +1,176 @@
+/* -------------------- Variables -------------------- */
+:root {
+  --bg: #0b0b12;
+  --card: rgba(255, 255, 255, 0.06);
+  --text: #eaeaf2;
+  --muted: rgba(234, 234, 242, 0.7);
+  --border: rgba(255, 255, 255, 0.12);
+  --accent: #7c2cff;
+  --accent2: #ff2b6a;
+}
+
+/* -------------------- Stall Payment Card  -------------------- */
+.stall-payment-card {
+  background: var(--card);
+  padding: 22px 25px;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+  width: 100%;
+  max-width: 450px;
+  margin: 30px auto;
+}
+
+/* Title */
+.form-title {
+  margin-top: 0;
+  text-align: center;
+  color: var(--text);
+  margin-bottom: 25px;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+/* Stall Summary */
+.stall-summary p {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 6px 0;
+}
+
+/* -------------------- Payment Form -------------------- */
+.payment-form {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px; 
+}
+
+/* Spacing to non-radio labels */
+.payment-form label:not(.card-type-group label) {
+  display: flex;
+  flex-direction: column; 
+  gap: 6px;               
+  font-size: 13px;
+  color: rgba(234,234,242,0.8);
+  font-weight: 600;
+}
+
+/* -------------------- Card Type -------------------- */
+.card-type-group.horizontal {
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+  margin-bottom: 10px;
+  align-items: center;
+}
+
+.card-type-group.horizontal label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: var(--text);
+}
+
+.card-type-group.horizontal input[type="radio"] {
+  margin-right: 8px;
+}
+
+.card-logo {
+  width: 45px;
+  height: auto;
+}
+
+/* -------------------- Inputs -------------------- */
+.payment-form input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  font-size: 14px;
+  background: rgba(0,0,0,0.25);
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.payment-form input:focus {
+  border-color: var(--accent);
+}
+
+/* -------------------- Expiry + CVV -------------------- */
+.card-row {
+  display: flex;
+  gap: 12px;
+}
+
+.card-row label {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* -------------------- Buttons -------------------- */
+.pay-btn {
+  background: linear-gradient(90deg, var(--accent2), var(--accent));
+  color: #fff;
+  font-weight: bold;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s;
+  width: 100%;
+}
+
+.pay-btn:hover {
+  transform: translateY(-1px);
+  opacity: 0.9;
+}
+
+.demo-btn {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-weight: bold;
+  padding: 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: 0.3s;
+  width: 100%;
+}
+
+.demo-btn:hover {
+  background: rgba(255,255,255,0.12);
+}
+
+.payment-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.payment-buttons button {
+  flex: 1;
+}
+
+/* -------------------- Error & Info -------------------- */
+.error-text,
+.info-text {
+  text-align: center;
+  font-size: 15px;
+  margin-top: 15px;
+}
+
+.error-text {
+  color: #ff9aa9;
+}
+
+.error-msg {
+  color: #ff9aa9;
+  font-size: 12px;
+  margin-top: 3px;
+  display: block;
+}

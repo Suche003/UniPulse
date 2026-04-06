@@ -5,6 +5,7 @@ import Student from "../models/Student.js";
 import Club from "../models/Club.js";
 import SuperAdmin from "../models/SuperAdmin.js";
 import Sponsor from "../models/Sponsor.js";
+import Vendor from "../models/Vendor.js"; 
 
 export async function commonLogin(req, res) {
   const { identifier, password } = req.body;
@@ -36,7 +37,7 @@ export async function commonLogin(req, res) {
 
   // 2) Try Club by clubId OR email
   const club = await Club.findOne({
-    $or: [{ clubId: identifier }, { email: identifier }],
+    $or: [{ clubid: identifier }, { email: identifier }],
     isActive: true,
   });
 
@@ -55,7 +56,7 @@ export async function commonLogin(req, res) {
       role: "club",
       redirectTo: "/club/dashboard",
       token,
-      user: { id: club._id, clubId: club.clubId, clubName: club.clubName, email: club.email },
+      user: { id: club._id, clubid: club.clubid, clubName: club.clubName, email: club.email },
     });
   }
 
@@ -102,4 +103,41 @@ export async function commonLogin(req, res) {
   }
 
   return res.status(401).json({ message: "Invalid credentials" });
+}
+  // 4) Try Vendor by email
+  try {
+    const vendorEmail = identifier.trim().toLowerCase(); 
+    const vendor = await Vendor.findOne({ email: vendorEmail });
+
+    if (vendor) {
+      if (vendor.status === "pending") {
+        return res.status(403).json({ message: "Vendor not approved yet" });
+      } else if (vendor.status === "rejected") {
+        return res.status(403).json({ message: "Vendor registration rejected" });
+      }
+
+      const ok = await bcrypt.compare(password, vendor.passwordHash);
+      if (!ok) return res.status(401).json({ message: "Incorrect password" });
+
+      const token = jwt.sign(
+        { sub: vendor._id.toString(), role: "vendor" },
+        process.env.JWT_SECRET,
+        { expiresIn: "7d" }
+      );
+
+      return res.json({
+        message: "Login success",
+        role: "vendor",
+        redirectTo: "/vendor/dashboard",
+        token,
+        user: { id: vendor._id, name: vendor.name, email: vendor.email, stallType: vendor.stallType },
+      });
+    }
+
+    // If vendor not found
+    return res.status(404).json({ message: "Vendor not registered" });
+  } catch (err) {
+    console.error("Vendor login error:", err);
+    return res.status(500).json({ message: "Server error. Please try again." });
+  }
 }
