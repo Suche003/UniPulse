@@ -1,0 +1,133 @@
+.club-payments {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: var(--bg);
+  min-height: calc(100vh - 80px);
+  border-radius: 0;
+}
+
+.club-payments h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 2rem;
+  background: linear-gradient(135deg, var(--accent2), var(--accent));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  letter-spacing: -0.02em;
+}
+
+/* Table Wrapper – glass effect */
+.payments-table-wrapper {
+  overflow-x: auto;
+  border-radius: 28px;
+  background: var(--card);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border);
+}
+
+.payments-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+.payments-table th,
+.payments-table td {
+  padding: 1rem 1.2rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.payments-table th {
+  background: rgba(0, 0, 0, 0.3);
+  font-weight: 700;
+  color: var(--text);
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+}
+
+.payments-table td {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.payments-table tr:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Empty state – glass card */
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  background: var(--card);
+  backdrop-filter: blur(10px);
+  border-radius: 28px;
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  color: var(--muted);
+}
+
+.empty-state p {
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* Button – modern style */
+.btn-sm {
+  padding: 0.5rem 1.2rem;
+  font-size: 0.75rem;
+  border-radius: 40px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.btn-sm:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .club-payments {
+    padding: 1rem;
+  }
+  .club-payments h1 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .payments-table th,
+  .payments-table td {
+    padding: 0.75rem;
+    font-size: 0.8rem;
+  }
+  .btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.7rem;
+  }
+}
+
+/* Animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.payments-table-wrapper,
+.empty-state {
+  animation: fadeInUp 0.4s ease-out forwards;
+}
