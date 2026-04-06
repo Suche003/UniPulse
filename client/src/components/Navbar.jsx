@@ -45,6 +45,11 @@ export default function Navbar() {
               <Link className="btn btn--primary" to="/signup">
                 Sign Up
               </Link>
+
+              {/* Your Vendor Register button */}
+              <Link className="btn btn--primary" to="/register">
+                Register
+              </Link>
             </>
           ) : (
             <>

@@ -1,0 +1,220 @@
+:root {
+  --bg: #0b0b12;
+  --card: rgba(255, 255, 255, 0.06);
+  --text: #eaeaf2;
+  --muted: rgba(234, 234, 242, 0.7);
+  --border: rgba(255, 255, 255, 0.12);
+  --accent: #7c2cff;
+  --accent2: #ff2b6a;
+}
+
+/* Main container */
+.stalls-container {
+  width: 90%;
+  max-width: 1600px;
+  margin: 20px auto;
+  padding: 40px;
+  border-radius: 12px;
+  min-height: 1500px;
+  background: var(--card);
+  color: var(--text);
+  font-family: 'Poppins', sans-serif;
+  box-sizing: border-box;
+}
+
+/* Heading */
+.event-stalls-heading {
+  font-size: 32px !important;
+  margin-bottom: 30px;
+  text-align: center;
+  color: var(--text);
+}
+
+/* Add Stall Button */
+.add-stall-btn {
+  display: block;
+  margin: 10px auto 40px auto;
+  background: linear-gradient(90deg, var(--accent2), var(--accent));
+  color: white;
+  padding: 8px 16px;
+  font-size: 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.add-stall-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* Stalls Grid */
+.stalls-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  justify-content: center; 
+  align-items: stretch;
+}
+
+/* Stall Card */
+.stall-card {
+  display: flex;              
+  flex-direction: column;   
+  justify-content: space-between;
+  background: var(--card);   
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  width: 100%;
+  max-width: 350px;
+  min-height: 350px;
+  box-sizing: border-box;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stall-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+/* Vertical layout */
+.stall-horizontal {
+  display: flex;
+  flex-direction: column; 
+  gap: 12px;
+  align-items: stretch;
+  height: auto;
+}
+
+/* Image container */
+.stall-image-container {
+  width: 100%;
+  height: 200px;
+  flex-shrink: 0;
+}
+
+.stall-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+/* Details container */
+.stall-details {
+  width: 100%;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Field Name Bold */
+.field-name {
+  font-weight: 800;
+  margin-right: 4px;
+}
+
+/* Stall Text */
+.stall-details p {
+  margin: 4px 0;
+  font-size: 16px;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.stall-actions {
+  display: flex;
+  gap: 14px;
+  width: 50%;
+  margin: 12px auto 0 auto;
+  align-items: center;
+  justify-content: center;
+}
+
+.stall-actions .action-btn {
+  flex: 1;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  width: 100%;
+  padding: 0;
+  margin: 12px 0;
+  line-height: 0;
+  box-sizing: border-box;
+}
+
+.stall-actions .icon {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+.stall-actions .action-btn svg {
+  vertical-align: middle;
+}
+
+.stall-actions .edit-btn {
+  background-color: #28a745;
+}
+
+.stall-actions .edit-btn:hover {
+  background-color: #1e7e34;
+}
+
+.stall-actions .delete-btn {
+  background-color: #dc3545;
+}
+
+.stall-actions .delete-btn:hover {
+  background-color: #b02a37;
+}
+
+/* No stalls message */
+.stalls-container p {
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 20px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .stalls-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  }
+
+  .stall-card {
+    font-size: 13px;
+    padding: 12px;
+    height: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .stall-image-container {
+    height: 180px;
+  }
+}
+
+@media (max-width: 480px) {
+  .stalls-container {
+    width: 95%;
+    margin: 15px auto;
+  }
+
+  .add-stall-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+}

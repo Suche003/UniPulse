@@ -1,0 +1,176 @@
+/* --- Root theme --- */
+:root {
+  --bg: #0b0b12;
+  --card: rgba(255, 255, 255, 0.06);
+  --text: #eaeaf2;
+  --muted: rgba(234, 234, 242, 0.7);
+  --border: rgba(255, 255, 255, 0.12);
+  --accent: #7c2cff;
+  --accent2: #ff2b6a;
+}
+
+/* --- Container --- */
+.vendor-stalls-container {
+  max-width: 1100px;
+  margin: 50px auto;
+  padding: 24px;
+  color: var(--text);
+  background: transparent;
+}
+
+.vendor-stalls-container h1 {
+  text-align: center;
+  font-size: 32px;
+  margin-bottom: 40px;
+  background: linear-gradient(90deg, var(--accent2), var(--accent));
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+/* --- Event Section --- */
+.vendor-event-section {
+  margin-bottom: 40px;
+}
+
+/* --- Event Header --- */
+.vendor-event-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+  padding: 10px 10px;
+}
+
+.vendor-event-title {
+  color: var(--muted);
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.vendor-event-date {
+  font-size: 14px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.vendor-event-date svg {
+  color: var(--accent2);
+}
+
+/* --- Stalls Grid  --- */
+.vendor-stalls-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 320px));
+  gap: 20px;
+  justify-content: center;
+}
+
+/* --- Stall Card --- */
+.vendor-stall-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px;
+  transition: 0.2s ease;
+  backdrop-filter: blur(10px);
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+}
+
+.vendor-stall-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(124,44,255,0.5);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+}
+
+/* --- Stall Image --- */
+.vendor-stall-image-container {
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  background: rgba(0,0,0,0.3);
+}
+
+.vendor-stall-image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* --- Stall Details --- */
+.vendor-stall-details {
+  text-align: center;
+}
+
+.vendor-stall-details p {
+  margin: 6px 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* --- Book Button --- */
+.vendor-book-btn {
+  margin-top: 10px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: none;
+  font-weight: 600;
+  background: linear-gradient(90deg, var(--accent2), var(--accent));
+  color: white;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.vendor-book-btn:hover:enabled {
+  transform: translateY(-1px);
+  opacity: 0.95;
+}
+
+.vendor-book-btn:disabled {
+  background: rgba(255,255,255,0.1);
+  cursor: not-allowed;
+}
+
+/* --- SOLD OUT Badge --- */
+.vendor-stall-card[data-availability="Unavailable"]::before {
+  content: "SOLD OUT";
+  position: absolute;
+  top: 22px;
+  left: -2px;
+  background: var(--accent2);
+  color: white;
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 8px;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  transform: rotate(-35deg); 
+}
+
+/* --- No Events Message --- */
+.vendor-stalls-container p {
+  text-align: center;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+  .vendor-event-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+
+  .vendor-stalls-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    justify-content: center;
+  }
+}

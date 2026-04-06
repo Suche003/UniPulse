@@ -1,0 +1,187 @@
+:root {
+  --bg: #0b0b12;
+  --card: rgba(255, 255, 255, 0.06);
+  --text: #eaeaf2;
+  --muted: rgba(234, 234, 242, 0.7);
+  --border: rgba(255, 255, 255, 0.12);
+  --accent: #7c2cff;
+  --accent2: #ff2b6a;
+}
+
+* { 
+  box-sizing: border-box; 
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: radial-gradient(1200px 600px at 20% 10%, rgba(255,43,106,0.25), transparent 60%),
+              radial-gradient(900px 500px at 80% 30%, rgba(124,44,255,0.25), transparent 60%),
+              var(--bg);
+  color: var(--text);
+}
+
+/* Stall Form Container */
+.stall-container {
+  max-width: 450px;
+  margin: 15px auto;
+  padding: 20px;
+  background: var(--card);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+/* Topic / Title */
+.stall-container > h2 {
+  color: #ffffff;
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+/* Form */
+.stall-form {
+  padding-top: 24px;
+  display: grid;
+  gap: 40px;
+}
+
+.form-group {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Inputs */
+.form-group input,
+.form-group textarea {
+  padding: 12.8px;
+  font-size: 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  background: rgba(0,0,0,0.25);
+  transition: 0.3s ease;
+  resize: none;
+  appearance: none;
+}
+
+/* Select with default arrow */
+.form-group select {
+  padding: 12.8px;
+  font-size: 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  background: rgba(0,0,0,0.25);
+  transition: 0.3s ease;
+  cursor: pointer;
+
+  appearance: auto;
+  -webkit-appearance: auto;
+  -moz-appearance: auto;
+}
+
+/* dropdown option values */
+.form-group select option {
+  background: #303030;  
+  color: #ffffff;     
+}
+
+/* Floating labels */
+.form-group label {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  font-size: 16px;
+  color: var(--muted);
+  background: transparent;
+  pointer-events: none;
+  transition: 0.3s ease;
+}
+
+/* textarea label position */
+.form-group textarea + label {
+  top: 20px;
+}
+
+/* floating animation */
+.form-group input:focus + label,
+.form-group input:not(:placeholder-shown) + label,
+.form-group textarea:focus + label,
+.form-group textarea:not(:placeholder-shown) + label,
+.form-group select:focus + label,
+.select-group.has-value label {
+  top: -10px;
+  font-size: 13px;
+  font-weight: bold;
+  color: var(--muted);
+}
+
+/* Focus */
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 3px var(--accent);
+}
+
+/* Error */
+.error {
+  color: #ff4d6d;
+  font-weight: bold;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+/* Buttons */
+.create-btn {
+  width: 100%;
+  padding: 11px 16px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 12px;
+  background: linear-gradient(90deg, var(--accent2), var(--accent));
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.create-btn:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+
+.demo-btn {
+  width: 100%;
+  padding: 11px 16px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.06);
+  color: var(--muted);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.demo-btn:hover {
+  background: rgba(255,255,255,0.12);
+  color: var(--text);
+}
+
+/* Responsive */
+@media (max-width: 500px) {
+  .stall-container {
+    padding: 16px;
+  }
+
+  .stall-form {
+    gap: 22px;
+  }
+}
