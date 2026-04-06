@@ -3,11 +3,16 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { connectDB } from "./config/db.js";
 import studentRoutes from "./routes/studentRoutes.js";
+import vendorRoutes from "./routes/vendorRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import eventRoutes from "./routes/eventRoutes.js";
 import clubRoutes from "./routes/clubRoute.js";
 
+import stallRoutes from "./routes/stallRoutes.js";
+import bookingStallRoutes from "./routes/bookingStallRoutes.js"; 
+import stallPaymentRoutes from "./routes/stallPaymentRoutes.js";
 import { errorHandler } from "./middleware/errorHandler.js";
+import studentProfileRoutes from "./routes/studentProfileRoutes.js";
 
 
 dotenv.config();
@@ -20,7 +25,11 @@ app.use(express.json());
 app.get("/", (req, res) => res.send("UniPulse API running ✅"));
 
 app.use("/api/students", studentRoutes);
+app.use("/api/vendors", vendorRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/stalls", stallRoutes);
+app.use("/api/bookings", bookingStallRoutes); 
+app.use("/api/stall-payment", stallPaymentRoutes);
 
 //Events
 app.use("/api/events", eventRoutes);
@@ -30,6 +39,8 @@ app.use('/uploads', express.static('uploads'));
 app.use("/api/clubs", clubRoutes);
 
 app.use(errorHandler);
+
+app.use("/api/students", studentProfileRoutes);
 
 const PORT = process.env.PORT || 5000;
 

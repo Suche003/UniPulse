@@ -9,6 +9,11 @@ export default function Navbar() {
   const logged = isLoggedIn();
   const role = getRole();
 
+  const storedUser = localStorage.getItem("unipulse_user");
+  const user = storedUser ? JSON.parse(storedUser) : null;
+
+  const userName = user?.name || "";
+
   const dashboardPath =
     role === "student"
       ? "/student/dashboard"
@@ -22,15 +27,6 @@ export default function Navbar() {
     logout();
     navigate("/login");
   }
-
-  const roleLabel =
-    role === "student"
-      ? "Student"
-      : role === "club"
-      ? "Club"
-      : role === "superadmin"
-      ? "Super Admin"
-      : "";
 
   return (
     <header className="nav">
@@ -49,15 +45,29 @@ export default function Navbar() {
               <Link className="btn btn--primary" to="/signup">
                 Sign Up
               </Link>
+
+              {/* Your Vendor Register button */}
+              <Link className="btn btn--primary" to="/register">
+                Register
+              </Link>
             </>
           ) : (
             <>
               
 
+              {/* Dashboard */}
               <Link className="btn btn--ghost" to={dashboardPath}>
                 Dashboard
               </Link>
 
+              {/* Profile (only for students) */}
+              {role === "student" && (
+                <Link className="btn btn--ghost" to="/student/profile">
+                  My Profile
+                </Link>
+              )}
+
+              {/* Logout */}
               <button className="btn btn--primary" onClick={handleLogout}>
                 Logout
               </button>

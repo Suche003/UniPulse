@@ -1,0 +1,130 @@
+/* Container */
+.booking-form-container {
+  width: min(400px, 92%);
+  margin: 60px auto;
+  padding: 24px;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  backdrop-filter: blur(10px);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+/* Header */
+.booking-form-container h1 {
+  text-align: center;
+  margin-bottom: 18px;
+  font-size: 26px;
+  color: var(--text);
+}
+
+/* Form layout */
+.booking-form-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Labels */
+.booking-form-container label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 500;
+  color: rgba(234,234,242,0.85);
+  font-size: 14px;
+}
+
+/* Inputs and selects */
+.booking-form-container input,
+.booking-form-container select,
+.booking-form-container textarea {
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(0,0,0,0.25);
+  color: var(--text);
+  font-size: 15px;
+  margin-top: 6px;
+  transition: 0.2s ease;
+}
+
+/* Focus state */
+.booking-form-container input:focus,
+.booking-form-container select:focus,
+.booking-form-container textarea:focus {
+  border-color: rgba(124,44,255,0.65);
+  outline: none;
+}
+
+/* Textarea */
+.booking-form-container textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+
+/* Confirm Booking button */
+.booking-form-container button[type="submit"] {
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  background: linear-gradient(90deg, var(--accent2), var(--accent));
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.booking-form-container button[type="submit"]:hover:not(:disabled) {
+  transform: translateY(-1px);
+  opacity: 0.95;
+}
+
+.booking-form-container button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Error messages */
+.booking-form-container .error {
+  color: #ff9aa9;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* Booking details block */
+.booking-form-container .booking-details {
+  margin-bottom: 16px;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.05);
+  color: var(--muted);
+}
+
+/* Demo button */
+.booking-form-container .demo-button {
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.05);
+  color: var(--text);
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.booking-form-container .demo-button:hover {
+  transform: translateY(-1px);
+  opacity: 0.9;
+}
+
+/* Buttons container */
+.form-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.form-buttons button {
+  flex: 1;
+}

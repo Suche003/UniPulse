@@ -1,0 +1,113 @@
+:root { 
+  --bg: #0b0b12;
+  --card: rgba(255, 255, 255, 0.06);
+  --text: #eaeaf2;
+  --muted: rgba(234, 234, 242, 0.7);
+  --border: rgba(255, 255, 255, 0.12);
+  --accent: #7c2cff;
+  --accent2: #ff2b6a;
+}
+
+.edit-stall-container {
+  max-width: 500px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: var(--card);
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  font-family: 'Poppins', sans-serif;
+  color: var(--text);
+}
+
+.edit-stall-title {
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: 35px;
+  color: var(--text);
+  font-size: 24px;
+}
+
+/* Form */
+.edit-stall-form-new {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Each field + label container */
+.field-group {
+  width: 80%;
+  display: flex;
+  flex-direction: column; 
+  margin-bottom: 15px;
+}
+
+/* Label styling */
+.field-group label {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 5px;
+  text-align: left;
+}
+
+/* Input, textarea, select */
+.field-group input,
+.field-group textarea,
+.field-group select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 14px;
+  color: var(--text);
+  background: rgba(0,0,0,0.25);
+  box-sizing: border-box;
+}
+
+.field-group input:focus,
+.field-group textarea:focus,
+.field-group select:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.field-group textarea {
+  min-height: 60px;
+  resize: vertical;
+}
+
+/* Default select arrow */
+.field-group select {
+  appearance: auto;
+}
+
+/* Submit button */
+.edit-stall-form-new button {
+  width: 80%;
+  padding: 12px 0;
+  background: linear-gradient(90deg, var(--accent2), var(--accent));
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.edit-stall-form-new button:hover {
+  background-color: rgba(124, 44, 255, 0.8);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .field-group,
+  .field-group input,
+  .field-group textarea,
+  .field-group select,
+  .edit-stall-form-new button {
+    width: 100%;
+  }
+}
