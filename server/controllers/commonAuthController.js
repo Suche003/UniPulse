@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import Student from "../models/Student.js";
 import Club from "../models/Club.js";
 import SuperAdmin from "../models/SuperAdmin.js";
-import Vendor from "../models/Vendor.js"; // <-- added for vendor
+import Vendor from "../models/Vendor.js"; 
 
 export async function commonLogin(req, res) {
   const { identifier, password } = req.body;
