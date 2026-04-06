@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { apiRequest } from '../api/api';
-import './SuperAdminPanel.css'; // we'll create this
+import './SuperAdminPanel.css'; 
 
 export default function SuperAdminPanel() {
   const [stats, setStats] = useState(null);
@@ -29,9 +28,7 @@ export default function SuperAdminPanel() {
         <p>Loading stats...</p>
       ) : stats && (
         <div className="stats-grid">
-          <div className="stat-card">Total Vendors: {stats.vendors}</div>
           <div className="stat-card">Total Sponsors: {stats.sponsors}</div>
-          <div className="stat-card">Pending Vendors: {stats.pendingVendors}</div>
           <div className="stat-card">Pending Sponsors: {stats.pendingSponsors}</div>
           <div className="stat-card revenue">Total Revenue: ${stats.totalRevenue}</div>
         </div>
@@ -46,9 +43,6 @@ export default function SuperAdminPanel() {
         </button>
         <button className="btn-primary" onClick={() => window.location.href = "/admin/packages"}>
           Sponsorship Packages
-        </button>
-        <button className="btn-primary" onClick={() => window.location.href = "/admin/stall-requests"}>
-          Stall Requests
         </button>
       </div>
     </div>

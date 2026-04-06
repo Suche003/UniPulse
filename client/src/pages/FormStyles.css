@@ -122,3 +122,15 @@
     transform: translateY(0);
   }
 }
+
+.multi-select {
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 20px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  font-size: 0.9rem;
+}
+.multi-select option {
+  padding: 0.5rem;
+}

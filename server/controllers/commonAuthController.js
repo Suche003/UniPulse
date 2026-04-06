@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import Student from "../models/Student.js";
 import Club from "../models/Club.js";
 import SuperAdmin from "../models/SuperAdmin.js";
+import Sponsor from "../models/Sponsor.js";
 
 export async function commonLogin(req, res) {
   const { identifier, password } = req.body;
@@ -58,7 +59,28 @@ export async function commonLogin(req, res) {
     });
   }
 
-  // 3) Try Student by regNo
+   // 3) Sponsor 
+  const sponsor = await Sponsor.findOne({ contactEmail: identifier, isActive: true });
+  if (sponsor) {
+    const ok = await bcrypt.compare(password, sponsor.passwordHash);
+    if (!ok) return res.status(401).json({ message: "Invalid credentials" });
+
+    const token = jwt.sign(
+      { sub: sponsor._id.toString(), role: "sponsor" },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    return res.json({
+      message: "Login success",
+      role: "sponsor",
+      redirectTo: "/sponsor/dashboard",
+      token,
+      user: { id: sponsor._id, name: sponsor.name, email: sponsor.contactEmail },
+    });
+  }
+
+  // 4) Try Student by regNo
   const student = await Student.findOne({ regNo: identifier });
   if (student) {
     const ok = await bcrypt.compare(password, student.passwordHash);

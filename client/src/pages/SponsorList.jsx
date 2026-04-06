@@ -6,15 +6,18 @@ import LoadingSpinner from '../components/UI/LoadingSpinner';
 import EmptyState from '../components/UI/EmptyState';
 import './SponsorList.css';
 
+const ITEMS_PER_PAGE = 9;
+
 const SponsorList = () => {
   const [sponsors, setSponsors] = useState([]);
-  const [filteredSponsors, setFilteredSponsors] = useState([]);
+  const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [levelFilter, setLevelFilter] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [actionLoading, setActionLoading] = useState(null); // track which sponsor is performing action
+  const [actionLoading, setActionLoading] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     fetchSponsors();
@@ -29,7 +32,6 @@ const SponsorList = () => {
     try {
       const data = await apiRequest('/api/sponsors');
       setSponsors(data);
-      setError('');
     } catch (err) {
       setError(err.message);
       toast.error('Failed to load sponsors');
@@ -39,17 +41,18 @@ const SponsorList = () => {
   };
 
   const applyFilters = () => {
-    let filtered = [...sponsors];
-    if (statusFilter) filtered = filtered.filter(s => s.status === statusFilter);
-    if (levelFilter) filtered = filtered.filter(s => s.level === levelFilter);
+    let filteredList = [...sponsors];
+    if (statusFilter) filteredList = filteredList.filter(s => s.status === statusFilter);
+    if (levelFilter) filteredList = filteredList.filter(s => s.level === levelFilter);
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(s =>
+      filteredList = filteredList.filter(s =>
         s.name.toLowerCase().includes(term) ||
         (s.description && s.description.toLowerCase().includes(term))
       );
     }
-    setFilteredSponsors(filtered);
+    setFiltered(filteredList);
+    setCurrentPage(1);
   };
 
   const clearFilters = () => {
@@ -60,14 +63,13 @@ const SponsorList = () => {
 
   const handleDelete = async (id, name) => {
     if (!window.confirm(`Delete sponsor "${name}"? This action cannot be undone.`)) return;
-    
     setActionLoading(id);
     try {
       await apiRequest(`/api/sponsors/${id}`, { method: 'DELETE' });
       setSponsors(sponsors.filter(s => s._id !== id));
-      toast.success('Sponsor deleted successfully');
+      toast.success('Sponsor deleted');
     } catch (err) {
-      toast.error(err.message || 'Failed to delete sponsor');
+      toast.error(err.message);
     } finally {
       setActionLoading(null);
     }
@@ -78,47 +80,25 @@ const SponsorList = () => {
     try {
       await apiRequest(`/api/sponsors/${id}/status`, { method: 'PATCH', body: { status: newStatus } });
       await fetchSponsors();
-      toast.success(`Sponsor ${newStatus} successfully`);
+      toast.success(`Sponsor ${newStatus}`);
     } catch (err) {
-      toast.error(err.message || `Failed to update status to ${newStatus}`);
+      toast.error(err.message);
     } finally {
       setActionLoading(null);
     }
   };
 
-  const handlePaymentUpdate = async (id) => {
-    const paid = prompt('Enter amount paid:');
-    if (paid === null) return;
-    const amount = parseFloat(paid);
-    if (isNaN(amount)) {
-      toast.error('Invalid amount');
-      return;
-    }
-    setActionLoading(id);
-    try {
-      await apiRequest(`/api/sponsors/${id}/payment`, { method: 'PATCH', body: { paymentStatus: 'paid', amountPaid: amount } });
-      await fetchSponsors();
-      toast.success(`Payment recorded: $${amount}`);
-    } catch (err) {
-      toast.error(err.message || 'Failed to update payment');
-    } finally {
-      setActionLoading(null);
-    }
-  };
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+  const start = (currentPage - 1) * ITEMS_PER_PAGE;
+  const currentSponsors = filtered.slice(start, start + ITEMS_PER_PAGE);
 
   if (loading) return <LoadingSpinner size="lg" message="Loading sponsors..." />;
-  if (error) return (
-    <div className="sponsor-container">
-      <div className="error-message">Error: {error}</div>
-      <button className="btn-primary" onClick={fetchSponsors}>Retry</button>
-    </div>
-  );
+  if (error) return <div className="error-message">Error: {error}</div>;
 
   return (
     <div className="sponsor-container">
       <div className="sponsor-header">
         <h2>📦 Sponsors</h2>
-        <Link to="/sponsors/new" className="btn-primary">➕ Add Sponsor</Link>
       </div>
 
       <div className="filters-bar">
@@ -150,80 +130,84 @@ const SponsorList = () => {
         </div>
       </div>
 
-      {filteredSponsors.length === 0 ? (
-        <EmptyState
-          title="No sponsors found"
-          message={searchTerm || statusFilter || levelFilter ? "Try adjusting your filters" : "Get started by adding your first sponsor"}
-          actionText={searchTerm || statusFilter || levelFilter ? "Clear Filters" : "Add Sponsor"}
-          onAction={searchTerm || statusFilter || levelFilter ? clearFilters : () => window.location.href = "/sponsors/new"}
-        />
+      {currentSponsors.length === 0 ? (
+        <EmptyState title="No sponsors found" message="Try adjusting your filters" />
       ) : (
-        <div className="sponsor-grid">
-          {filteredSponsors.map(sponsor => (
-            <div key={sponsor._id} className="sponsor-card">
-              <img
-                src={sponsor.logo ? `http://localhost:5000/${sponsor.logo}` : '/default-sponsor.png'}
-                alt={sponsor.name}
-                className="sponsor-logo"
-              />
-              <h3>{sponsor.name}</h3>
-              <p className="sponsor-description">{sponsor.description?.slice(0, 100)}...</p>
-              <div className="sponsor-details">
-                {sponsor.website && (
-                  <a href={sponsor.website} target="_blank" rel="noopener noreferrer">🌐 {sponsor.website}</a>
-                )}
-                <span>📧 {sponsor.contactEmail}</span>
-                {sponsor.contactPhone && <span>📞 {sponsor.contactPhone}</span>}
-              </div>
-              <span className={`sponsor-level ${sponsor.level?.toLowerCase()}`}>🏆 {sponsor.level}</span>
-              <div className="sponsor-status">
-                Status: <span className={`badge status-${sponsor.status}`}>{sponsor.status}</span>
-              </div>
-              <div className="sponsor-payment">
-                Payment: {sponsor.paymentStatus} (${sponsor.amountPaid}/${sponsor.totalAmount})
-              </div>
-              <div className="sponsor-actions">
-                <Link to={`/sponsors/edit/${sponsor._id}`} className="btn-sm">✏️ Edit</Link>
-                <button
-                  onClick={() => handleDelete(sponsor._id, sponsor.name)}
-                  className="btn-sm btn-sm-danger"
-                  disabled={actionLoading === sponsor._id}
-                >
-                  {actionLoading === sponsor._id ? '...' : '🗑️ Delete'}
-                </button>
-                {sponsor.status === 'pending' && (
-                  <>
+        <>
+          <div className="sponsor-grid">
+            {currentSponsors.map(sponsor => {
+              const paidPercent = sponsor.totalAmount ? (sponsor.amountPaid / sponsor.totalAmount) * 100 : 0;
+              return (
+                <div key={sponsor._id} className="sponsor-card">
+                  <img
+                    src={sponsor.logo ? `http://localhost:5000/${sponsor.logo}` : '/default-sponsor.png'}
+                    alt={sponsor.name}
+                    className="sponsor-logo"
+                  />
+                  <h3>{sponsor.name}</h3>
+                  <p className="sponsor-description">{sponsor.description?.slice(0, 100)}...</p>
+                  <div className="sponsor-details">
+                    {sponsor.website && <a href={sponsor.website} target="_blank">🌐 {sponsor.website}</a>}
+                    <span>📧 {sponsor.contactEmail}</span>
+                    {sponsor.contactPhone && <span>📞 {sponsor.contactPhone}</span>}
+                  </div>
+                  <span className={`sponsor-level ${sponsor.level?.toLowerCase()}`}>🏆 {sponsor.level}</span>
+                  <div className="sponsor-status">
+                    Status: <span className={`badge status-${sponsor.status}`}>{sponsor.status}</span>
+                  </div>
+                  <div className="sponsor-payment">
+                    <div className="payment-info">
+                      <span>Payment: {sponsor.paymentStatus}</span>
+                      <span>(${sponsor.amountPaid}/${sponsor.totalAmount})</span>
+                    </div>
+                    <div className="progress-bar">
+                      <div className="progress-fill" style={{ width: `${paidPercent}%` }}></div>
+                    </div>
+                  </div>
+                  <div className="sponsor-actions">
                     <button
-                      onClick={() => handleStatusUpdate(sponsor._id, 'approved')}
-                      className="btn-sm btn-sm-success"
-                      disabled={actionLoading === sponsor._id}
-                    >
-                      {actionLoading === sponsor._id ? '...' : '✅ Approve'}
-                    </button>
-                    <button
-                      onClick={() => handleStatusUpdate(sponsor._id, 'rejected')}
+                      onClick={() => handleDelete(sponsor._id, sponsor.name)}
                       className="btn-sm btn-sm-danger"
                       disabled={actionLoading === sponsor._id}
                     >
-                      {actionLoading === sponsor._id ? '...' : '❌ Reject'}
+                      {actionLoading === sponsor._id ? '...' : '🗑️ Delete'}
                     </button>
-                  </>
-                )}
-                <button
-                  onClick={() => handlePaymentUpdate(sponsor._id)}
-                  className="btn-sm"
-                  disabled={actionLoading === sponsor._id}
-                >
-                  {actionLoading === sponsor._id ? '...' : '💰 Mark Paid'}
-                </button>
-              </div>
+                    {sponsor.status === 'pending' && (
+                      <>
+                        <button
+                          onClick={() => handleStatusUpdate(sponsor._id, 'approved')}
+                          className="btn-sm btn-sm-success"
+                          disabled={actionLoading === sponsor._id}
+                        >
+                          ✅ Approve
+                        </button>
+                        <button
+                          onClick={() => handleStatusUpdate(sponsor._id, 'rejected')}
+                          className="btn-sm btn-sm-danger"
+                          disabled={actionLoading === sponsor._id}
+                        >
+                          ❌ Reject
+                        </button>
+                      </>
+                    )}
+                    {/* ❌ No "Record Payment" button for super admin */}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {totalPages > 1 && (
+            <div className="pagination">
+              <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}>Prev</button>
+              <span>Page {currentPage} of {totalPages}</span>
+              <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>Next</button>
             </div>
-          ))}
-        </div>
+          )}
+        </>
       )}
     </div>
   );
 };
 
 export default SponsorList;
-

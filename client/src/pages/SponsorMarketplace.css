@@ -1,0 +1,313 @@
+.sponsor-marketplace {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: var(--bg);
+  min-height: calc(100vh - 80px);
+}
+
+.sponsor-marketplace h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, var(--accent2), var(--accent));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  letter-spacing: -0.02em;
+}
+
+.sponsor-marketplace > p {
+  color: var(--muted);
+  margin-bottom: 2rem;
+  font-size: 1rem;
+}
+
+.offerings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.offering-card {
+  background: var(--card);
+  backdrop-filter: blur(10px);
+  border-radius: 28px;
+  padding: 1.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+}
+
+.offering-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 30px -12px rgba(0, 0, 0, 0.5);
+  background: rgba(30, 30, 40, 0.95);
+}
+
+.offering-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.sponsor-logo-small {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #1a1a24;
+  border: 1px solid var(--border);
+}
+
+.offering-header h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text);
+}
+
+.offering-card h4 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 0.5rem 0;
+  background: linear-gradient(135deg, var(--accent2), var(--accent));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  display: inline-block;
+}
+
+.offering-card p {
+  color: var(--muted);
+  line-height: 1.5;
+  font-size: 0.9rem;
+  margin: 0.5rem 0;
+}
+
+.budget-range {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 0.5rem 0;
+  padding: 0.5rem 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+}
+
+.categories {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin: 0.5rem 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.category-badge {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.offering-card .btn-primary {
+  background: linear-gradient(135deg, var(--accent2), var(--accent));
+  border: none;
+  color: white;
+  padding: 0.7rem 1rem;
+  border-radius: 40px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.9rem;
+  width: 100%;
+  margin-top: 1rem;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.offering-card .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(124, 44, 255, 0.5);
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: var(--card);
+  border-radius: 28px;
+  width: 90%;
+  max-width: 550px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 1.8rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--border);
+}
+
+.modal h3 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, var(--accent2), var(--accent));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.modal .field {
+  margin-bottom: 1rem;
+}
+
+.modal .field label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+  color: var(--text);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.modal .field input,
+.modal .field select,
+.modal .field textarea {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 0.9rem;
+  background: #1a1a24;
+  color: var(--text);
+  transition: all 0.2s;
+}
+
+.modal .field input:focus,
+.modal .field select:focus,
+.modal .field textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(124, 44, 255, 0.2);
+  background: #22222e;
+}
+
+.modal .field small {
+  font-size: 0.7rem;
+  color: var(--muted);
+  display: block;
+  margin-top: 0.25rem;
+}
+
+.modal .actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.modal .btn-primary {
+  background: linear-gradient(135deg, var(--accent2), var(--accent));
+  flex: 1;
+  padding: 0.8rem;
+  border-radius: 40px;
+  color: white;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.modal .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(124, 44, 255, 0.5);
+}
+
+.modal .btn-sm {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.8rem 1.2rem;
+  border-radius: 40px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  color: var(--text);
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.modal .btn-sm:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  background: var(--card);
+  backdrop-filter: blur(10px);
+  border-radius: 28px;
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.empty-state h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--text);
+}
+
+.empty-state p {
+  color: var(--muted);
+}
+
+/* Animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.offering-card {
+  animation: fadeInUp 0.4s ease-out forwards;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sponsor-marketplace {
+    padding: 1rem;
+  }
+  .sponsor-marketplace h1 {
+    font-size: 1.5rem;
+  }
+  .offerings-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .modal {
+    padding: 1.2rem;
+    width: 95%;
+  }
+  .offering-card {
+    padding: 1.2rem;
+  }
+}

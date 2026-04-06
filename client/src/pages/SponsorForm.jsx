@@ -1,4 +1,4 @@
-
+// SponsorForm.jsx – with event multi-select and package auto-fill
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -12,6 +12,7 @@ const SponsorForm = () => {
   const isEdit = !!id;
 
   const [packages, setPackages] = useState([]);
+  const [events, setEvents] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -19,7 +20,7 @@ const SponsorForm = () => {
     contactEmail: '',
     contactPhone: '',
     level: 'Other',
-    events: '',
+    events: [], // array of event IDs
     totalAmount: '',
     logo: null,
   });
@@ -27,26 +28,21 @@ const SponsorForm = () => {
   const [fetching, setFetching] = useState(false);
   const [error, setError] = useState('');
   const [phoneError, setPhoneError] = useState('');
-  const [packagesLoading, setPackagesLoading] = useState(true);
 
-  // Fetch packages on mount
   useEffect(() => {
-    const loadPackages = async () => {
+    const loadData = async () => {
       try {
-        const data = await apiRequest('/api/packages');
-        setPackages(data);
+        const [packagesData, eventsData] = await Promise.all([
+          apiRequest('/api/packages'),
+          apiRequest('/api/events')
+        ]);
+        setPackages(packagesData);
+        setEvents(eventsData);
       } catch (err) {
-        console.error('Failed to load packages', err);
-        toast.error('Could not load sponsorship packages');
-      } finally {
-        setPackagesLoading(false);
+        toast.error('Failed to load packages/events');
       }
     };
-    loadPackages();
-  }, []);
-
-  // If editing, fetch sponsor data
-  useEffect(() => {
+    loadData();
     if (isEdit) fetchSponsor();
   }, [id]);
 
@@ -61,36 +57,27 @@ const SponsorForm = () => {
         contactEmail: data.contactEmail,
         contactPhone: data.contactPhone || '',
         level: data.level,
-        events: data.events.map(e => e._id).join(','),
+        events: data.events.map(e => e._id),
         totalAmount: data.totalAmount,
         logo: null,
       });
     } catch (err) {
-      toast.error(err.message || 'Failed to load sponsor');
+      toast.error(err.message);
       setError(err.message);
     } finally {
       setFetching(false);
     }
   };
 
-  // Phone validation
-  const validatePhone = (phone) => {
-    if (!phone) return true;
-    const phoneRegex = /^\d{10}$/;
-    return phoneRegex.test(phone.replace(/\D/g, ''));
-  };
+  const validatePhone = (phone) => !phone || /^\d{10}$/.test(phone.replace(/\D/g, ''));
 
   const handleChange = (e) => {
     const { name, value, type, files } = e.target;
-
     if (name === 'contactPhone') {
       const cleaned = value.replace(/\D/g, '');
       setPhoneError(cleaned && !validatePhone(cleaned) ? 'Phone must be 10 digits' : '');
-      setFormData({ ...formData, [name]: cleaned });
-      return;
-    }
-
-    if (type === 'file') {
+      setFormData({ ...formData, contactPhone: cleaned });
+    } else if (type === 'file') {
       setFormData({ ...formData, logo: files[0] });
     } else if (name === 'level') {
       const selectedPackage = packages.find(p => p.name === value);
@@ -103,6 +90,10 @@ const SponsorForm = () => {
       } else {
         setFormData({ ...formData, level: value });
       }
+    } else if (name === 'events') {
+      // multi-select: value is an array of selected event IDs
+      const selected = Array.from(e.target.selectedOptions, option => option.value);
+      setFormData({ ...formData, events: selected });
     } else {
       setFormData({ ...formData, [name]: value });
     }
@@ -124,6 +115,8 @@ const SponsorForm = () => {
       Object.keys(formData).forEach(key => {
         if (key === 'logo' && formData.logo) {
           data.append(key, formData.logo);
+        } else if (key === 'events') {
+          data.append(key, formData.events.join(',')); // send as comma-separated
         } else if (key !== 'logo') {
           data.append(key, formData[key]);
         }
@@ -135,7 +128,7 @@ const SponsorForm = () => {
       toast.success(isEdit ? 'Sponsor updated!' : 'Sponsor created!');
       setTimeout(() => navigate('/sponsors'), 1500);
     } catch (err) {
-      toast.error(err.message || 'Something went wrong');
+      toast.error(err.message);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -178,24 +171,20 @@ const SponsorForm = () => {
             onChange={handleChange}
             placeholder="10 digits (e.g., 0712345678)"
           />
-          {phoneError && <div className="error-message" style={{ fontSize: '12px', marginTop: '5px' }}>{phoneError}</div>}
+          {phoneError && <div className="error-message" style={{ fontSize: '12px' }}>{phoneError}</div>}
         </div>
 
         <div className="form-group">
           <label>🏆 Sponsorship Package</label>
-          {packagesLoading ? (
-            <LoadingSpinner size="sm" />
-          ) : (
-            <select name="level" value={formData.level} onChange={handleChange} required>
-              <option value="">Select a package</option>
-              {packages.map(pkg => (
-                <option key={pkg._id} value={pkg.name}>
-                  {pkg.name} - ${pkg.price}
-                </option>
-              ))}
-              <option value="Other">Other (custom amount)</option>
-            </select>
-          )}
+          <select name="level" value={formData.level} onChange={handleChange} required>
+            <option value="">Select a package</option>
+            {packages.map(pkg => (
+              <option key={pkg._id} value={pkg.name}>
+                {pkg.name} - ${pkg.price}
+              </option>
+            ))}
+            <option value="Other">Other (custom amount)</option>
+          </select>
           <small>Select a package to auto-fill amount, or choose "Other" to set manually.</small>
         </div>
 
@@ -212,14 +201,22 @@ const SponsorForm = () => {
         </div>
 
         <div className="form-group">
-          <label>📅 Sponsored Events (comma-separated event IDs)</label>
-          <input
-            type="text"
+          <label>📅 Sponsored Events</label>
+          <select
             name="events"
+            multiple
             value={formData.events}
             onChange={handleChange}
-            placeholder="e.g., 66f5b2f8a1b2c3d4e5f6g7h8, ..."
-          />
+            size="5"
+            className="multi-select"
+          >
+            {events.map(ev => (
+              <option key={ev._id} value={ev._id}>
+                {ev.title} – {new Date(ev.date).toLocaleDateString()}
+              </option>
+            ))}
+          </select>
+          <small>Hold Ctrl/Cmd to select multiple events</small>
         </div>
 
         <div className="form-group">

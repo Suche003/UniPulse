@@ -1,5 +1,5 @@
 import { Routes, Route } from "react-router-dom";
-import { Toaster } from "react-hot-toast"; // ← import
+import { Toaster } from "react-hot-toast";
 
 import Home from "./pages/Home";
 import Signup from "./pages/Signup";
@@ -7,21 +7,38 @@ import Login from "./pages/Login";
 import EventForm from "./pages/EventFormPage";
 import EventListAd from "./pages/EventListAd";
 import SponsorList from './pages/SponsorList';
-import SponsorForm from './pages/SponsorForm';
-import VendorList from './pages/VendorList';
-import VendorForm from './pages/VendorForm';
-import VendorDashboard from './pages/VendorDashboard';    
 import PackageManagement from './pages/PackageManagement';
+
+// Sponsor-related pages
+import SponsorSignup from './pages/SponsorSignup';
+import SponsorDashboard from './pages/SponsorDashboard';
+import SponsorDirectory from './pages/SponsorDirectory';
+import ClubRequests from './pages/ClubRequests';
+import SponsorMarketplace from './pages/SponsorMarketplace';
+import ClubPayments from './pages/ClubPayments';
 
 import ProtectedRoute from "./auth/ProtectedRoute";
 import RoleRoute from "./auth/RoleRoute";
 
+/* Temporary dashboard placeholders */
 function StudentDashboard() {
   return <div>Student Dashboard</div>;
 }
 
 function ClubDashboard() {
-  return <div>Club Dashboard</div>;
+  return (
+    <div className="container" style={{ padding: '2rem' }}>
+      <h1>Club Dashboard</h1>
+      <div className="card" style={{ padding: '1.5rem', marginBottom: '1rem' }}>
+        <p>Welcome to your club dashboard. Manage your events and sponsorship requests here.</p>
+      </div>
+      <div style={{ display: 'flex', gap: '1rem' }}>
+        <a href="/club/marketplace" className="btn-primary">Sponsorship Marketplace</a>
+        <a href="/club/requests" className="btn-primary">View Requests</a>
+        <a href="/club/payments" className="btn-primary">Payments Received</a>
+      </div>
+    </div>
+  );
 }
 
 function SuperAdminPanel() {
@@ -91,6 +108,7 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/sponsor-signup" element={<SponsorSignup />} />
 
         {/* Protected routes (must be logged in) */}
         <Route element={<ProtectedRoute />}>
@@ -102,6 +120,10 @@ export default function App() {
           {/* Club only */}
           <Route element={<RoleRoute allow={["club"]} />}>
             <Route path="/club/dashboard" element={<ClubDashboard />} />
+            <Route path="/club/sponsors" element={<SponsorDirectory />} />
+            <Route path="/club/marketplace" element={<SponsorMarketplace />} />
+            <Route path="/club/requests" element={<ClubRequests />} />
+            <Route path="/club/payments" element={<ClubPayments />} />
           </Route>
 
           {/* Super Admin only */}
@@ -111,28 +133,18 @@ export default function App() {
             <Route path="/superadmin/events-get" element={<EventListAd />} />
           </Route>
 
-          {/* Sponsor routes (superadmin only) */}
+          {/* Sponsor management (superadmin only) – only list, no create/edit */}
           <Route element={<RoleRoute allow={["superadmin"]} />}>
             <Route path="/sponsors" element={<SponsorList />} />
-            <Route path="/sponsors/new" element={<SponsorForm />} />
-            <Route path="/sponsors/edit/:id" element={<SponsorForm />} />
           </Route>
 
-          {/* Vendor management (superadmin only) */}
-          <Route element={<RoleRoute allow={["superadmin"]} />}>
-            <Route path="/vendors" element={<VendorList />} />
-            <Route path="/vendors/new" element={<VendorForm />} />
-            <Route path="/vendors/edit/:id" element={<VendorForm />} />
-          </Route>
-
-          {/* Vendor Dashboard */}
-          <Route element={<RoleRoute allow={["vendor"]} />}>
-            <Route path="/vendor/dashboard" element={<VendorDashboard />} />
+          {/* Sponsor Dashboard */}
+          <Route element={<RoleRoute allow={["sponsor"]} />}>
+            <Route path="/sponsor/dashboard" element={<SponsorDashboard />} />
           </Route>
         </Route>
 
         <Route path="/admin/packages" element={<PackageManagement />} />
-
 
         <Route path="*" element={<div>404 - Page Not Found</div>} />
       </Routes>
