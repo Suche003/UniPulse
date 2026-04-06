@@ -9,6 +9,7 @@ import stallRoutes from "./routes/stallRoutes.js";
 import bookingStallRoutes from "./routes/bookingStallRoutes.js"; 
 import stallPaymentRoutes from "./routes/stallPaymentRoutes.js";
 import { errorHandler } from "./middleware/errorHandler.js";
+import studentProfileRoutes from "./routes/studentProfileRoutes.js";
 
 dotenv.config();
 
@@ -27,6 +28,8 @@ app.use("/api/bookings", bookingStallRoutes);
 app.use("/api/stall-payment", stallPaymentRoutes);
 
 app.use(errorHandler);
+
+app.use("/api/students", studentProfileRoutes);
 
 const PORT = process.env.PORT || 5000;
 

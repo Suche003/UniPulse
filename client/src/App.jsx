@@ -14,15 +14,14 @@ import ApprovedStall from "./pages/ApprovedStall";
 import StallPayment from "./pages/StallPayment";
 import VendorDashboard from "./pages/VendorDashboard"; 
 import VendorRegister from "./pages/VendorRegister"; 
+import StudentDashboard from "./pages/StudentDashboard";
+import Profile from "./pages/Profile";
+import Payment from "./pages/Payment";
 
 import ProtectedRoute from "./auth/ProtectedRoute";
 import RoleRoute from "./auth/RoleRoute";
 
 /* Temporary dashboard placeholders */
-function StudentDashboard() {
-  return <div>Student Dashboard</div>;
-}
-
 function ClubDashboard() {
   return <div>Club Dashboard</div>;
 }
@@ -71,9 +70,14 @@ export default function App() {
       {/* Protected routes (must be logged in) */}
       <Route element={<ProtectedRoute />}>
 
+      {/* Protected routes */}
+      <Route element={<ProtectedRoute />}>
         {/* Student only */}
         <Route element={<RoleRoute allow={["student"]} />}>
           <Route path="/student/dashboard" element={<StudentDashboard />} />
+          <Route path="/student/profile" element={<Profile />} />
+          <Route path="/student/events/:id" element={<EventDetails />} />
+          <Route path="/student/payment/:id" element={<Payment />} />
         </Route>
 
         {/* Club only */}
@@ -117,6 +121,10 @@ export default function App() {
           <Route path="/superadmin/vendors" element={<Vendor />} />
 
           <Route path="/payment/:bookingId" element={<StallPayment />} />
+          <Route
+            path="/superadmin/control-panel"
+            element={<SuperAdminPanel />}
+          />
         </Route>
       </Route>
 
