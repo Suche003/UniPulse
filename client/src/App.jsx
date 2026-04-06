@@ -3,15 +3,15 @@ import { Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
+import StudentDashboard from "./pages/StudentDashboard";
+import EventDetails from "./pages/EventDetails";
+import Profile from "./pages/Profile";
+import Payment from "./pages/Payment";
 
 import ProtectedRoute from "./auth/ProtectedRoute";
 import RoleRoute from "./auth/RoleRoute";
 
 /* Temporary dashboard placeholders */
-function StudentDashboard() {
-  return <div>Student Dashboard</div>;
-}
-
 function ClubDashboard() {
   return <div>Club Dashboard</div>;
 }
@@ -28,12 +28,14 @@ export default function App() {
       <Route path="/signup" element={<Signup />} />
       <Route path="/login" element={<Login />} />
 
-      {/* Protected routes (must be logged in) */}
+      {/* Protected routes */}
       <Route element={<ProtectedRoute />}>
-        
         {/* Student only */}
         <Route element={<RoleRoute allow={["student"]} />}>
           <Route path="/student/dashboard" element={<StudentDashboard />} />
+          <Route path="/student/profile" element={<Profile />} />
+          <Route path="/student/events/:id" element={<EventDetails />} />
+          <Route path="/student/payment/:id" element={<Payment />} />
         </Route>
 
         {/* Club only */}
@@ -43,9 +45,11 @@ export default function App() {
 
         {/* Super Admin only */}
         <Route element={<RoleRoute allow={["superadmin"]} />}>
-          <Route path="/superadmin/control-panel" element={<SuperAdminPanel />} />
+          <Route
+            path="/superadmin/control-panel"
+            element={<SuperAdminPanel />}
+          />
         </Route>
-
       </Route>
 
       {/* Fallback route */}
