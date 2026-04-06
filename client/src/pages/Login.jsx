@@ -48,7 +48,7 @@ export default function Login() {
 
   return (
     <div className="page">
-      <Navbar />
+     
       <main className="container">
         <section className="authCard">
           <h1 className="authTitle">Login</h1>
