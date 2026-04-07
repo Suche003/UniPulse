@@ -16,17 +16,12 @@ import Sponsor from "../models/Sponsor.js";
 const router = express.Router();
 
 // ==================== Public Routes ====================
-
-// Sponsor self-registration
 router.post("/register", registerSponsor);
-
-// Public list of approved sponsors (for clubs & students)
 router.get("/public", async (req, res) => {
   try {
     const sponsors = await Sponsor.find({ status: "approved", isActive: true })
       .select("-passwordHash -__v")
       .sort({ createdAt: -1 });
-
     return res.json(sponsors);
   } catch (err) {
     return res.status(500).json({ message: err.message });
@@ -36,13 +31,18 @@ router.get("/public", async (req, res) => {
 // ==================== Protected Routes ====================
 router.use(requireAuth);
 
-// Get all sponsors (superadmin)
-router.get("/", requireRole("superadmin"), getSponsors);
+// Get own profile (sponsor only) – FIXED
+router.get("/profile", requireRole("sponsor"), async (req, res) => {
+  try {
+    const sponsor = await Sponsor.findById(req.user.sub).select("-passwordHash");
+    if (!sponsor) return res.status(404).json({ message: "Sponsor not found" });
+    res.json(sponsor);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 
-// Get single sponsor by ID
-router.get("/:id", requireRole("superadmin"), getSponsorById);
-
-// ==================== Update own profile (sponsor only) ====================
+// Update own profile (sponsor only)
 router.put(
   "/profile",
   requireRole("sponsor"),
@@ -52,6 +52,7 @@ router.put(
       const sponsorId = req.user.sub;
       const updateData = { ...req.body };
 
+      // Parse JSON strings if needed
       if (updateData.socialLinks && typeof updateData.socialLinks === "string") {
         try {
           updateData.socialLinks = JSON.parse(updateData.socialLinks);
@@ -59,7 +60,6 @@ router.put(
           return res.status(400).json({ message: "Invalid socialLinks format" });
         }
       }
-
       if (updateData.contacts && typeof updateData.contacts === "string") {
         try {
           updateData.contacts = JSON.parse(updateData.contacts);
@@ -82,10 +82,7 @@ router.put(
         runValidators: true,
       }).select("-passwordHash");
 
-      if (!sponsor) {
-        return res.status(404).json({ message: "Sponsor not found" });
-      }
-
+      if (!sponsor) return res.status(404).json({ message: "Sponsor not found" });
       return res.json(sponsor);
     } catch (err) {
       console.error("Profile update error:", err);
@@ -95,6 +92,8 @@ router.put(
 );
 
 // ==================== Admin-only Routes ====================
+router.get("/", requireRole("superadmin"), getSponsors);
+router.get("/:id", requireRole("superadmin"), getSponsorById);
 router.post("/", requireRole("superadmin"), uploadSponsorLogo, createSponsor);
 router.put("/:id", requireRole("superadmin"), uploadSponsorLogo, updateSponsor);
 router.delete("/:id", requireRole("superadmin"), deleteSponsor);

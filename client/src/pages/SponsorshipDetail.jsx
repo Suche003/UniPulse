@@ -31,7 +31,7 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
         body,
       });
       toast.success(`Request ${action}d`);
-      onRefresh();
+      await onRefresh();
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -55,7 +55,7 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
         body: { selectedPackage, paymentDeadline: null, materialsNeeded }
       });
       toast.success('Proposal accepted! Coordination started.');
-      onRefresh();
+      await onRefresh();
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -81,7 +81,7 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
           headers: {},
         });
         toast.success('File uploaded');
-        onRefresh();
+        await onRefresh();
       } catch (err) {
         toast.error(err.message);
       } finally {
@@ -99,7 +99,7 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
         body: { type, data }
       });
       toast.success('Updated');
-      onRefresh();
+      await onRefresh();
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -117,7 +117,7 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
       });
       toast.success('Payment instructions saved');
       setEditingInstructions(false);
-      onRefresh();
+      await onRefresh();
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -136,7 +136,7 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
       });
       toast.success(`Meeting ${action === 'accept_meeting' ? 'accepted and scheduled' : 'declined'}`);
       setShowMeetingScheduleForm(false);
-      onRefresh();
+      await onRefresh();
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -152,7 +152,7 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
         body: { meetingCompleted: true }
       });
       toast.success('Meeting marked as completed');
-      onRefresh();
+      await onRefresh();
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -172,7 +172,7 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
         body: { amount: parseFloat(paymentAmount), transactionId, notes: paymentNotes }
       });
       toast.success('Payment recorded successfully');
-      onRefresh();
+      await onRefresh();
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -190,17 +190,14 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
             <p><strong>{request.event?.title || 'Event'}</strong></p>
             <p>Proposed Amount: ${request.proposedAmount}</p>
           </div>
-          {request.status === 'pending' && (
+          {/* Only sponsor sees action buttons on pending requests */}
+          {userRole === 'sponsor' && request.status === 'pending' && (
             <div className="actions">
               <button className="btn-sm btn-sm-success" onClick={() => handleResponse('accept')} disabled={actionLoading}>Accept</button>
               <button className="btn-sm btn-sm-danger" onClick={() => handleResponse('decline')} disabled={actionLoading}>Decline</button>
               <button className="btn-sm" onClick={() => { const amt = prompt('Counter amount:'); if(amt) handleResponse('counter', parseFloat(amt)); }} disabled={actionLoading}>Counter</button>
               <button className="btn-sm" onClick={() => { const details = prompt('Meeting details:'); if(details) handleResponse('meeting', null, details); }} disabled={actionLoading}>Request Meeting</button>
-            </div>
-          )}
-          {request.status === 'pending' && !request.agreementSigned && (
-            <div className="actions">
-              <button className="btn-primary" onClick={handleAcceptProposal} disabled={actionLoading}>Start Coordination</button>
+              <button className="btn-primary" onClick={handleAcceptProposal} disabled={actionLoading}>Accept Proposal & Start Coordination</button>
             </div>
           )}
         </div>
@@ -215,13 +212,13 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
         <div className="section"><h4>Packages</h4>{request.proposal.packages?.map((p,i)=><div key={i}><strong>{p.name}</strong> – ${p.amount}<br/>{p.benefits}</div>)}</div>
         <div className="section"><h4>Call to Action</h4><p>{request.proposal.callToAction}</p></div>
         <div className="section"><h4>Contact</h4><p>{request.proposal.contact?.name} | {request.proposal.contact?.email}</p></div>
-        {request.status === 'pending' && (
+        {/* Only sponsor sees action buttons on pending requests */}
+        {userRole === 'sponsor' && request.status === 'pending' && (
           <div className="actions">
             <button className="btn-sm btn-sm-success" onClick={() => handleResponse('accept')} disabled={actionLoading}>Accept</button>
             <button className="btn-sm btn-sm-danger" onClick={() => handleResponse('decline')} disabled={actionLoading}>Decline</button>
             <button className="btn-sm" onClick={() => { const amt = prompt('Counter amount:'); if(amt) handleResponse('counter', parseFloat(amt)); }} disabled={actionLoading}>Counter</button>
             <button className="btn-sm" onClick={() => { const details = prompt('Meeting details:'); if(details) handleResponse('meeting', null, details); }} disabled={actionLoading}>Request Meeting</button>
-            {/* Show "Accept Proposal & Start Coordination" only when pending and proposal exists */}
             <button className="btn-primary" onClick={handleAcceptProposal} disabled={actionLoading}>Accept Proposal & Start Coordination</button>
           </div>
         )}
@@ -229,13 +226,13 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
     );
   };
 
-  // ==================== Coordination Tab (Role‑based) ====================
+  // ==================== Coordination Tab ====================
   const renderCoordination = () => {
+    // Sponsor view
     if (userRole === 'sponsor') {
       const canPay = (request.status === 'accepted' || request.status === 'meeting_scheduled') && request.paymentStatus !== 'paid';
       return (
         <div className="coordination">
-          {/* Display scheduled meeting if exists */}
           {request.meetingSchedule && request.meetingSchedule.date && (
             <div className="section">
               <h4>📅 Scheduled Meeting</h4>
@@ -299,7 +296,7 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
       );
     }
 
-    // Club view
+    // Club view – includes Payment Instructions form and meeting response
     return (
       <div className="coordination">
         {request.status === 'meeting_requested' && (
@@ -343,29 +340,61 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
           </div>
         )}
 
+        {/* Payment Instructions Form – Club View */}
         <div className="section">
           <h4>💳 Payment Information (Provide bank details for sponsor)</h4>
           {editingInstructions ? (
             <form onSubmit={handleSaveInstructions}>
-              <input placeholder="Bank Name" value={instructions.bankName || ''} onChange={e => setInstructions({...instructions, bankName: e.target.value})} />
-              <input placeholder="Account Name" value={instructions.accountName || ''} onChange={e => setInstructions({...instructions, accountName: e.target.value})} />
-              <input placeholder="Account Number" value={instructions.accountNumber || ''} onChange={e => setInstructions({...instructions, accountNumber: e.target.value})} />
-              <input type="date" placeholder="Payment Deadline" value={instructions.deadline?.slice(0,10) || ''} onChange={e => setInstructions({...instructions, deadline: e.target.value})} />
-              <textarea placeholder="Other Details" value={instructions.otherDetails || ''} onChange={e => setInstructions({...instructions, otherDetails: e.target.value})} rows="2" />
+              <input
+                type="text"
+                placeholder="Bank Name"
+                value={instructions.bankName || ''}
+                onChange={e => setInstructions({...instructions, bankName: e.target.value})}
+              />
+              <input
+                type="text"
+                placeholder="Account Name"
+                value={instructions.accountName || ''}
+                onChange={e => setInstructions({...instructions, accountName: e.target.value})}
+              />
+              <input
+                type="text"
+                placeholder="Account Number"
+                value={instructions.accountNumber || ''}
+                onChange={e => setInstructions({...instructions, accountNumber: e.target.value})}
+              />
+              <input
+                type="date"
+                placeholder="Payment Deadline"
+                value={instructions.deadline ? instructions.deadline.slice(0,10) : ''}
+                onChange={e => setInstructions({...instructions, deadline: e.target.value})}
+              />
+              <textarea
+                placeholder="Other Details (e.g., reference format)"
+                value={instructions.otherDetails || ''}
+                onChange={e => setInstructions({...instructions, otherDetails: e.target.value})}
+                rows="2"
+              />
               <div className="actions">
-                <button type="submit" className="btn-sm btn-sm-success" disabled={actionLoading}>Save</button>
+                <button type="submit" className="btn-sm btn-sm-success" disabled={actionLoading}>Save Instructions</button>
                 <button type="button" className="btn-sm" onClick={() => setEditingInstructions(false)}>Cancel</button>
               </div>
             </form>
           ) : (
             <div>
-              {request.paymentInstructions?.bankName && <p><strong>Bank:</strong> {request.paymentInstructions.bankName}</p>}
-              {request.paymentInstructions?.accountName && <p><strong>Account Name:</strong> {request.paymentInstructions.accountName}</p>}
-              {request.paymentInstructions?.accountNumber && <p><strong>Account Number:</strong> {request.paymentInstructions.accountNumber}</p>}
-              {request.paymentInstructions?.deadline && <p><strong>Payment Deadline:</strong> {new Date(request.paymentInstructions.deadline).toLocaleDateString()}</p>}
-              {request.paymentInstructions?.otherDetails && <p><strong>Other Details:</strong> {request.paymentInstructions.otherDetails}</p>}
-              {(!request.paymentInstructions || Object.keys(request.paymentInstructions).length === 0) && <p>No payment instructions provided yet.</p>}
-              <button className="btn-sm" onClick={() => setEditingInstructions(true)}>Edit Instructions</button>
+              {request.paymentInstructions?.bankName && (
+                <>
+                  <p><strong>Bank:</strong> {request.paymentInstructions.bankName}</p>
+                  <p><strong>Account Name:</strong> {request.paymentInstructions.accountName}</p>
+                  <p><strong>Account Number:</strong> {request.paymentInstructions.accountNumber}</p>
+                  {request.paymentInstructions.deadline && <p><strong>Payment Deadline:</strong> {new Date(request.paymentInstructions.deadline).toLocaleDateString()}</p>}
+                  {request.paymentInstructions.otherDetails && <p><strong>Other Details:</strong> {request.paymentInstructions.otherDetails}</p>}
+                </>
+              )}
+              {(!request.paymentInstructions || Object.keys(request.paymentInstructions).length === 0) && (
+                <p>No payment instructions provided yet.</p>
+              )}
+              <button className="btn-sm" onClick={() => setEditingInstructions(true)}>✏️ Edit Instructions</button>
             </div>
           )}
         </div>

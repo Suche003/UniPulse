@@ -19,7 +19,7 @@ const storage = multer.diskStorage({
 
 export const uploadSponsorLogo = multer({ storage }).single("logo");
 
-// Create sponsor
+// Create sponsor (admin only)
 export const createSponsor = async (req, res) => {
   try {
     console.log("🔥 createSponsor called");
@@ -67,7 +67,7 @@ export const createSponsor = async (req, res) => {
   }
 };
 
-// Get all sponsors
+// Get all sponsors (admin only, with optional status filter)
 export const getSponsors = async (req, res) => {
   try {
     const { status } = req.query;
@@ -84,7 +84,7 @@ export const getSponsors = async (req, res) => {
   }
 };
 
-// Get sponsor by id
+// Get sponsor by id (admin only)
 export const getSponsorById = async (req, res) => {
   try {
     const sponsor = await Sponsor.findById(req.params.id).populate(
@@ -103,7 +103,7 @@ export const getSponsorById = async (req, res) => {
   }
 };
 
-// Update sponsor
+// Update sponsor (admin only)
 export const updateSponsor = async (req, res) => {
   try {
     const updateData = { ...req.body };
@@ -129,7 +129,7 @@ export const updateSponsor = async (req, res) => {
   }
 };
 
-// Delete sponsor
+// Delete sponsor (admin only)
 export const deleteSponsor = async (req, res) => {
   try {
     const sponsor = await Sponsor.findByIdAndDelete(req.params.id);
@@ -151,7 +151,7 @@ export const deleteSponsor = async (req, res) => {
   }
 };
 
-// Update sponsor status
+// Update sponsor status (admin only) – this is the critical approval endpoint
 export const updateSponsorStatus = async (req, res) => {
   try {
     const { status } = req.body;
@@ -163,13 +163,14 @@ export const updateSponsorStatus = async (req, res) => {
     const sponsor = await Sponsor.findByIdAndUpdate(
       req.params.id,
       { status },
-      { new: true }
+      { new: true }   // return updated document
     );
 
     if (!sponsor) {
       return res.status(404).json({ message: "Sponsor not found" });
     }
 
+    console.log(`✅ Sponsor ${sponsor.name} status updated to ${status}`);
     return res.json(sponsor);
   } catch (error) {
     console.error("❌ Error in updateSponsorStatus:", error);
@@ -177,7 +178,7 @@ export const updateSponsorStatus = async (req, res) => {
   }
 };
 
-// Update sponsor payment
+// Update sponsor payment (admin only)
 export const updateSponsorPayment = async (req, res) => {
   try {
     const { paymentStatus, amountPaid } = req.body;

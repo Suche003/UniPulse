@@ -24,7 +24,7 @@ const router = express.Router();
 router.use(requireAuth);
 
 // ==================== Super Admin ====================
-router.get('/', requireAuth, requireRole('superadmin'), async (req, res) => {
+router.get('/', requireRole('superadmin'), async (req, res) => {
   try {
     const requests = await SponsorshipRequest.find()
       .populate('event', 'title date location')
@@ -49,6 +49,7 @@ router.get('/my-club-requests', requireRole('club'), async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+
 router.delete('/:requestId', requireRole('club'), async (req, res) => {
   try {
     const request = await SponsorshipRequest.findById(req.params.requestId);
@@ -61,8 +62,10 @@ router.delete('/:requestId', requireRole('club'), async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+
 router.patch('/:requestId/club-respond', requireRole('club'), clubRespond);
-router.patch('/:requestId/payment-instructions', requireAuth, requireRole('club'), async (req, res) => {
+
+router.patch('/:requestId/payment-instructions', requireRole('club'), async (req, res) => {
   try {
     const request = await SponsorshipRequest.findById(req.params.requestId);
     if (!request) return res.status(404).json({ message: 'Request not found' });
@@ -74,8 +77,8 @@ router.patch('/:requestId/payment-instructions', requireAuth, requireRole('club'
     res.status(500).json({ message: err.message });
   }
 });
-// Club marks meeting as completed
-router.patch('/:requestId/meeting-completed', requireAuth, requireRole('club'), async (req, res) => {
+
+router.patch('/:requestId/meeting-completed', requireRole('club'), async (req, res) => {
   try {
     const request = await SponsorshipRequest.findById(req.params.requestId);
     if (!request) return res.status(404).json({ message: 'Request not found' });
@@ -92,11 +95,11 @@ router.patch('/:requestId/meeting-completed', requireAuth, requireRole('club'), 
 router.get('/my-requests', requireRole('sponsor'), getSponsorRequests);
 router.patch('/:requestId/respond', requireRole('sponsor'), respondToRequest);
 router.patch('/:requestId/accept-proposal', requireRole('sponsor'), acceptProposal);
-router.patch('/:requestId/coordination', requireAuth, updateCoordination);
-router.post('/:requestId/upload', requireAuth, uploadFile);
+router.patch('/:requestId/coordination', requireRole('sponsor'), updateCoordination);
+router.post('/:requestId/upload', requireRole('sponsor'), uploadFile);
 
 // Manual payment recording (sponsor)
-router.post('/:requestId/record-payment', requireAuth, requireRole('sponsor'), async (req, res) => {
+router.post('/:requestId/record-payment', requireRole('sponsor'), async (req, res) => {
   try {
     const { amount, transactionId, notes } = req.body;
     const request = await SponsorshipRequest.findById(req.params.requestId);
@@ -149,7 +152,7 @@ router.post('/:requestId/record-payment', requireAuth, requireRole('sponsor'), a
 });
 
 // ==================== Contract Management ====================
-router.patch('/:requestId/contract', requireAuth, requireRole('sponsor'), uploadContract);
+router.patch('/:requestId/contract', requireRole('sponsor'), uploadContract);
 router.patch('/:requestId/sign', requireAuth, requireRole(['sponsor', 'club']), signContract);
 
 export default router;

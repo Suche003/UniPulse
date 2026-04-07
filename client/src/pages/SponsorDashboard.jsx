@@ -24,6 +24,7 @@ const SponsorDashboard = () => {
     contacts: [],
   });
   const [newContact, setNewContact] = useState({ name: '', email: '', phone: '', role: '' });
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -40,15 +41,16 @@ const SponsorDashboard = () => {
       setPayments(paymentsData);
     } catch (err) {
       toast.error('Failed to load data');
+      console.error('Fetch error:', err);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
   const fetchProfile = async () => {
     try {
-      const user = JSON.parse(localStorage.getItem('unipulse_user'));
-      const sponsor = await apiRequest(`/api/sponsors/${user.id}`);
+      const sponsor = await apiRequest('/api/sponsors/profile');
       setProfile(sponsor);
       setProfileForm({
         name: sponsor.name,
@@ -66,8 +68,6 @@ const SponsorDashboard = () => {
 
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
-
-    // Validation
     if (!profileForm.name.trim()) {
       toast.error('Organization name is required');
       return;
@@ -123,6 +123,12 @@ const SponsorDashboard = () => {
     const newContacts = [...profileForm.contacts];
     newContacts.splice(index, 1);
     setProfileForm({ ...profileForm, contacts: newContacts });
+  };
+
+  // Manual refresh button handler
+  const handleRefresh = () => {
+    setRefreshing(true);
+    fetchData();
   };
 
   // Calculate stats
@@ -194,6 +200,16 @@ const SponsorDashboard = () => {
       <div className="tab-content">
         {activeTab === 'requests' && (
           <>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
+              <button 
+                className="btn-sm" 
+                onClick={handleRefresh} 
+                disabled={refreshing}
+                style={{ minWidth: '100px' }}
+              >
+                {refreshing ? 'Refreshing...' : '🔄 Refresh'}
+              </button>
+            </div>
             {requests.length === 0 ? (
               <div className="empty-state">
                 <div className="empty-icon">📭</div>
@@ -255,6 +271,7 @@ const SponsorDashboard = () => {
         {activeTab === 'profile' && (
           <div className="profile-section">
             {!editingProfile ? (
+              // ========== VIEW MODE ==========
               <div className="profile-view">
                 <div className="profile-avatar">
                   {profile?.logo ? (
@@ -298,16 +315,20 @@ const SponsorDashboard = () => {
                 <button className="btn-primary" onClick={() => setEditingProfile(true)}>✏️ Edit Profile</button>
               </div>
             ) : (
+              // ========== EDIT MODE ==========
               <form onSubmit={handleProfileUpdate} className="profile-form">
                 <h3>Edit Company Profile</h3>
+                
                 <div className="form-group">
                   <label>Organization Name *</label>
                   <input type="text" value={profileForm.name} onChange={e => setProfileForm({ ...profileForm, name: e.target.value })} required />
                 </div>
+                
                 <div className="form-group">
                   <label>Description</label>
                   <textarea value={profileForm.description} onChange={e => setProfileForm({ ...profileForm, description: e.target.value })} rows="4" placeholder="Tell us about your company..." />
                 </div>
+                
                 <div className="form-row">
                   <div className="form-group">
                     <label>Website</label>
@@ -318,6 +339,7 @@ const SponsorDashboard = () => {
                     <input type="tel" value={profileForm.contactPhone} onChange={e => setProfileForm({ ...profileForm, contactPhone: e.target.value.replace(/\D/g, '') })} placeholder="10 digits" />
                   </div>
                 </div>
+                
                 <div className="form-group">
                   <label>Social Links</label>
                   <div className="form-row">
@@ -329,6 +351,7 @@ const SponsorDashboard = () => {
                     <input type="url" placeholder="Instagram" value={profileForm.socialLinks.instagram} onChange={e => setProfileForm({ ...profileForm, socialLinks: { ...profileForm.socialLinks, instagram: e.target.value } })} />
                   </div>
                 </div>
+                
                 <div className="form-group">
                   <label>Contact Persons</label>
                   {profileForm.contacts.map((c, idx) => (
@@ -345,11 +368,13 @@ const SponsorDashboard = () => {
                     <button type="button" className="btn-sm" onClick={addContact}>+ Add</button>
                   </div>
                 </div>
+                
                 <div className="form-group">
                   <label>Company Logo</label>
                   <input type="file" accept="image/*" onChange={e => setProfileForm({ ...profileForm, logo: e.target.files[0] })} />
                   <small>Recommended: Square image, max 2MB</small>
                 </div>
+                
                 <div className="actions">
                   <button type="submit" className="btn-primary">💾 Save Changes</button>
                   <button type="button" className="btn-secondary" onClick={() => setEditingProfile(false)}>Cancel</button>

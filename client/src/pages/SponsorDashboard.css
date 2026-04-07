@@ -314,7 +314,7 @@
   background: rgba(124, 44, 255, 0.2);
 }
 
-/* Profile Form */
+/* Profile Form - Fixed overlapping styles */
 .profile-form {
   max-width: 700px;
   margin: 0 auto;
@@ -327,11 +327,11 @@
   color: var(--text);
 }
 
-.form-group {
-  margin-bottom: 1.2rem;
+.profile-form .form-group {
+  margin-bottom: 1.5rem;
 }
 
-.form-group label {
+.profile-form .form-group label {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 600;
@@ -339,9 +339,9 @@
   font-size: 0.9rem;
 }
 
-.form-group input,
-.form-group textarea,
-.form-group select {
+.profile-form input,
+.profile-form textarea,
+.profile-form select {
   width: 100%;
   padding: 0.85rem 1rem;
   border: 1px solid var(--border);
@@ -351,50 +351,96 @@
   font-family: inherit;
   transition: all 0.2s;
   font-size: 0.95rem;
+  box-sizing: border-box;
 }
 
-.form-group input:focus,
-.form-group textarea:focus,
-.form-group select:focus {
+.profile-form input:focus,
+.profile-form textarea:focus,
+.profile-form select:focus {
   outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(124, 44, 255, 0.2);
   background: #22222e;
 }
 
-.form-row {
+/* Form row (two columns) */
+.profile-form .form-row {
   display: flex;
   gap: 1rem;
   margin-bottom: 0;
+  flex-wrap: wrap;
 }
 
-.form-row .form-group {
+.profile-form .form-row .form-group {
   flex: 1;
+  min-width: 150px;
 }
 
-.contact-item {
+/* Social links rows */
+.profile-form .social-row {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.profile-form .social-row input {
+  flex: 1;
+  min-width: 120px;
+}
+
+/* Contact items */
+.profile-form .contact-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
   background: rgba(0, 0, 0, 0.3);
   padding: 0.75rem 1rem;
   border-radius: 16px;
   margin-bottom: 0.5rem;
 }
 
-.add-contact {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr auto;
-  gap: 0.5rem;
-  margin-top: 0.75rem;
+.profile-form .contact-item span {
+  flex: 1;
+  word-break: break-word;
+  color: var(--text);
 }
 
-.actions {
+.profile-form .contact-item button {
+  flex-shrink: 0;
+}
+
+/* Add contact grid */
+.profile-form .add-contact {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  align-items: center;
+}
+
+.profile-form .add-contact input,
+.profile-form .add-contact button {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Actions buttons */
+.profile-form .actions {
   display: flex;
   gap: 1rem;
   margin-top: 1.5rem;
+  flex-wrap: wrap;
 }
 
+.profile-form .actions button {
+  flex: 1;
+  min-width: 120px;
+}
+
+/* Base buttons */
 .btn-primary {
   background: linear-gradient(135deg, var(--accent2), var(--accent));
   color: white;
@@ -457,18 +503,34 @@
     padding: 0.6rem 1.2rem;
     font-size: 0.8rem;
   }
-  .form-row {
+  .profile-form .form-row {
     flex-direction: column;
     gap: 0;
   }
-  .add-contact {
+  .profile-form .add-contact {
     grid-template-columns: 1fr;
+  }
+  .profile-form .contact-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .profile-form .contact-item button {
+    align-self: flex-end;
   }
   .profile-info-grid {
     grid-template-columns: 1fr;
   }
   .stat-value {
     font-size: 1.8rem;
+  }
+  .profile-form .social-row {
+    flex-direction: column;
+  }
+  .profile-form .actions {
+    flex-direction: column;
+  }
+  .profile-form .actions button {
+    width: 100%;
   }
 }
 
@@ -487,4 +549,168 @@
 .offering-card,
 .sponsorship-detail-card {
   animation: fadeInUp 0.4s ease-out forwards;
+}
+
+/* ===== PROFILE FORM ENHANCEMENTS ===== */
+.profile-form {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.profile-form .form-section {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.profile-form .form-section:last-of-type {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.form-section-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* social grid 2 columns */
+.profile-form .social-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+/* contact persons list */
+.contacts-list {
+  margin-bottom: 1.5rem;
+}
+
+.contact-card-item {
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 20px;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.contact-info {
+  flex: 1;
+}
+
+.contact-role {
+  font-size: 0.8rem;
+  color: var(--accent);
+  margin-left: 0.5rem;
+}
+
+.contact-details {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-top: 0.3rem;
+  flex-wrap: wrap;
+}
+
+.remove-contact-btn {
+  background: rgba(255, 70, 70, 0.15);
+  border-color: rgba(255, 70, 70, 0.3);
+  color: #ff8888;
+}
+
+.remove-contact-btn:hover {
+  background: rgba(255, 70, 70, 0.3);
+  color: #ffaaaa;
+}
+
+/* add new contact */
+.add-contact-section {
+  margin-top: 0.5rem;
+}
+
+.add-contact-section > label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.add-contact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+  align-items: end;
+}
+
+.btn-add-contact {
+  background: linear-gradient(135deg, var(--accent2), var(--accent));
+  border: none;
+  color: white;
+  padding: 0.7rem 1rem;
+  border-radius: 40px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-add-contact:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(124, 44, 255, 0.4);
+}
+
+/* action buttons row */
+.profile-form .form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.profile-form .form-actions button {
+  flex: 1;
+  min-width: 140px;
+}
+
+/* required star */
+.required-star {
+  color: #ff6b6b;
+  margin-left: 3px;
+}
+
+/* responsive adjustments */
+@media (max-width: 640px) {
+  .add-contact-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .contact-card-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .remove-contact-btn {
+    align-self: flex-end;
+  }
+  
+  .contact-details {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
+  .profile-form .form-actions {
+    flex-direction: column;
+  }
 }

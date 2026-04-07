@@ -2,7 +2,9 @@ import SponsorshipRequest from '../models/SponsorshipRequest.js';
 import Event from '../models/Event.js';
 import Sponsor from '../models/Sponsor.js';
 import Club from '../models/Club.js';
-import Notification from '../models/Notification.js'; // ✅ in‑app notifications
+import Notification from '../models/Notification.js';
+import Payment from '../models/Payment.js';
+import { sendEmail } from '../utils/email.js';
 
 // ==================== Basic Request Functions ====================
 export const createRequest = async (req, res) => {
@@ -15,7 +17,9 @@ export const createRequest = async (req, res) => {
 
     const sponsor = await Sponsor.findById(sponsorId);
     if (!sponsor) return res.status(404).json({ message: 'Sponsor not found' });
-    if (sponsor.status !== 'approved') return res.status(400).json({ message: 'Sponsor is not approved' });
+    if (sponsor.status !== 'approved') {
+      return res.status(400).json({ message: 'Sponsor is not approved yet' });
+    }
 
     const request = new SponsorshipRequest({
       event: eventId,
@@ -28,7 +32,6 @@ export const createRequest = async (req, res) => {
 
     await request.save();
 
-    // ✅ In‑app notification for sponsor
     await Notification.create({
       userId: sponsor._id,
       userModel: 'Sponsor',
@@ -38,8 +41,10 @@ export const createRequest = async (req, res) => {
       relatedRequestId: request._id
     });
 
+    console.log(`✅ Sponsorship request created: ${request._id} (sponsor: ${sponsor.name})`);
     res.status(201).json(request);
   } catch (err) {
+    console.error('❌ createRequest error:', err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -47,11 +52,16 @@ export const createRequest = async (req, res) => {
 export const getSponsorRequests = async (req, res) => {
   try {
     const sponsorId = req.user.sub;
+    console.log(`📋 Fetching requests for sponsor ID: ${sponsorId}`);
+
     const requests = await SponsorshipRequest.find({ sponsor: sponsorId })
       .populate('event', 'title date location')
       .populate('club', 'clubName email');
+
+    console.log(`✅ Found ${requests.length} requests for sponsor`);
     res.json(requests);
   } catch (err) {
+    console.error('❌ getSponsorRequests error:', err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -90,7 +100,6 @@ export const respondToRequest = async (req, res) => {
     request.respondedBy = 'sponsor';
     await request.save();
 
-    // ✅ In‑app notification for club
     await Notification.create({
       userId: request.club._id,
       userModel: 'Club',
@@ -100,8 +109,10 @@ export const respondToRequest = async (req, res) => {
       relatedRequestId: request._id
     });
 
+    console.log(`✅ Sponsor responded with ${action} to request ${requestId}`);
     res.json(request);
   } catch (err) {
+    console.error('❌ respondToRequest error:', err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -132,22 +143,19 @@ export const clubRespond = async (req, res) => {
     request.respondedBy = 'club';
     await request.save();
 
-    // ✅ In‑app notification for sponsor
-    let notificationMessage = `Your sponsorship request for event "${request.event.title}" has been ${action === 'accept_counter' ? 'accepted after counter' : 'meeting accepted'}.`;
-    if (meetingSchedule) {
-      notificationMessage += ` Meeting scheduled: ${new Date(meetingSchedule.date).toLocaleDateString()} at ${meetingSchedule.time} - ${meetingSchedule.location}`;
-    }
     await Notification.create({
       userId: request.sponsor._id,
       userModel: 'Sponsor',
       title: 'Sponsorship request update',
-      message: notificationMessage,
+      message: `Your sponsorship request for event "${request.event.title}" has been ${action === 'accept_counter' ? 'accepted after counter' : 'meeting accepted'}.`,
       type: 'success',
       relatedRequestId: request._id
     });
 
+    console.log(`✅ Club responded with ${action} to request ${requestId}`);
     res.json(request);
   } catch (err) {
+    console.error('❌ clubRespond error:', err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -167,6 +175,7 @@ export const uploadContract = async (req, res) => {
 
     res.json({ message: 'Contract uploaded', request });
   } catch (err) {
+    console.error('❌ uploadContract error:', err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -196,6 +205,7 @@ export const signContract = async (req, res) => {
     await request.save();
     res.json({ message: 'Contract signed', request });
   } catch (err) {
+    console.error('❌ signContract error:', err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -210,8 +220,11 @@ export const createDetailedProposal = async (req, res) => {
     if (!event) return res.status(404).json({ message: 'Event not found' });
 
     const sponsor = await Sponsor.findById(sponsorId);
-    if (!sponsor || sponsor.status !== 'approved') {
-      return res.status(400).json({ message: 'Sponsor not available' });
+    if (!sponsor) {
+      return res.status(404).json({ message: 'Sponsor not found' });
+    }
+    if (sponsor.status !== 'approved') {
+      return res.status(400).json({ message: 'Sponsor is not approved yet' });
     }
 
     const request = new SponsorshipRequest({
@@ -225,7 +238,6 @@ export const createDetailedProposal = async (req, res) => {
 
     await request.save();
 
-    // ✅ In‑app notification for sponsor
     await Notification.create({
       userId: sponsor._id,
       userModel: 'Sponsor',
@@ -235,8 +247,10 @@ export const createDetailedProposal = async (req, res) => {
       relatedRequestId: request._id
     });
 
+    console.log(`✅ Detailed proposal created: ${request._id} for sponsor ${sponsor.name}`);
     res.status(201).json(request);
   } catch (err) {
+    console.error('❌ createDetailedProposal error:', err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -257,7 +271,6 @@ export const acceptProposal = async (req, res) => {
     request.materials = materialsNeeded;
     await request.save();
 
-    // ✅ In‑app notification for club
     const club = await Club.findById(request.club);
     await Notification.create({
       userId: club._id,
@@ -268,8 +281,10 @@ export const acceptProposal = async (req, res) => {
       relatedRequestId: request._id
     });
 
+    console.log(`✅ Sponsor accepted proposal ${requestId}`);
     res.json(request);
   } catch (err) {
+    console.error('❌ acceptProposal error:', err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -310,6 +325,7 @@ export const updateCoordination = async (req, res) => {
     await request.save();
     res.json(request);
   } catch (err) {
+    console.error('❌ updateCoordination error:', err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -355,6 +371,67 @@ export const uploadFile = async (req, res) => {
     await request.save();
     res.json({ message: 'File uploaded', url: fileUrl });
   } catch (err) {
+    console.error('❌ uploadFile error:', err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Record payment manually (sponsor)
+export const recordPayment = async (req, res) => {
+  try {
+    const { requestId } = req.params;
+    const { amount, transactionId, notes } = req.body;
+    const sponsorId = req.user.sub;
+
+    const request = await SponsorshipRequest.findById(requestId)
+      .populate('event', 'title')
+      .populate('sponsor', 'name totalAmount');
+    if (!request) return res.status(404).json({ message: 'Request not found' });
+    if (request.sponsor._id.toString() !== sponsorId) return res.status(403).json({ message: 'Not your request' });
+    if (request.status !== 'accepted' && request.status !== 'meeting_scheduled') {
+      return res.status(400).json({ message: 'Request not accepted or meeting not scheduled' });
+    }
+
+    const payment = new Payment({
+      sponsorshipRequest: request._id,
+      sponsor: sponsorId,
+      event: request.event._id,
+      amount,
+      transactionId,
+      notes,
+      status: 'completed',
+      paidAt: new Date()
+    });
+    await payment.save();
+
+    // Update sponsor's amountPaid and paymentStatus
+    const sponsor = await Sponsor.findById(sponsorId);
+    const totalPaid = (await Payment.aggregate([
+      { $match: { sponsor: sponsor._id, status: 'completed' } },
+      { $group: { _id: null, total: { $sum: '$amount' } } }
+    ]))[0]?.total || 0;
+    sponsor.amountPaid = totalPaid;
+    sponsor.paymentStatus = totalPaid >= sponsor.totalAmount ? 'paid' : totalPaid > 0 ? 'partial' : 'unpaid';
+    await sponsor.save();
+
+    request.paymentStatus = 'paid';
+    await request.save();
+
+    const club = await Club.findById(request.club);
+    if (club) {
+      await sendEmail({
+        to: club.email,
+        subject: 'Sponsorship Payment Received',
+        html: `<p><strong>${sponsor.name}</strong> has paid <strong>$${amount}</strong> for your event "${request.event.title}".</p>
+               <p>Transaction ID: ${transactionId || 'N/A'}</p>
+               <p>You can view the receipt in your dashboard.</p>`
+      });
+    }
+
+    console.log(`💰 Payment recorded: ${payment._id} for request ${requestId}`);
+    res.status(201).json(payment);
+  } catch (err) {
+    console.error('❌ recordPayment error:', err);
     res.status(500).json({ message: err.message });
   }
 };
