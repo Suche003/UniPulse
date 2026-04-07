@@ -1,26 +1,67 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./ClubForm.css";
 
 export default function CreateClub() {
+  const navigate = useNavigate();
+
   const [form, setForm] = useState({
     clubName: "",
     email: "",
     password: "",
     faculty: "",
-    clubid: "", // Will be set after creation
   });
 
-  const [errors, setErrors] = useState({ email: "", password: "" });
+  const [errors, setErrors] = useState({
+    clubName: "",
+    email: "",
+    password: "",
+    faculty: "",
+  });
+
+  const [successMessage, setSuccessMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const facultyOptions = [
+    "None",
+    "Computing",
+    "Human Science",
+    "Engineering",
+    "Hospitality",
+    "Business Management",
+  ];
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    setErrors((prev) => ({
+      ...prev,
+      [name]: "",
+    }));
+
+    setSuccessMessage("");
   };
 
-  // Validate email & password
   const validate = () => {
     let valid = true;
-    let tempErrors = { email: "", password: "" };
+
+    const tempErrors = {
+      clubName: "",
+      email: "",
+      password: "",
+      faculty: "",
+    };
+
+    if (!form.clubName.trim()) {
+      tempErrors.clubName = "Club name is required.";
+      valid = false;
+    }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(form.email)) {
@@ -35,107 +76,164 @@ export default function CreateClub() {
       valid = false;
     }
 
+    if (!form.faculty) {
+      tempErrors.faculty = "Please select a faculty.";
+      valid = false;
+    }
+
     setErrors(tempErrors);
     return valid;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!validate()) return;
 
-    if (!form.faculty) {
-      alert("Please select a faculty");
-      return;
-    }
-
     try {
-      // POST to backend (create club)
-      const res = await axios.post("http://localhost:5000/api/clubs/create", {
-        clubName: form.clubName,
-        email: form.email,
+      setSubmitting(true);
+      setSuccessMessage("");
+
+      await axios.post("http://localhost:5000/api/clubs/create", {
+        clubName: form.clubName.trim(),
+        email: form.email.trim(),
         password: form.password,
         faculty: form.faculty,
       });
 
-      alert("Club Created Successfully!");
-      
-      // Set the clubId returned from backend
+      setSuccessMessage(
+        "Club created successfully. The club can now log in using the email and password."
+      );
+
       setForm({
         clubName: "",
         email: "",
         password: "",
         faculty: "",
-        clubid: res.data.club.clubid, // Read-only field
       });
 
-      setErrors({ email: "", password: "" });
+      setErrors({
+        clubName: "",
+        email: "",
+        password: "",
+        faculty: "",
+      });
     } catch (err) {
       alert(err.response?.data?.message || "Error creating club");
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
-    <div className="create-club-page">
-      <div className="create-club-container">
-        <h2>Create Club</h2>
-        <form onSubmit={handleSubmit}>
-          {/* Club ID (read-only) */}
-          <input
-            type="text"
-            name="clubid"
-            placeholder="Club ID (auto-generated)"
-            value={form.clubid}
-            readOnly
-          />
+    <div className="club-create-page">
+      <div className="club-create-bg"></div>
 
-          {/* Club Name */}
-          <input
-            type="text"
-            name="clubName"
-            placeholder="Club Name"
-            value={form.clubName}
-            onChange={handleChange}
-            required
-          />
+      <div className="club-create-shell">
+        <button
+          type="button"
+          className="club-create-back-btn"
+          onClick={() => navigate("/superadmin/control-panel")}
+        >
+          <span>&#8617;</span> Go Back
+        </button>
 
-          {/* Faculty */}
-          <select
-            name="faculty"
-            value={form.faculty}
-            onChange={handleChange}
-            required
-          >
-            <option value="">Select Faculty</option>
-            <option value="Science">Science</option>
-            <option value="Engineering">Engineering</option>
-            <option value="Business">Business</option>
-            <option value="Arts">Arts</option>
-          </select>
+        <div className="club-create-card">
+          <div className="club-create-header">
+            <h1 className="club-create-title">Create Club or Society</h1>
+          </div>
 
-          {/* Email */}
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            value={form.email}
-            onChange={handleChange}
-            required
-          />
-          {errors.email && <div className="error">{errors.email}</div>}
+          <form onSubmit={handleSubmit} className="club-create-form" noValidate>
+            <div className="club-create-field">
+              <label className="club-create-label" htmlFor="clubName">
+                Club or Society Name
+              </label>
+              <input
+                className="club-create-input"
+                id="clubName"
+                type="text"
+                name="clubName"
+                placeholder="Enter club or society name"
+                value={form.clubName}
+                onChange={handleChange}
+              />
+              {errors.clubName && (
+                <div className="club-create-error">{errors.clubName}</div>
+              )}
+            </div>
 
-          {/* Password */}
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={form.password}
-            onChange={handleChange}
-            required
-          />
-          {errors.password && <div className="error">{errors.password}</div>}
+            <div className="club-create-field">
+              <label className="club-create-label" htmlFor="faculty">
+                Faculty
+              </label>
+              <select
+                className="club-create-input"
+                id="faculty"
+                name="faculty"
+                value={form.faculty}
+                onChange={handleChange}
+              >
+                <option value="">Select Faculty</option>
+                {facultyOptions.map((faculty) => (
+                  <option key={faculty} value={faculty}>
+                    {faculty}
+                  </option>
+                ))}
+              </select>
+              {errors.faculty && (
+                <div className="club-create-error">{errors.faculty}</div>
+              )}
+            </div>
 
-          <button type="submit">Create Club</button>
-        </form>
+            <div className="club-create-field">
+              <label className="club-create-label" htmlFor="email">
+                Club Email
+              </label>
+              <input
+                className="club-create-input"
+                id="email"
+                type="email"
+                name="email"
+                placeholder="Enter club email"
+                value={form.email}
+                onChange={handleChange}
+              />
+              {errors.email && (
+                <div className="club-create-error">{errors.email}</div>
+              )}
+            </div>
+
+            <div className="club-create-field">
+              <label className="club-create-label" htmlFor="password">
+                Password
+              </label>
+              <input
+                className="club-create-input"
+                id="password"
+                type="password"
+                name="password"
+                placeholder="Create a strong password"
+                value={form.password}
+                onChange={handleChange}
+              />
+              {errors.password && (
+                <div className="club-create-error">{errors.password}</div>
+              )}
+            </div>
+
+            {successMessage && (
+              <div className="club-create-success">{successMessage}</div>
+            )}
+
+            <button
+              type="submit"
+              className="club-create-submit-btn"
+              disabled={submitting}
+            >
+              {submitting ? "Creating Club..." : "Create Club"}
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );

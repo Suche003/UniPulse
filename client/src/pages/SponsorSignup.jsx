@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
-import Navbar from "../components/Navbar";
 import { apiRequest } from "../api/api";
 import LoadingSpinner from "../components/UI/LoadingSpinner";
 import "./SponsorSignup.css";
@@ -24,7 +23,6 @@ export default function SponsorSignup() {
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState("");
 
-  // Fallback packages in case API fails or returns empty
   const fallbackPackages = [
     { _id: "platinum", name: "Platinum", price: 10000 },
     { _id: "gold", name: "Gold", price: 5000 },
@@ -47,6 +45,7 @@ export default function SponsorSignup() {
         setPackagesLoading(false);
       }
     };
+
     loadPackages();
   }, []);
 
@@ -60,31 +59,37 @@ export default function SponsorSignup() {
     setTouched((prev) => ({ ...prev, [e.target.name]: true }));
   };
 
-  // Validation logic
   const validateField = (name, value) => {
     switch (name) {
       case "name":
         return value.trim() ? "" : "Organization name is required";
+
       case "email":
         if (!value.trim()) return "Email is required";
         if (!/\S+@\S+\.\S+/.test(value)) return "Invalid email format";
         return "";
+
       case "password":
         if (!value) return "Password is required";
         if (value.length < 6) return "Password must be at least 6 characters";
         return "";
+
       case "confirmPassword":
         if (!value) return "Please confirm your password";
         if (value !== form.password) return "Passwords do not match";
         return "";
+
       case "contactPhone":
         if (!value) return "";
-        const digits = value.replace(/\D/g, "");
-        if (digits.length !== 10) return "Phone must be 10 digits (e.g., 0712345678)";
+        if (value.replace(/\D/g, "").length !== 10) {
+          return "Phone must be 10 digits (e.g., 0712345678)";
+        }
         return "";
+
       case "description":
         if (value.length > 500) return "Description must not exceed 500 characters";
         return "";
+
       default:
         return "";
     }
@@ -94,15 +99,27 @@ export default function SponsorSignup() {
     name: touched.name ? validateField("name", form.name) : "",
     email: touched.email ? validateField("email", form.email) : "",
     password: touched.password ? validateField("password", form.password) : "",
-    confirmPassword: touched.confirmPassword ? validateField("confirmPassword", form.confirmPassword) : "",
-    contactPhone: touched.contactPhone ? validateField("contactPhone", form.contactPhone) : "",
-    description: touched.description ? validateField("description", form.description) : "",
+    confirmPassword: touched.confirmPassword
+      ? validateField("confirmPassword", form.confirmPassword)
+      : "",
+    contactPhone: touched.contactPhone
+      ? validateField("contactPhone", form.contactPhone)
+      : "",
+    description: touched.description
+      ? validateField("description", form.description)
+      : "",
   };
 
-  const isValid = Object.values(errors).every((e) => e === "") && form.name && form.email && form.password && form.confirmPassword;
+  const isValid =
+    Object.values(errors).every((e) => e === "") &&
+    form.name &&
+    form.email &&
+    form.password &&
+    form.confirmPassword;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     setTouched({
       name: true,
       email: true,
@@ -122,6 +139,7 @@ export default function SponsorSignup() {
 
     try {
       const cleanedPhone = form.contactPhone.replace(/\D/g, "");
+
       const payload = {
         name: form.name.trim(),
         email: form.email.trim(),
@@ -147,8 +165,8 @@ export default function SponsorSignup() {
         return;
       }
 
-      toast.success("Registration successful! ✅ Please wait for admin approval.");
-      setTimeout(() => navigate("/login"), 3000);
+      toast.success("Registration successful! Please wait for admin approval.");
+      setTimeout(() => navigate("/login"), 2000);
     } catch (err) {
       const errorMsg = "Server error. Please try again.";
       setServerError(errorMsg);
@@ -159,45 +177,82 @@ export default function SponsorSignup() {
   };
 
   return (
-    <div className="sponsor-signup-page">
-      <Navbar />
+    <div className="sponsor-page">
+      <div className="sponsor-page__bg"></div>
 
-      {/* Hero Section */}
-      <div className="signup-hero">
-        <div className="hero-overlay"></div>
-        <div className="hero-content">
-          <h1>Partner with University Events</h1>
-          <p>Become a sponsor and connect with thousands of students, clubs, and societies.</p>
-          <div className="hero-badge">✨ 25% off your first event sponsorship ✨</div>
-        </div>
+      <div className="sponsor-page__topbar">
+        <Link to="/" className="sponsor-home-btn">
+         <span>&#8617;</span> Go Back
+        </Link>
       </div>
 
-      {/* Signup Form Card */}
-      <div className="signup-container">
-        <div className="signup-card">
-          <h2>Create Sponsor Account</h2>
-          <p className="signup-subtitle">Join our community of valued partners</p>
+      <main className="sponsor-layout">
+        <section className="sponsor-info">
+          <h1 className="sponsor-info__title">
+            Bringing Events to Life with <span>Your Brand</span>
+          </h1>
 
-          {serverError && <div className="alert alert-error">{serverError}</div>}
+          <div className="sponsor-feature-grid">
+            <div className="sponsor-feature-card">
+              <div className="sponsor-feature-card__icon">📢</div>
+              <h3>Boost Brand Visibility</h3>
+              <p>
+                Showcase your brand across events and reach a highly
+                engaged audience.
+              </p>
+            </div>
 
-          <form onSubmit={handleSubmit} className="signup-form" noValidate>
-            {/* Organization Name */}
-            <div className="form-group">
-              <label>🏢 Organization Name *</label>
+            <div className="sponsor-feature-card">
+              <div className="sponsor-feature-card__icon">🤝</div>
+              <h3>Partner with Organizers</h3>
+              <p>
+                Collaborate directly with organizers planning impactful
+                events on campus.
+              </p>
+            </div>
+
+            <div className="sponsor-feature-card">
+              <div className="sponsor-feature-card__icon">🎯</div>
+              <h3>Choose Sponsorship Packages</h3>
+              <p>
+                Select the package that matches your goals in
+                a flexible way.
+              </p>
+            </div>
+
+            <div className="sponsor-feature-card">
+              <div className="sponsor-feature-card__icon">🚀</div>
+              <h3>Grow Your Presence</h3>
+              <p>
+                Build long-term connections with students and strengthen your
+                presence.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="sponsor-form-card">
+          <div className="sponsor-form-card__header">
+            <h2>Sponsor Registration</h2>
+          </div>
+
+          {serverError && <div className="sponsor-alert">{serverError}</div>}
+
+          <form onSubmit={handleSubmit} className="sponsor-form" noValidate>
+            <div className="sponsor-field">
+              <label>Organization Name</label>
               <input
                 name="name"
                 value={form.name}
                 onChange={onChange}
                 onBlur={onBlur}
                 placeholder="Your company / organization name"
-                className={errors.name ? "error" : ""}
               />
-              {errors.name && <span className="error-text">{errors.name}</span>}
+              {errors.name && <p className="sponsor-error">{errors.name}</p>}
             </div>
 
-            {/* Email */}
-            <div className="form-group">
-              <label>📧 Email *</label>
+            <div className="sponsor-field">
+              <label>Email</label>
               <input
                 name="email"
                 type="email"
@@ -205,114 +260,128 @@ export default function SponsorSignup() {
                 onChange={onChange}
                 onBlur={onBlur}
                 placeholder="contact@yourcompany.com"
-                className={errors.email ? "error" : ""}
               />
-              {errors.email && <span className="error-text">{errors.email}</span>}
+              {errors.email && <p className="sponsor-error">{errors.email}</p>}
             </div>
 
-            {/* Password + Confirm Password */}
-            <div className="form-row">
-              <div className="form-group">
-                <label>🔒 Password *</label>
+            <div className="sponsor-row">
+              <div className="sponsor-field">
+                <label>Password</label>
                 <input
                   name="password"
                   type="password"
                   value={form.password}
                   onChange={onChange}
                   onBlur={onBlur}
-                  className={errors.password ? "error" : ""}
+                  placeholder="Enter password"
                 />
-                {errors.password && <span className="error-text">{errors.password}</span>}
+                {errors.password && (
+                  <p className="sponsor-error">{errors.password}</p>
+                )}
               </div>
-              <div className="form-group">
-                <label>🔒 Confirm Password *</label>
+
+              <div className="sponsor-field">
+                <label>Confirm Password</label>
                 <input
                   name="confirmPassword"
                   type="password"
                   value={form.confirmPassword}
                   onChange={onChange}
                   onBlur={onBlur}
-                  className={errors.confirmPassword ? "error" : ""}
+                  placeholder="Re-enter password"
                 />
-                {errors.confirmPassword && <span className="error-text">{errors.confirmPassword}</span>}
+                {errors.confirmPassword && (
+                  <p className="sponsor-error">{errors.confirmPassword}</p>
+                )}
               </div>
             </div>
 
-            {/* Description with counter */}
-            <div className="form-group">
-              <label>📝 Description</label>
+            <div className="sponsor-field">
+              <label>Description</label>
               <textarea
                 name="description"
                 value={form.description}
                 onChange={onChange}
                 onBlur={onBlur}
                 rows="3"
-                placeholder="Tell us about your organization (max 500 characters)"
                 maxLength="500"
-                className={errors.description ? "error" : ""}
+                placeholder="Tell us about your organization"
               />
-              <div className="char-counter">{form.description.length}/500 characters</div>
-              {errors.description && <span className="error-text">{errors.description}</span>}
+              <div className="sponsor-counter">
+                {form.description.length}/500 characters
+              </div>
+              {errors.description && (
+                <p className="sponsor-error">{errors.description}</p>
+              )}
             </div>
 
-            {/* Website + Phone row */}
-            <div className="form-row">
-              <div className="form-group">
-                <label>🌐 Website</label>
-                <input name="website" value={form.website} onChange={onChange} placeholder="https://..." />
+            <div className="sponsor-row">
+              <div className="sponsor-field">
+                <label>Website</label>
+                <input
+                  name="website"
+                  value={form.website}
+                  onChange={onChange}
+                  placeholder="https://yourcompany.com"
+                />
               </div>
-              <div className="form-group">
-                <label>📞 Phone</label>
+
+              <div className="sponsor-field">
+                <label>Phone</label>
                 <input
                   name="contactPhone"
                   value={form.contactPhone}
                   onChange={onChange}
                   onBlur={onBlur}
                   placeholder="0712345678"
-                  className={errors.contactPhone ? "error" : ""}
                 />
-                {errors.contactPhone && <span className="error-text">{errors.contactPhone}</span>}
-                <small>10 digits, e.g., 0712345678</small>
+                {errors.contactPhone && (
+                  <p className="sponsor-error">{errors.contactPhone}</p>
+                )}
               </div>
             </div>
 
-            {/* Sponsorship Package dropdown (styled) */}
-            <div className="form-group package-selector">
-              <label>🏆 Sponsorship Package (optional)</label>
+            <div className="sponsor-field">
+              <label>Sponsorship Package (Optional)</label>
+
               {packagesLoading ? (
-                <LoadingSpinner size="sm" />
-              ) : (
-                <div className="custom-select-wrapper">
-                  <select
-                    name="packageId"
-                    value={form.packageId}
-                    onChange={onChange}
-                    className={errors.packageId ? "error" : ""}
-                  >
-                    <option value="">Select a package (optional)</option>
-                    {packages.map((pkg) => (
-                      <option key={pkg._id} value={pkg._id}>
-                        {pkg.name} - ${pkg.price.toLocaleString()}
-                      </option>
-                    ))}
-                  </select>
-                  <span className="select-arrow">⌵</span>
+                <div className="sponsor-loading">
+                  <LoadingSpinner size="sm" />
                 </div>
+              ) : (
+                <select
+                  name="packageId"
+                  value={form.packageId}
+                  onChange={onChange}
+                >
+                  <option value="">Select a package (optional)</option>
+                  {packages.map((pkg) => (
+                    <option key={pkg._id} value={pkg._id}>
+                      {pkg.name} - ${pkg.price.toLocaleString()}
+                    </option>
+                  ))}
+                </select>
               )}
-              <small>Choosing a package will set your sponsorship amount. You can change it later.</small>
-              {errors.packageId && <span className="error-text">{errors.packageId}</span>}
+
+              <small className="sponsor-help">
+                You can choose a package now and change it later if needed.
+              </small>
             </div>
 
-            <button type="submit" className="btn-signup" disabled={submitting}>
-              {submitting ? "Creating account..." : "Register as Sponsor"}
+            <button
+              type="submit"
+              className="sponsor-submit-btn"
+              disabled={submitting}
+            >
+              {submitting ? "Creating account..." : "Submit Request"}
             </button>
 
-            <p className="signup-footer">
+            <p className="sponsor-footer">
               Already have an account? <Link to="/login">Log in</Link>
             </p>
           </form>
-        </div>
-      </div>
+        </section>
+      </main>
     </div>
   );
 }

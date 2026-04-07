@@ -1,213 +1,151 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import toast from 'react-hot-toast';
-import { apiRequest } from '../api/api';
-import LoadingSpinner from '../components/UI/LoadingSpinner';
-import EmptyState from '../components/UI/EmptyState';
-import './SponsorList.css';
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import { apiRequest } from "../api/api";
+import "./SponsorList.css";
 
-const ITEMS_PER_PAGE = 9;
+export default function SponsorList() {
+  const navigate = useNavigate();
 
-const SponsorList = () => {
   const [sponsors, setSponsors] = useState([]);
-  const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [levelFilter, setLevelFilter] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [actionLoading, setActionLoading] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
+
+  async function fetchSponsors() {
+    setLoading(true);
+
+    try {
+      const data = await apiRequest("/api/sponsors");
+
+      const safeData = Array.isArray(data) ? data : [];
+
+      const pendingSponsors = safeData.filter(
+        (sponsor) => (sponsor?.status || "").toLowerCase() === "pending"
+      );
+
+      setSponsors(pendingSponsors);
+    } catch (err) {
+      console.error(err);
+      toast.error(err?.message || "Failed to load sponsor requests");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
     fetchSponsors();
   }, []);
 
-  useEffect(() => {
-    applyFilters();
-  }, [sponsors, statusFilter, levelFilter, searchTerm]);
-
-  const fetchSponsors = async () => {
-    setLoading(true);
+  async function updateStatus(id, newStatus) {
     try {
-      const data = await apiRequest('/api/sponsors');
-      setSponsors(data);
-    } catch (err) {
-      setError(err.message);
-      toast.error('Failed to load sponsors');
-    } finally {
-      setLoading(false);
-    }
-  };
+      const data = await apiRequest(`/api/sponsors/${id}/status`, {
+        method: "PATCH",
+        body: { status: newStatus },
+      });
 
-  const applyFilters = () => {
-    let filteredList = [...sponsors];
-    if (statusFilter) filteredList = filteredList.filter(s => s.status === statusFilter);
-    if (levelFilter) filteredList = filteredList.filter(s => s.level === levelFilter);
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      filteredList = filteredList.filter(s =>
-        s.name.toLowerCase().includes(term) ||
-        (s.description && s.description.toLowerCase().includes(term))
+      setSponsors((prev) => prev.filter((s) => s._id !== id));
+
+      toast.success(
+        `Sponsor ${newStatus === "approved" ? "approved" : "rejected"} successfully!`
       );
-    }
-    setFiltered(filteredList);
-    setCurrentPage(1);
-  };
-
-  const clearFilters = () => {
-    setStatusFilter('');
-    setLevelFilter('');
-    setSearchTerm('');
-  };
-
-  const handleDelete = async (id, name) => {
-    if (!window.confirm(`Delete sponsor "${name}"? This action cannot be undone.`)) return;
-    setActionLoading(id);
-    try {
-      await apiRequest(`/api/sponsors/${id}`, { method: 'DELETE' });
-      setSponsors(sponsors.filter(s => s._id !== id));
-      toast.success('Sponsor deleted');
     } catch (err) {
-      toast.error(err.message);
-    } finally {
-      setActionLoading(null);
+      console.error(err);
+      toast.error(err?.message || "Failed to update sponsor");
     }
-  };
+  }
 
-  const handleStatusUpdate = async (id, newStatus) => {
-    setActionLoading(id);
-    try {
-      await apiRequest(`/api/sponsors/${id}/status`, { method: 'PATCH', body: { status: newStatus } });
-      await fetchSponsors();
-      toast.success(`Sponsor ${newStatus}`);
-    } catch (err) {
-      toast.error(err.message);
-    } finally {
-      setActionLoading(null);
-    }
-  };
+  const renderCards = () => (
+    <div className="sponsor-requests-grid">
+      {sponsors.map((s) => (
+        <div key={s._id} className="sponsor-request-card">
+          <div className="sponsor-request-card__row">
+            <div className="sponsor-request-card__name">
+              <h3>{s?.name || "Sponsor"}</h3>
+            </div>
 
-  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
-  const start = (currentPage - 1) * ITEMS_PER_PAGE;
-  const currentSponsors = filtered.slice(start, start + ITEMS_PER_PAGE);
+            <div className="sponsor-request-card__details">
+              <div className="sponsor-detail-item">
+                <span className="sponsor-detail-label">Email</span>
+                <span className="sponsor-detail-value">
+                  {s?.contactEmail || "-"}
+                </span>
+              </div>
 
-  if (loading) return <LoadingSpinner size="lg" message="Loading sponsors..." />;
-  if (error) return <div className="error-message">Error: {error}</div>;
+              <div className="sponsor-detail-item">
+                <span className="sponsor-detail-label">Phone</span>
+                <span className="sponsor-detail-value">
+                  {s?.contactPhone || "-"}
+                </span>
+              </div>
 
-  return (
-    <div className="sponsor-container">
-      <div className="sponsor-header">
-        <h2>📦 Sponsors</h2>
-      </div>
+              <div className="sponsor-detail-item">
+                <span className="sponsor-detail-label">Level</span>
+                <span className="sponsor-detail-value">
+                  {s?.level || "-"}
+                </span>
+              </div>
 
-      <div className="filters-bar">
-        <div className="search-box">
-          <span className="search-icon">🔍</span>
-          <input
-            type="text"
-            placeholder="Search by name or description..."
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-          />
-        </div>
-        <div className="filter-group">
-          <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
-            <option value="">All Status</option>
-            <option value="pending">Pending</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
-          </select>
-          <select value={levelFilter} onChange={e => setLevelFilter(e.target.value)}>
-            <option value="">All Levels</option>
-            <option value="Platinum">Platinum</option>
-            <option value="Gold">Gold</option>
-            <option value="Silver">Silver</option>
-            <option value="Bronze">Bronze</option>
-            <option value="Other">Other</option>
-          </select>
-          <button className="btn-sm" onClick={clearFilters}>Clear Filters</button>
-        </div>
-      </div>
+              <div className="sponsor-detail-item">
+                <span className="sponsor-detail-label">Website</span>
+                <span className="sponsor-detail-value">
+                  {s?.website || "-"}
+                </span>
+              </div>
+            </div>
 
-      {currentSponsors.length === 0 ? (
-        <EmptyState title="No sponsors found" message="Try adjusting your filters" />
-      ) : (
-        <>
-          <div className="sponsor-grid">
-            {currentSponsors.map(sponsor => {
-              const paidPercent = sponsor.totalAmount ? (sponsor.amountPaid / sponsor.totalAmount) * 100 : 0;
-              return (
-                <div key={sponsor._id} className="sponsor-card">
-                  <img
-                    src={sponsor.logo ? `http://localhost:5000/${sponsor.logo}` : '/default-sponsor.png'}
-                    alt={sponsor.name}
-                    className="sponsor-logo"
-                  />
-                  <h3>{sponsor.name}</h3>
-                  <p className="sponsor-description">{sponsor.description?.slice(0, 100)}...</p>
-                  <div className="sponsor-details">
-                    {sponsor.website && <a href={sponsor.website} target="_blank">🌐 {sponsor.website}</a>}
-                    <span>📧 {sponsor.contactEmail}</span>
-                    {sponsor.contactPhone && <span>📞 {sponsor.contactPhone}</span>}
-                  </div>
-                  <span className={`sponsor-level ${sponsor.level?.toLowerCase()}`}>🏆 {sponsor.level}</span>
-                  <div className="sponsor-status">
-                    Status: <span className={`badge status-${sponsor.status}`}>{sponsor.status}</span>
-                  </div>
-                  <div className="sponsor-payment">
-                    <div className="payment-info">
-                      <span>Payment: {sponsor.paymentStatus}</span>
-                      <span>(${sponsor.amountPaid}/${sponsor.totalAmount})</span>
-                    </div>
-                    <div className="progress-bar">
-                      <div className="progress-fill" style={{ width: `${paidPercent}%` }}></div>
-                    </div>
-                  </div>
-                  <div className="sponsor-actions">
-                    <button
-                      onClick={() => handleDelete(sponsor._id, sponsor.name)}
-                      className="btn-sm btn-sm-danger"
-                      disabled={actionLoading === sponsor._id}
-                    >
-                      {actionLoading === sponsor._id ? '...' : '🗑️ Delete'}
-                    </button>
-                    {sponsor.status === 'pending' && (
-                      <>
-                        <button
-                          onClick={() => handleStatusUpdate(sponsor._id, 'approved')}
-                          className="btn-sm btn-sm-success"
-                          disabled={actionLoading === sponsor._id}
-                        >
-                          ✅ Approve
-                        </button>
-                        <button
-                          onClick={() => handleStatusUpdate(sponsor._id, 'rejected')}
-                          className="btn-sm btn-sm-danger"
-                          disabled={actionLoading === sponsor._id}
-                        >
-                          ❌ Reject
-                        </button>
-                      </>
-                    )}
-                    {/* ❌ No "Record Payment" button for super admin */}
-                  </div>
-                </div>
-              );
-            })}
+            <div className="sponsor-request-card__actions">
+              <button
+                className="sponsor-btn sponsor-btn--approve"
+                onClick={() => updateStatus(s._id, "approved")}
+              >
+                Approve
+              </button>
+
+              <button
+                className="sponsor-btn sponsor-btn--reject"
+                onClick={() => updateStatus(s._id, "rejected")}
+              >
+                Reject
+              </button>
+            </div>
           </div>
 
-          {totalPages > 1 && (
-            <div className="pagination">
-              <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}>Prev</button>
-              <span>Page {currentPage} of {totalPages}</span>
-              <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>Next</button>
+          {s?.description && (
+            <div className="sponsor-request-card__description">
+              <span className="sponsor-detail-label">Description</span>
+              <p>{s.description}</p>
             </div>
           )}
-        </>
-      )}
+        </div>
+      ))}
     </div>
   );
-};
 
-export default SponsorList;
+  return (
+    <div className="sponsor-requests-page">
+      <div className="sponsor-requests-container">
+        <div className="sponsor-requests-header">
+          <h1>Sponsor Requests</h1>
+
+          <button
+            className="sponsor-back-btn"
+            onClick={() => navigate("/superadmin/control-panel")}
+          >
+            <span>&#8617;</span> Go Back
+          </button>
+        </div>
+
+        {loading ? (
+          <div className="sponsor-loading-card">
+            Loading sponsor requests...
+          </div>
+        ) : sponsors.length === 0 ? (
+          <div className="sponsor-empty-card">
+            No pending sponsor requests found.
+          </div>
+        ) : (
+          renderCards()
+        )}
+      </div>
+    </div>
+  );
+}

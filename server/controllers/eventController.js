@@ -1,4 +1,3 @@
-// controllers/eventController.js
 import Event from "../models/Event.js";
 import Counter from "../models/Counter.js";
 
@@ -27,23 +26,20 @@ export const createEvent = async (req, res) => {
       ispaid: req.body.ispaid === "true" || req.body.ispaid === true,
       ticketPrice: req.body.ticketPrice,
       pdf: req.files.pdf[0].filename,
-      image: req.files?.image ? req.files.image[0].filename : null
+      image: req.files?.image ? req.files.image[0].filename : null,
     });
 
     await newEvent.save();
     res.status(201).json(newEvent);
-
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
-
-
 // GET ALL EVENTS
 export const getAllEvents = async (req, res) => {
   try {
-    const events = await Event.find().sort({ date: 1 }); // sorted by date ascending
+    const events = await Event.find().sort({ date: 1 });
     res.status(200).json(events);
   } catch (err) {
     console.error("Error fetching events:", err);
@@ -51,7 +47,7 @@ export const getAllEvents = async (req, res) => {
   }
 };
 
-// GET ALL APPROVE EVENTS
+// GET ALL APPROVED EVENTS
 export const getEvents = async (req, res) => {
   try {
     const events = await Event.find({ status: "approved" }).sort({ createdAt: -1 });
@@ -59,6 +55,20 @@ export const getEvents = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message });
+  }
+};
+
+// GET EVENTS CREATED BY ONE CLUB
+export const getMyClubEvents = async (req, res) => {
+  try {
+    const { clubid } = req.params;
+
+    const events = await Event.find({ clubid }).sort({ date: 1 });
+
+    res.status(200).json(events);
+  } catch (err) {
+    console.error("Error fetching club events:", err);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -76,7 +86,7 @@ export const deleteEvent = async (req, res) => {
   }
 };
 
-// Get all pending events
+// GET ALL PENDING EVENTS
 export const getPendingEvents = async (req, res) => {
   try {
     const pendingEvents = await Event.find({ status: "pending" }).sort({ createdAt: -1 });
@@ -87,7 +97,7 @@ export const getPendingEvents = async (req, res) => {
   }
 };
 
-// Approve an event
+// APPROVE EVENT
 export const approveEvent = async (req, res) => {
   try {
     const updated = await Event.findByIdAndUpdate(
@@ -103,7 +113,7 @@ export const approveEvent = async (req, res) => {
   }
 };
 
-// Reject an event
+// REJECT EVENT
 export const rejectEvent = async (req, res) => {
   try {
     const updated = await Event.findByIdAndUpdate(
@@ -118,5 +128,3 @@ export const rejectEvent = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
-
-

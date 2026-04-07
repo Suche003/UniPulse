@@ -1,71 +1,125 @@
 import { Link } from "react-router-dom";
-import Navbar from "../components/Navbar";
+import logo from "../assets/Logo.png";
+import "./Home.css";
 
 export default function Home() {
   return (
-    <div className="page">
-      
+    <div className="home-page">
+      <main className="home-container">
+        <section className="home-hero">
+          <div className="home-hero__content">
+            <div className="home-hero__logo">
+              <img src={logo} alt="UniPulse Logo" />
+            </div>
 
-      <main className="container">
-        <section className="hero">
-          <div className="hero__left">
-            <h1 className="hero__title">
-              Discover and manage university events with <span>UniPulse</span>
+            <h1 className="home-hero__title">
+              One platform for <span>Students, Sponsors, Vendors</span> and
+              university <span>Event Organizers</span>
             </h1>
 
-            <p className="hero__subtitle">
-              Stay updated with club activities, society meetups, workshops, and
-              campus events — all in one place.
-            </p>
-
-            <div className="hero__actions">
-              <Link className="btn btn--primary" to="/login">
-                Student Login
+            <div className="home-hero__actions">
+              <Link className="home-btn home-btn--primary" to="/login">
+                Get Started
               </Link>
-              <Link className="btn btn--ghost" to="/signup">
-                Create Account
-              </Link>
-            </div>
-
-            <p className="hero__hint">
-              Admins and clubs will have a separate portal.
-            </p>
-          </div>
-
-          <div className="hero__right">
-            <div className="card">
-              <h3>What you can do</h3>
-              <ul>
-                <li>Browse upcoming campus events</li>
-                <li>Register and get reminders</li>
-                <li>Follow clubs & societies</li>
-                <li>See event details instantly</li>
-              </ul>
             </div>
           </div>
         </section>
 
-        <section className="features">
-          <h2 className="sectionTitle">Built for students and clubs</h2>
+        <hr className="hrc" />
 
-          <div className="grid">
-            <div className="feature">
-              <h3>Fast discovery</h3>
-              <p>Find events by club, date, or category.</p>
+        <section className="home-section">
+          <div className="home-grid home-grid--three">
+            <div className="home-card">
+              <h3>Become a Sponsor</h3>
+
+              <p>
+                Connect with university events, explore sponsorship
+                opportunities that match your brand.
+              </p>
+
+              <Link
+                className="home-btn home-btn--primary"
+                to="/sponsor-signup"
+              >
+                Become a Sponsor
+              </Link>
             </div>
-            <div className="feature">
-              <h3>Easy registration</h3>
-              <p>Join events with one click and track your schedule.</p>
+
+            <div className="home-card">
+              <h3>Register As a Vendor</h3>
+
+              <p>
+                Showcase your products or services, and receive stall-related
+                opportunities from event organizers.
+              </p>
+
+              <Link
+                className="home-btn home-btn--primary"
+                to="/register"
+              >
+                Register Vendor
+              </Link>
             </div>
-            <div className="feature">
-              <h3>Club management</h3>
-              <p>Admins can add clubs and authorize event creation.</p>
+
+            <div className="home-card">
+              <h3>Student Sign Up</h3>
+
+              <p>
+                Discover upcoming events, register easily, track your
+                participation, and stay connected with events.
+              </p>
+
+              <Link className="home-btn home-btn--primary" to="/signup">
+                Student Sign Up
+              </Link>
             </div>
           </div>
         </section>
 
-        <footer className="footer">
-          <p>© {new Date().getFullYear()} UniPulse • University Event Management System</p>
+        <section className="home-section">
+          <h2 className="home-section__title">Why use UniPulse?</h2>
+
+          <div className="home-grid home-grid--three">
+            <div className="home-card home-feature">
+              <div className="home-feature__icon">📅</div>
+
+              <h3>Easy Event Discovery</h3>
+
+              <p>
+                Find campus events quickly by category, date, organizer, or
+                interest.
+              </p>
+            </div>
+
+            <div className="home-card home-feature">
+              <div className="home-feature__icon">🤝</div>
+
+              <h3>Better Collaboration</h3>
+
+              <p>
+                Bring students, clubs, sponsors, and vendors together in one
+                connected system.
+              </p>
+            </div>
+
+            <div className="home-card home-feature">
+              <div className="home-feature__icon">⚡</div>
+
+              <h3>Simple Participation</h3>
+
+              <p>
+                Register, manage involvement, and keep track of event-related
+                activities with ease.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <footer className="home-footer">
+          <p>
+            © {new Date().getFullYear()} UniPulse • University Event Management
+            System
+          </p>
         </footer>
       </main>
     </div>

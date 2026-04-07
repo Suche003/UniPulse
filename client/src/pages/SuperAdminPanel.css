@@ -1,30 +1,427 @@
-.superadmin-panel {
-  max-width: 1200px;
-  margin: 2rem auto;
-  padding: 0 2rem;
+.superadmin-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(255, 0, 102, 0.16), transparent 25%),
+    radial-gradient(circle at top right, rgba(139, 92, 246, 0.16), transparent 28%),
+    linear-gradient(135deg, #090212 0%, #050814 45%, #120a24 100%);
+  color: #f5f7ff;
 }
-.stats-grid {
+
+.superadmin-container {
+  width: min(1350px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 36px 0 60px;
+}
+
+.superadmin-hero {
+  margin-bottom: 34px;
+}
+
+.superadmin-hero__content {
+  max-width: 900px;
+}
+
+.superadmin-hero h1 {
+  margin: 0 0 14px;
+  font-size: clamp(2.2rem, 4vw, 4.2rem);
+  line-height: 1.08;
+  font-weight: 850;
+  letter-spacing: -0.03em;
+  color: #ffffff;
+}
+
+.superadmin-hero p {
+  margin: 0;
+  max-width: 820px;
+  color: rgba(232, 236, 255, 0.8);
+  line-height: 1.8;
+  font-size: 1.03rem;
+}
+
+.superadmin-overview-section {
+  margin-bottom: 50px;
+}
+
+.superadmin-overview-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-  margin: 2rem 0;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
 }
-.stat-card {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 16px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  text-align: center;
-  font-weight: 600;
-  font-size: 1.1rem;
+
+.superadmin-side-quick-actions,
+.superadmin-side-stats {
+  background:
+    radial-gradient(circle at top right, rgba(139, 92, 246, 0.12), transparent 35%),
+    radial-gradient(circle at bottom left, rgba(255, 47, 146, 0.1), transparent 32%),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.07),
+      rgba(255, 255, 255, 0.035)
+    );
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 28px;
+  padding: 24px 22px;
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(12px);
+  height: 100%;
 }
-.stat-card.revenue {
-  background: linear-gradient(135deg, #7c2cff10, #ff2b6a10);
-  border-left: 4px solid #7c2cff;
+
+.superadmin-section-heading {
+  margin-bottom: 22px;
 }
-.admin-actions {
+
+.superadmin-section-heading--tight {
+  margin-bottom: 18px;
+}
+
+.superadmin-section-heading h2 {
+  margin: 0 0 8px;
+  font-size: 1.8rem;
+  color: #ffffff;
+  font-weight: 850;
+  letter-spacing: -0.02em;
+}
+
+.superadmin-section-heading p {
+  margin: 0;
+  color: rgba(232, 236, 255, 0.72);
+  line-height: 1.7;
+}
+
+.superadmin-loading-card {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.08),
+    rgba(255, 255, 255, 0.04)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  padding: 26px 24px;
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(12px);
+}
+
+/* Quick Actions */
+.superadmin-side-quick-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.superadmin-side-quick-grid .superadmin-action-card,
+.superadmin-side-quick-grid button.superadmin-action-card {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  min-height: 140px;
   display: flex;
-  gap: 1rem;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px 20px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  outline: none;
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.07), transparent 45%),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.09),
+      rgba(255, 255, 255, 0.045)
+    ) !important;
+  color: #ffffff !important;
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px);
+  cursor: pointer;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease,
+    background 0.25s ease;
+}
+
+.superadmin-side-quick-grid .superadmin-action-card:nth-child(3) {
+  grid-column: span 2;
+  min-height: 110px;
+}
+
+.superadmin-side-quick-grid .superadmin-action-card:hover,
+.superadmin-side-quick-grid button.superadmin-action-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 47, 146, 0.24);
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.09), transparent 45%),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.11),
+      rgba(255, 255, 255, 0.06)
+    ) !important;
+  box-shadow:
+    0 16px 34px rgba(0, 0, 0, 0.24),
+    0 0 0 1px rgba(168, 85, 247, 0.08);
+}
+
+.superadmin-side-quick-grid .superadmin-action-card:focus,
+.superadmin-side-quick-grid button.superadmin-action-card:focus {
+  border-color: rgba(139, 92, 246, 0.5);
+  box-shadow:
+    0 0 0 3px rgba(139, 92, 246, 0.16),
+    0 14px 30px rgba(0, 0, 0, 0.26);
+}
+
+.superadmin-side-quick-grid .superadmin-action-card:active,
+.superadmin-side-quick-grid button.superadmin-action-card:active {
+  transform: translateY(0);
+}
+
+.superadmin-side-quick-grid .superadmin-action-card h3,
+.superadmin-side-quick-grid button.superadmin-action-card h3 {
+  margin: 0;
+  color: #ffffff !important;
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.42;
+  letter-spacing: 0.01em;
+  text-align: center;
+  max-width: 220px;
+}
+
+/* Stats */
+.superadmin-side-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.superadmin-stat-card {
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.05), transparent 42%),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.08),
+      rgba(255, 255, 255, 0.04)
+    );
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 22px;
+  padding: 20px 18px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(12px);
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    border-color 0.22s ease;
+}
+
+.superadmin-stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.24);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.superadmin-stat-card__label {
+  display: block;
+  margin-bottom: 12px;
+  color: rgba(232, 236, 255, 0.72);
+  font-size: 0.93rem;
+  font-weight: 600;
+}
+
+.superadmin-stat-card h3 {
+  margin: 0;
+  font-size: clamp(1.8rem, 2.5vw, 2.4rem);
+  color: #ffffff;
+  font-weight: 850;
+  letter-spacing: -0.03em;
+}
+
+/* Main Management */
+.superadmin-actions-section {
+  margin-bottom: 42px;
+}
+
+.superadmin-actions-section .superadmin-section-heading {
+  margin-bottom: 22px;
+}
+
+.superadmin-actions-section .superadmin-section-heading h2 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 850;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+}
+
+.superadmin-main-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  align-items: stretch;
+}
+
+.superadmin-main-card {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at top right, rgba(139, 92, 246, 0.14), transparent 35%),
+    radial-gradient(circle at bottom left, rgba(255, 47, 146, 0.12), transparent 35%),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.08),
+      rgba(255, 255, 255, 0.04)
+    );
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 28px;
+  padding: 28px 24px 24px;
+  color: #ffffff;
+  box-shadow:
+    0 14px 36px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(14px);
+  transition:
+    transform 0.28s ease,
+    box-shadow 0.28s ease,
+    border-color 0.28s ease;
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.superadmin-main-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.04),
+    transparent 35%,
+    transparent 65%,
+    rgba(255, 255, 255, 0.03)
+  );
+  pointer-events: none;
+}
+
+.superadmin-main-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(255, 47, 146, 0.24);
+  box-shadow:
+    0 22px 48px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(139, 92, 246, 0.08);
+}
+
+.superadmin-main-card h3 {
+  margin: 0 0 0px;
+  font-size: 1.3rem;
+  font-weight: 850;
+  line-height: 1.35;
+  color: #ffffff;
+  max-width: 90%;
+}
+
+.superadmin-main-card__actions {
+  display: flex;
   flex-wrap: wrap;
-  margin-top: 2rem;
+  gap: 12px;
+}
+
+/* Main Management Buttons */
+.superadmin-mini-btn {
+  border: none !important;
+  outline: none !important;
+  cursor: pointer !important;
+  padding: 13px 18px !important;
+  border-radius: 14px !important;
+  font-weight: 700!important;
+  color: white !important;
+  background: linear-gradient(
+    135deg,
+    rgba(236, 72, 153, 0.95),
+    rgba(168, 85, 247, 0.95)
+  ) !important;
+  transition: all 0.25s ease !important;
+}
+
+.superadmin-mini-btn:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 47, 146, 0.18);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.98),
+    rgba(248, 228, 255, 0.95)
+  );
+  color: #251a3d;
+  box-shadow:
+    0 14px 28px rgba(0, 0, 0, 0.16),
+    0 6px 18px rgba(168, 85, 247, 0.14);
+}
+
+.superadmin-mini-btn:active {
+  transform: translateY(0);
+}
+
+.superadmin-mini-btn:focus {
+  outline: none;
+  border-color: rgba(139, 92, 246, 0.45);
+  box-shadow:
+    0 0 0 3px rgba(139, 92, 246, 0.16),
+    0 12px 24px rgba(0, 0, 0, 0.16);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .superadmin-overview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .superadmin-side-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .superadmin-main-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .superadmin-container {
+    width: min(100% - 24px, 100%);
+    padding: 26px 0 44px;
+  }
+
+  .superadmin-hero h1 {
+    font-size: clamp(1.9rem, 8vw, 2.8rem);
+  }
+
+  .superadmin-main-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .superadmin-side-quick-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .superadmin-side-quick-grid .superadmin-action-card:nth-child(3) {
+    grid-column: span 1;
+  }
+
+  .superadmin-side-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .superadmin-main-card {
+    min-height: auto;
+  }
+
+  .superadmin-main-card h3 {
+    max-width: 100%;
+    margin-bottom: 18px;
+  }
+
+  .superadmin-mini-btn {
+    width: 100%;
+    justify-content: center;
+  }
 }

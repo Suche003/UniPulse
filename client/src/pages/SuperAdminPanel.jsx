@@ -1,8 +1,11 @@
-import { useState, useEffect } from 'react';
-import { apiRequest } from '../api/api';
-import './SuperAdminPanel.css'; 
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import Navbar from "../components/Navbar";
+import { apiRequest } from "../api/api";
+import "./SuperAdminPanel.css";
 
 export default function SuperAdminPanel() {
+  const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -12,128 +15,155 @@ export default function SuperAdminPanel() {
 
   const fetchStats = async () => {
     try {
-      const data = await apiRequest('/api/admin/stats');
+      const data = await apiRequest("/api/admin/stats");
       setStats(data);
     } catch (err) {
-      console.error('Failed to fetch stats', err);
+      console.error("Failed to fetch stats", err);
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <div className="superadmin-panel">
-      <h2>Super Admin Control Panel</h2>
-      {loading ? (
-        <p>Loading stats...</p>
-      ) : stats && (
-        <div className="stats-grid">
-          <div className="stat-card">Total Sponsors: {stats.sponsors}</div>
-          <div className="stat-card">Pending Sponsors: {stats.pendingSponsors}</div>
-          <div className="stat-card revenue">Total Revenue: ${stats.totalRevenue}</div>
-        </div>
-      )}
-
-      <div className="admin-actions">
-        <button className="btn-primary" onClick={() => window.location.href = "/superadmin/events"}>
-          Create Event
-        </button>
-        <button className="btn-primary" onClick={() => window.location.href = "/superadmin/events-get"}>
-          Show Event
-        </button>
-        <button className="btn-primary" onClick={() => window.location.href = "/admin/packages"}>
-          Sponsorship Packages
-        </button>
-import React from "react";
-import Navbar from "../components/Navbar"; // your Navbar component
-
-function SuperAdminPanel() {
-  const cards = [
-    { title: "Create Event", color: "#A084FF", link: "/superadmin/events" },
-    { title: "Show Events", color: "#FF7BA9", link: "/superadmin/events-get" },
-    { title: "Pending Events", color: "#FFD47B", link: "/superadmin/pendingevents" },
+  const mainCards = [
+    {
+      title: "Manage Event Organizers",
+      actions: [
+        { label: "Create Club or Society", path: "/superadmin/createclub" },
+        { label: "View Clubs & Socities", path: "/superadmin/viewallclubs" },
+      ],
+    },
+    {
+      title: "Manage Events",
+      actions: [
+        { label: "All Events", path: "/superadmin/alleventsadmin" },
+        { label: "Pending Events", path: "/superadmin/pendingevents" },
+      ],
+    },
+    {
+      title: "Manage Users",
+      actions: [
+        { label: "Vendors", path: "/superadmin/vendors" },
+        { label: "Sponsors", path: "/superadmin/sponsors" },
+        { label: "Students", path: "/superadmin/students" },
+      ],
+    },
   ];
 
-  const navigate = (link) => {
-    window.location.href = link;
-  };
+  const quickActions = [
+    {
+      title: "Vendor Registration Requests",
+      path: "/superadmin/vendor-requests",
+    },
+    {
+      title: "Event Registration Requests",
+      path: "/superadmin/pendingevents",
+    },
+    {
+      title: "Sponsor Registration Requests",
+      path: "/superadmin/sponsor-requests",
+    },
+  ];
 
   return (
-    <div>
-      <Navbar />
+    <div className="superadmin-page">
+      <Navbar superAdminMinimal={true} />
 
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          flexDirection: "column",
-          padding: "40px",
-          gap: "40px",
-        }}
-      >
-        <h2 style={{ color: "var(--text)", marginBottom: "40px" }}>
-          Super Admin Control Panel
-        </h2>
+      <main className="superadmin-container">
+        <section className="superadmin-hero">
+          <div className="superadmin-hero__content">
+            <h1>Super Admin Control Panel</h1>
+          </div>
+        </section>
 
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            flexWrap: "wrap",
-            gap: "20px",
-          }}
-        >
-          {cards.map((card, index) => (
-            <div
-              key={index}
-              style={{
-                backgroundColor: card.color + "22",
-                color: "#000",
-                width: "220px",
-                height: "140px",
-                borderRadius: "16px",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-                boxShadow: `0 4px 12px ${card.color}66`,
-                transition: "transform 0.2s, box-shadow 0.2s",
-                cursor: "pointer",
-              }}
-              onClick={() => navigate(card.link)}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "translateY(-5px)";
-                e.currentTarget.style.boxShadow = `0 8px 20px ${card.color}88`;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow = `0 4px 12px ${card.color}66`;
-              }}
-            >
-              <h3 style={{ margin: 0 }}>{card.title}</h3>
-              <button
-                style={{
-                  marginTop: "12px",
-                  padding: "6px 14px",
-                  fontSize: "14px",
-                  borderRadius: "8px",
-                  border: "none",
-                  cursor: "pointer",
-                  backgroundColor: card.color,
-                  color: "#fff",
-                  fontWeight: "bold",
-                }}
-              >
-                Go
-              </button>
+        <section className="superadmin-overview-section">
+          <div className="superadmin-overview-grid">
+            <div className="superadmin-side-quick-actions">
+              <div className="superadmin-section-heading superadmin-section-heading--tight">
+                <h2>Quick Actions</h2>
+              </div>
+
+              <div className="superadmin-side-quick-grid">
+                {quickActions.map((card) => (
+                  <button
+                    key={card.title}
+                    className="superadmin-action-card"
+                    onClick={() => navigate(card.path)}
+                    type="button"
+                  >
+                    <h3>{card.title}</h3>
+                  </button>
+                ))}
+              </div>
             </div>
-          ))}
-        </div>
-      </div>
+
+            <div className="superadmin-side-stats">
+              <div className="superadmin-section-heading superadmin-section-heading--tight">
+                <h2>Platform Overview</h2>
+              </div>
+
+              {loading ? (
+                <div className="superadmin-loading-card">Loading stats...</div>
+              ) : (
+                <div className="superadmin-side-stats-grid">
+                  <div className="superadmin-stat-card">
+                    <span className="superadmin-stat-card__label">
+                      Total Students
+                    </span>
+                    <h3>{stats?.students ?? 0}</h3>
+                  </div>
+
+                  <div className="superadmin-stat-card">
+                    <span className="superadmin-stat-card__label">
+                      Total Vendors
+                    </span>
+                    <h3>{stats?.vendors ?? 0}</h3>
+                  </div>
+
+                  <div className="superadmin-stat-card">
+                    <span className="superadmin-stat-card__label">
+                      Total Events
+                    </span>
+                    <h3>{stats?.events ?? 0}</h3>
+                  </div>
+
+                  <div className="superadmin-stat-card superadmin-stat-card--highlight">
+                    <span className="superadmin-stat-card__label">
+                      Total Sponsors
+                    </span>
+                    <h3>{stats?.sponsors ?? 0}</h3>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        <section className="superadmin-actions-section">
+          <div className="superadmin-section-heading">
+            <h2>Main Management</h2>
+          </div>
+
+          <div className="superadmin-main-grid">
+            {mainCards.map((card) => (
+              <div key={card.title} className="superadmin-main-card">
+                <h3>{card.title}</h3>
+                <div className="superadmin-main-card__actions">
+                  {card.actions.map((action) => (
+                    <button
+                      key={action.label}
+                      type="button"
+                      className="superadmin-mini-btn"
+                      onClick={() => navigate(action.path)}
+                    >
+                      {action.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </main>
     </div>
   );
 }
-
-export default SuperAdminPanel;

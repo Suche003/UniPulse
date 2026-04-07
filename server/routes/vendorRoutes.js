@@ -3,6 +3,8 @@ import { body } from "express-validator";
 import {
   registerVendor,
   getAllVendors,
+  getVendorById,
+  deleteVendor,
   approveVendor,
   rejectVendor,
   loginVendor,
@@ -10,40 +12,62 @@ import {
 
 const router = Router();
 
-// Vendor registration
+// ================= Vendor Registration =================
 router.post(
   "/register",
   [
-    body("name").trim().notEmpty().withMessage("Vendor name is required"),
-    body("nic")
+    body("companyName")
       .trim()
-      .matches(/^(?:\d{9}[VvXx]|\d{12})$/)
-      .withMessage(
-        "NIC must be 9 digits + V/X (e.g., 123456789V) or 12 digits (e.g., 200331310064)"
-      ),
+      .notEmpty()
+      .withMessage("Company name is required"),
+
     body("contact")
       .trim()
       .matches(/^\d{10}$/)
-      .withMessage("Contact must be 10 digits"),
-    body("address").trim().notEmpty().withMessage("Address is required"),
-    body("email").trim().isEmail().withMessage("Email must be valid"),
+      .withMessage("Contact number must be 10 digits"),
+
+    body("address")
+      .trim()
+      .notEmpty()
+      .withMessage("Business address is required"),
+
+    body("email")
+      .trim()
+      .isEmail()
+      .withMessage("Business email must be valid"),
+
+    body("businessRegistrationNo")
+      .trim()
+      .notEmpty()
+      .withMessage("Business registration number is required"),
+
     body("password")
       .isLength({ min: 6 })
       .withMessage("Password must be at least 6 characters"),
+
     body("stallType")
       .trim()
       .notEmpty()
-      .isIn(["Food", "Merchandise", "Games", "Services", "Other"]),
+      .withMessage("Stall type is required")
+      .isIn(["Food", "Merchandise", "Games", "Services", "Other"])
+      .withMessage(
+        "Stall type must be Food, Merchandise, Games, Services, or Other"
+      ),
   ],
   registerVendor
 );
 
-// Vendor login
+// ================= Vendor Login =================
 router.post("/login", loginVendor);
 
-// Admin routes
-router.get("/requests", getAllVendors); 
+// ================= Admin Request Management =================
+router.get("/requests", getAllVendors);
 router.patch("/approve/:id", approveVendor);
 router.patch("/reject/:id", rejectVendor);
+
+// ================= Vendor List / Single / Delete =================
+router.get("/", getAllVendors);
+router.get("/:id", getVendorById);
+router.delete("/:id", deleteVendor);
 
 export default router;

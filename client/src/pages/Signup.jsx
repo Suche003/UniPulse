@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
+import { useNavigate, Link } from "react-router-dom";
+import "./StudentSignup.css";
 
 const initial = {
   name: "",
@@ -28,7 +28,6 @@ export default function Signup() {
     setTouched((p) => ({ ...p, [e.target.name]: true }));
   }
 
-  /* ================= VALIDATION ================= */
   const errors = useMemo(() => {
     const e = {};
 
@@ -64,9 +63,9 @@ export default function Signup() {
   const isValid = Object.keys(errors).length === 0;
   const showError = (field) => touched[field] && errors[field];
 
-  /* ================= SUBMIT ================= */
   async function onSubmit(e) {
     e.preventDefault();
+
     setTouched({
       name: true,
       nic: true,
@@ -102,7 +101,6 @@ export default function Signup() {
       const data = await res.json();
 
       if (!res.ok) {
-        // show detailed validation errors if available
         const msg = data?.errors
           ? data.errors.map((x) => `• ${x.msg}`).join("\n")
           : data.message || "Registration failed";
@@ -113,8 +111,6 @@ export default function Signup() {
       alert("Student registered successfully! Please login.");
       setForm(initial);
       setTouched({});
-
-      // Redirect to login page
       navigate("/login");
     } catch (err) {
       alert("Server error. Please try again.");
@@ -123,18 +119,69 @@ export default function Signup() {
     }
   }
 
-  /* ================= UI ================= */
   return (
-    <div className="page">
-      <Navbar />
+    <div className="student-page">
+      <div className="student-page__bg"></div>
 
-      <main className="container">
-        <section className="authCard">
-          <h1 className="authTitle">Student Sign Up</h1>
-          <p className="authSubtitle">Create your UniPulse student account</p>
+      <div className="student-page__topbar">
+        <Link to="/" className="student-home-btn">
+           <span>&#8617;</span> Go Back
+        </Link>
+      </div>
 
-          <form className="form" onSubmit={onSubmit} noValidate>
-            <div className="field">
+      <main className="student-layout">
+        <section className="student-info">
+
+          <h1 className="student-info__title">
+            Discover and join the best <span>university events</span>
+          </h1>
+
+          <div className="student-feature-grid">
+            <div className="student-feature-card">
+              <div className="student-feature-card__icon">📅</div>
+              <h3>Discover Events</h3>
+              <p>
+                Explore upcoming university events by category, organizer, or
+                interest.
+              </p>
+            </div>
+
+            <div className="student-feature-card">
+              <div className="student-feature-card__icon">🎟️</div>
+              <h3>Easy Registration</h3>
+              <p>
+                Register for free and paid events easily with a smooth signup
+                process.
+              </p>
+            </div>
+
+            <div className="student-feature-card">
+              <div className="student-feature-card__icon">⭐</div>
+              <h3>Track Participation</h3>
+              <p>
+                Keep track of the events you are attending and your ticket
+                purchases.
+              </p>
+            </div>
+
+            <div className="student-feature-card">
+              <div className="student-feature-card__icon">🤝</div>
+              <h3>Stay Connected</h3>
+              <p>
+                Stay updated with clubs, societies, sponsors, and campus
+                opportunities.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="student-form-card">
+          <div className="student-form-card__header">
+            <h2>Create Your Account</h2>
+          </div>
+
+          <form className="student-form" onSubmit={onSubmit} noValidate>
+            <div className="student-field">
               <label>Student Name</label>
               <input
                 name="name"
@@ -143,10 +190,12 @@ export default function Signup() {
                 onBlur={onBlur}
                 placeholder="Full Name"
               />
-              {showError("name") && <p className="error">{errors.name}</p>}
+              {showError("name") && (
+                <p className="student-error">{errors.name}</p>
+              )}
             </div>
 
-            <div className="field">
+            <div className="student-field">
               <label>NIC Number</label>
               <input
                 name="nic"
@@ -155,10 +204,12 @@ export default function Signup() {
                 onBlur={onBlur}
                 placeholder="123456789V or 200331310064"
               />
-              {showError("nic") && <p className="error">{errors.nic}</p>}
+              {showError("nic") && (
+                <p className="student-error">{errors.nic}</p>
+              )}
             </div>
 
-            <div className="field">
+            <div className="student-field">
               <label>Contact Number</label>
               <input
                 name="contact"
@@ -166,14 +217,13 @@ export default function Signup() {
                 onChange={onChange}
                 onBlur={onBlur}
                 placeholder="0771234567"
-                inputMode="numeric"
               />
               {showError("contact") && (
-                <p className="error">{errors.contact}</p>
+                <p className="student-error">{errors.contact}</p>
               )}
             </div>
 
-            <div className="field">
+            <div className="student-field">
               <label>Address</label>
               <textarea
                 name="address"
@@ -181,13 +231,14 @@ export default function Signup() {
                 onChange={onChange}
                 onBlur={onBlur}
                 rows="3"
+                placeholder="No 123, Main Street, Colombo"
               />
               {showError("address") && (
-                <p className="error">{errors.address}</p>
+                <p className="student-error">{errors.address}</p>
               )}
             </div>
 
-            <div className="field">
+            <div className="student-field">
               <label>Student Registration Number</label>
               <input
                 name="regNo"
@@ -196,10 +247,12 @@ export default function Signup() {
                 onBlur={onBlur}
                 placeholder="IT23552456"
               />
-              {showError("regNo") && <p className="error">{errors.regNo}</p>}
+              {showError("regNo") && (
+                <p className="student-error">{errors.regNo}</p>
+              )}
             </div>
 
-            <div className="field">
+            <div className="student-field">
               <label>Password</label>
               <input
                 type="password"
@@ -207,13 +260,14 @@ export default function Signup() {
                 value={form.password}
                 onChange={onChange}
                 onBlur={onBlur}
+                placeholder="Enter password"
               />
               {showError("password") && (
-                <p className="error">{errors.password}</p>
+                <p className="student-error">{errors.password}</p>
               )}
             </div>
 
-            <div className="field">
+            <div className="student-field">
               <label>Confirm Password</label>
               <input
                 type="password"
@@ -221,14 +275,15 @@ export default function Signup() {
                 value={form.confirmPassword}
                 onChange={onChange}
                 onBlur={onBlur}
+                placeholder="Re-enter password"
               />
               {showError("confirmPassword") && (
-                <p className="error">{errors.confirmPassword}</p>
+                <p className="student-error">{errors.confirmPassword}</p>
               )}
             </div>
 
             <button
-              className="btn btn--primary btn--full"
+              className="student-submit-btn"
               type="submit"
               disabled={submitting}
             >

@@ -1,171 +1,290 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import axios from "axios";
+import toast from "react-hot-toast";
+import { Link, useNavigate } from "react-router-dom";
 import "./EventForm.css";
 
-export default function EventFormPage() {
+const EventFormPage = () => {
+  const navigate = useNavigate();
+
+  const user = JSON.parse(localStorage.getItem("unipulse_user")) || {};
+  const clubid = user?._id || user?.id || user?.clubid || "";
+
   const [formData, setFormData] = useState({
-    clubid: "",
     title: "",
     description: "",
     date: "",
     location: "",
     ispaid: false,
-    ticketPrice: 0,
+    ticketPrice: "",
     pdf: null,
     image: null,
   });
 
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const getMinDateTime = () => {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    return now.toISOString().slice(0, 16);
+  };
 
   const handleChange = (e) => {
     const { name, value, type, checked, files } = e.target;
 
-    if (type === "file") {
-      const file = files[0];
-      if (!file) return;
-
-      if (name === "pdf" && file.type !== "application/pdf") {
-        return alert("Only PDF allowed!");
-      }
-      if (name === "image" && !file.type.startsWith("image/")) {
-        return alert("Only images allowed!");
-      }
-
-      setFormData((prev) => ({ ...prev, [name]: file }));
-    } else if (type === "checkbox") {
-      setFormData((prev) => ({ ...prev, [name]: checked }));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
+    if (type === "checkbox") {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: checked,
+        ticketPrice: name === "ispaid" && !checked ? "" : prev.ticketPrice,
+      }));
+      return;
     }
+
+    if (type === "file") {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: files[0] || null,
+      }));
+      return;
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const validateForm = () => {
+    if (!clubid) {
+      toast.error("Club ID not found. Please login again.");
+      return false;
+    }
+
+    if (!formData.title.trim()) {
+      toast.error("Event title is required.");
+      return false;
+    }
+
+    if (!formData.description.trim()) {
+      toast.error("Event description is required.");
+      return false;
+    }
+
+    if (!formData.date) {
+      toast.error("Event date is required.");
+      return false;
+    }
+
+    if (new Date(formData.date) <= new Date()) {
+      toast.error("Please select a future date and time.");
+      return false;
+    }
+
+    if (!formData.location.trim()) {
+      toast.error("Location is required.");
+      return false;
+    }
+
+    if (!formData.pdf) {
+      toast.error("Please upload the event PDF.");
+      return false;
+    }
+
+    if (formData.ispaid && (!formData.ticketPrice || Number(formData.ticketPrice) < 0)) {
+      toast.error("Please enter a valid ticket price.");
+      return false;
+    }
+
+    return true;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-    setSuccess("");
 
-    if (!formData.clubid.trim()) return setError("Club ID is required");
-    if (!formData.title.trim() || formData.title.length < 3)
-      return setError("Title must be at least 3 characters");
-    if (!formData.date) return setError("Date is required");
-    if (new Date(formData.date) < new Date())
-      return setError("Date must be in the future");
-    if (formData.ispaid && (!formData.ticketPrice || formData.ticketPrice <= 0))
-      return setError("Invalid ticket price");
-    if (!formData.pdf) return setError("PDF is required");
-    if (formData.pdf.size > 2 * 1024 * 1024)
-      return setError("PDF must be less than 2MB");
-    if (formData.image && formData.image.size > 3 * 1024 * 1024)
-      return setError("Image must be less than 3MB");
+    if (!validateForm()) return;
 
     try {
-      const data = new FormData();
-      Object.entries(formData).forEach(([key, val]) => {
-        if (val) data.append(key, val);
+      setLoading(true);
+
+      const submitData = new FormData();
+      submitData.append("clubid", clubid);
+      submitData.append("title", formData.title);
+      submitData.append("description", formData.description);
+      submitData.append("date", formData.date);
+      submitData.append("location", formData.location);
+      submitData.append("ispaid", formData.ispaid);
+
+      if (formData.ispaid) {
+        submitData.append("ticketPrice", formData.ticketPrice);
+      }
+
+      if (formData.pdf) {
+        submitData.append("pdf", formData.pdf);
+      }
+
+      if (formData.image) {
+        submitData.append("image", formData.image);
+      }
+
+      await axios.post("http://localhost:5000/api/events", submitData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
 
-      const res = await axios.post(`http://localhost:5000/api/events`, data, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      toast.success("Event request submitted successfully!");
 
-      setSuccess(`Event Created! ID: ${res.data.eventid}`);
       setFormData({
-        clubid: "",
         title: "",
         description: "",
         date: "",
         location: "",
         ispaid: false,
-        ticketPrice: 0,
+        ticketPrice: "",
         pdf: null,
         image: null,
       });
-    } catch (err) {
-      setError(err.response?.data?.message || err.message);
+
+      setTimeout(() => {
+        navigate("/club/dashboard");
+      }, 1200);
+    } catch (error) {
+      console.error("Error creating event:", error);
+      toast.error(error.response?.data?.message || "Failed to submit event request.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="form-container">
-      <h2>Event Request</h2>
-      {error && <p className="error">{error}</p>}
-      {success && <p className="success">{success}</p>}
+    <div className="event-form-page">
+      <div className="event-form-container">
+        <div className="event-form-header">
+          <Link to="/club/dashboard" className="event-form-back-btn">
+            ← Back
+          </Link>
 
-      <form className="event-form" onSubmit={handleSubmit} noValidate>
-        <input
-          name="clubid"
-          placeholder="Club ID"
-          value={formData.clubid}
-          onChange={handleChange}
-        />
-        <input
-          name="title"
-          placeholder="Title"
-          value={formData.title}
-          onChange={handleChange}
-        />
-        <textarea
-          name="description"
-          placeholder="Description"
-          value={formData.description}
-          onChange={handleChange}
-        />
-        <input
-          type="date"
-          name="date"
-          value={formData.date}
-          onChange={handleChange}
-        />
-        <input
-          name="location"
-          placeholder="Location"
-          value={formData.location}
-          onChange={handleChange}
-        />
-
-        <label className="checkbox-label">
-          <input
-            type="checkbox"
-            name="ispaid"
-            checked={formData.ispaid}
-            onChange={handleChange}
-          />
-          Paid Event
-        </label>
-
-        {formData.ispaid && (
-          <input
-            type="number"
-            name="ticketPrice"
-            placeholder="Ticket Price"
-            value={formData.ticketPrice}
-            onChange={handleChange}
-          />
-        )}
-
-        <div className="file-upload">
-          <label>Event PDF (required)</label>
-          <input
-            type="file"
-            name="pdf"
-            accept="application/pdf"
-            onChange={handleChange}
-          />
+          <div className="event-form-hero">
+            <h1>Create New Event</h1>
+            <p>
+              Submit your event details for approval. Once approved, your event
+              will appear in the club dashboard and student-facing event areas.
+            </p>
+          </div>
         </div>
 
-        <div className="file-upload">
-          <label>Event Image (optional)</label>
-          <input
-            type="file"
-            name="image"
-            accept="image/*"
-            onChange={handleChange}
-          />
-        </div>
+        <form className="event-form-card" onSubmit={handleSubmit}>
+          <div className="event-form-grid">
+            <div className="event-form-group full-width">
+              <label>Event Title</label>
+              <input
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={handleChange}
+                placeholder="Enter event title"
+              />
+            </div>
 
-        <button type="submit">Submit</button>
-      </form>
+            <div className="event-form-group full-width">
+              <label>Description</label>
+              <textarea
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                placeholder="Enter event description"
+                rows="5"
+              />
+            </div>
+
+            <div className="event-form-group">
+              <label>Date</label>
+              <input
+                type="datetime-local"
+                name="date"
+                value={formData.date}
+                onChange={handleChange}
+                min={getMinDateTime()}
+              />
+            </div>
+
+            <div className="event-form-group">
+              <label>Location</label>
+              <input
+                type="text"
+                name="location"
+                value={formData.location}
+                onChange={handleChange}
+                placeholder="Enter event location"
+              />
+            </div>
+
+            <div className="event-form-group">
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  name="ispaid"
+                  checked={formData.ispaid}
+                  onChange={handleChange}
+                />
+                <span>Paid Event</span>
+              </label>
+            </div>
+
+            <div className="event-form-group">
+              <label>Ticket Price</label>
+              <input
+                type="number"
+                name="ticketPrice"
+                value={formData.ticketPrice}
+                onChange={handleChange}
+                placeholder="Enter ticket price"
+                min="0"
+                disabled={!formData.ispaid}
+              />
+            </div>
+
+            <div className="event-form-group">
+              <label>Upload PDF</label>
+              <input
+                type="file"
+                name="pdf"
+                accept=".pdf"
+                onChange={handleChange}
+              />
+              <small>Required file</small>
+            </div>
+
+            <div className="event-form-group">
+              <label>Upload Event Image</label>
+              <input
+                type="file"
+                name="image"
+                accept="image/*"
+                onChange={handleChange}
+              />
+              <small>Optional image</small>
+            </div>
+          </div>
+
+          <div className="event-form-actions">
+            <button
+              type="button"
+              className="event-form-secondary-btn"
+              onClick={() => navigate("/club/dashboard")}
+            >
+              Cancel
+            </button>
+
+            <button type="submit" className="event-form-primary-btn" disabled={loading}>
+              {loading ? "Submitting..." : "Submit Event Request"}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
-}
+};
+
+export default EventFormPage;

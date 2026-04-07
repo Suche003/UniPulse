@@ -1,15 +1,16 @@
 import express from "express";
-import { createClub,updateEvent,getAllClubs} from "../controllers/clubController.js";
+import {
+  createClub,
+  updateEvent,
+  getAllClubs,
+  deleteClub,
+} from "../controllers/clubController.js";
 
 const router = express.Router();
 
 router.post("/create", createClub);
-// Update other event details
 router.put("/:id", updateEvent);
-
-//get All Clubs
 router.get("/", getAllClubs);
-
-
+router.delete("/:id", deleteClub);
 
 export default router;

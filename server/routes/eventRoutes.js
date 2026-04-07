@@ -1,15 +1,14 @@
-// routes/eventRoutes.js
 import express from "express";
 import multer from "multer";
-import { 
+import {
   createEvent,
   getEvents,
   deleteEvent,
   getPendingEvents,
   approveEvent,
   rejectEvent,
-  getAllEvents, 
-  
+  getAllEvents,
+  getMyClubEvents,
 } from "../controllers/eventController.js";
 
 const router = express.Router();
@@ -33,7 +32,7 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({ storage, fileFilter });
 
-// Routes
+// CREATE EVENT
 router.post(
   "/",
   upload.fields([
@@ -43,25 +42,25 @@ router.post(
   createEvent
 );
 
-//get all events
+// GET ALL EVENTS
 router.get("/all", getAllEvents);
 
+// GET EVENTS CREATED BY A SPECIFIC CLUB
+router.get("/club/:clubid", getMyClubEvents);
 
-
-// Get all pending events
+// GET ALL APPROVED EVENTS
 router.get("/", getEvents);
 
-// Delete event
+// DELETE EVENT
 router.delete("/:id", deleteEvent);
 
-
-// Get all pending events
+// GET ALL PENDING EVENTS
 router.get("/pending", getPendingEvents);
 
-// Approve event
+// APPROVE EVENT
 router.put("/approve/:id", approveEvent);
 
-// Reject event
+// REJECT EVENT
 router.put("/reject/:id", rejectEvent);
 
 export default router;

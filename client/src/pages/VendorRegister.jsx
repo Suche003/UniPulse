@@ -1,16 +1,16 @@
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
+import { useNavigate, Link } from "react-router-dom";
+import "./VendorRegister.css";
 
 const initial = {
-  name: "",
-  nic: "",
+  companyName: "",
   contact: "",
   address: "",
   email: "",
+  businessRegistrationNo: "",
+  stallType: "",
   password: "",
   confirmPassword: "",
-  stallType: "",
 };
 
 export default function VendorRegister() {
@@ -21,44 +21,56 @@ export default function VendorRegister() {
 
   function onChange(e) {
     const { name, value } = e.target;
-    setForm((p) => ({ ...p, [name]: value }));
+    setForm((prev) => ({ ...prev, [name]: value }));
   }
 
   function onBlur(e) {
-    setTouched((p) => ({ ...p, [e.target.name]: true }));
+    setTouched((prev) => ({ ...prev, [e.target.name]: true }));
   }
 
-  /* VALIDATION */
   const errors = useMemo(() => {
     const e = {};
 
-    if (!form.name.trim()) e.name = "Vendor name is required";
-
-    if (!form.nic.trim()) e.nic = "NIC is required";
-    else if (!/^(?:\d{9}[VvXx]|\d{12})$/.test(form.nic.trim()))
-      e.nic = "NIC must be 123456789V (old) or 200331310064 (new)";
+    if (!form.companyName.trim()) {
+      e.companyName = "Company name is required";
+    }
 
     const cleanContact = form.contact.replace(/\D/g, "");
-    if (!cleanContact) e.contact = "Contact number is required";
-    else if (cleanContact.length !== 10)
+    if (!cleanContact) {
+      e.contact = "Contact number is required";
+    } else if (cleanContact.length !== 10) {
       e.contact = "Contact number must be 10 digits";
+    }
 
-    if (!form.address.trim()) e.address = "Address is required";
+    if (!form.address.trim()) {
+      e.address = "Business address is required";
+    }
 
-    if (!form.email.trim()) e.email = "Email is required";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim()))
+    if (!form.email.trim()) {
+      e.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
       e.email = "Email must be valid";
+    }
 
-    if (!form.stallType) e.stallType = "Stall type is required";
+    if (!form.businessRegistrationNo.trim()) {
+      e.businessRegistrationNo = "Business registration number is required";
+    }
 
-    if (!form.password) e.password = "Password is required";
-    else if (form.password.length < 6)
+    if (!form.stallType) {
+      e.stallType = "Stall type is required";
+    }
+
+    if (!form.password) {
+      e.password = "Password is required";
+    } else if (form.password.length < 6) {
       e.password = "Password must be at least 6 characters";
+    }
 
-    if (!form.confirmPassword)
+    if (!form.confirmPassword) {
       e.confirmPassword = "Confirm password is required";
-    else if (form.confirmPassword !== form.password)
+    } else if (form.confirmPassword !== form.password) {
       e.confirmPassword = "Passwords do not match";
+    }
 
     return e;
   }, [form]);
@@ -66,21 +78,20 @@ export default function VendorRegister() {
   const isValid = Object.keys(errors).length === 0;
   const showError = (field) => touched[field] && errors[field];
 
-  /* SUBMIT */
   async function onSubmit(e) {
     e.preventDefault();
+
     setTouched({
-      name: true,
-      nic: true,
+      companyName: true,
       contact: true,
       address: true,
       email: true,
+      businessRegistrationNo: true,
       stallType: true,
       password: true,
       confirmPassword: true,
     });
 
-    // Popup for incomplete fields
     if (!isValid) {
       alert("Please fill all required fields correctly before submitting.");
       return;
@@ -92,11 +103,11 @@ export default function VendorRegister() {
       const cleanContact = form.contact.replace(/\D/g, "");
 
       const payload = {
-        name: form.name.trim(),
-        nic: form.nic.trim(),
+        companyName: form.companyName.trim(),
         contact: cleanContact,
         address: form.address.trim(),
         email: form.email.trim(),
+        businessRegistrationNo: form.businessRegistrationNo.trim(),
         stallType: form.stallType,
         password: form.password,
       };
@@ -113,6 +124,7 @@ export default function VendorRegister() {
         const msg = data?.errors
           ? data.errors.map((x) => `• ${x.msg}`).join("\n")
           : data.message || "Registration failed";
+
         alert(msg);
         return;
       }
@@ -129,42 +141,83 @@ export default function VendorRegister() {
     }
   }
 
-  /* UI */
   return (
-    <div className="page">
-      <Navbar />
+    <div className="vendor-page">
+      <div className="vendor-page__bg"></div>
 
-      <main className="container">
-        <section className="authCard">
-          <h1 className="authTitle">Vendor Sign Up</h1>
-          <p className="authSubtitle">Submit your vendor request</p>
+      <div className="vendor-page__topbar">
+        <Link to="/" className="vendor-home-btn">
+          <span>&#8617;</span> Go Back
+        </Link>
+      </div>
 
-          <form className="form" onSubmit={onSubmit} noValidate>
-            <div className="field">
-              <label>Vendor Name</label>
-              <input
-                name="name"
-                value={form.name}
-                onChange={onChange}
-                onBlur={onBlur}
-                placeholder="Full Name"
-              />
-              {showError("name") && <p className="error">{errors.name}</p>}
+      <main className="vendor-layout">
+        <section className="vendor-info">
+
+          <h1 className="vendor-info__title">
+            Grow your business through <span>campus events</span>
+          </h1>
+
+          <div className="vendor-feature-grid">
+            <div className="vendor-feature-card">
+              <div className="vendor-feature-card__icon">🏪</div>
+              <h3>Get Stall Opportunities</h3>
+              <p>
+                Receive access to event-related vendor opportunities from
+                university organizers.
+              </p>
             </div>
 
-            <div className="field">
-              <label>NIC Number</label>
-              <input
-                name="nic"
-                value={form.nic}
-                onChange={onChange}
-                onBlur={onBlur}
-                placeholder="123456789V or 200331310064"
-              />
-              {showError("nic") && <p className="error">{errors.nic}</p>}
+            <div className="vendor-feature-card">
+              <div className="vendor-feature-card__icon">🤝</div>
+              <h3>Connect with Organizers</h3>
+              <p>
+                Build direct relationships with event
+                planners in one platform.
+              </p>
             </div>
 
-            <div className="field">
+            <div className="vendor-feature-card">
+              <div className="vendor-feature-card__icon">📈</div>
+              <h3>Increase Visibility</h3>
+              <p>
+                Showcase your brand, products, and services to a large student
+                audience.
+              </p>
+            </div>
+
+            <div className="vendor-feature-card">
+              <div className="vendor-feature-card__icon">⚡</div>
+              <h3>Simple Registration</h3>
+              <p>
+                Submit your company details quickly and start your approval
+                process easily.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="vendor-form-card">
+          <div className="vendor-form-card__header">
+            <h2>Submit Registration Request</h2>
+          </div>
+
+          <form className="vendor-form" onSubmit={onSubmit} noValidate>
+            <div className="vendor-field">
+              <label>Company Name</label>
+              <input
+                name="companyName"
+                value={form.companyName}
+                onChange={onChange}
+                onBlur={onBlur}
+                placeholder="ABC Food Corner"
+              />
+              {showError("companyName") && (
+                <p className="vendor-error">{errors.companyName}</p>
+              )}
+            </div>
+
+            <div className="vendor-field">
               <label>Contact Number</label>
               <input
                 name="contact"
@@ -173,34 +226,55 @@ export default function VendorRegister() {
                 onBlur={onBlur}
                 placeholder="0771234567"
               />
-              {showError("contact") && <p className="error">{errors.contact}</p>}
+              {showError("contact") && (
+                <p className="vendor-error">{errors.contact}</p>
+              )}
             </div>
 
-            <div className="field">
-              <label>Address</label>
+            <div className="vendor-field">
+              <label>Business Address</label>
               <textarea
                 name="address"
                 value={form.address}
                 onChange={onChange}
                 onBlur={onBlur}
                 rows="3"
+                placeholder="No 123, Main Street, Colombo"
               />
-              {showError("address") && <p className="error">{errors.address}</p>}
+              {showError("address") && (
+                <p className="vendor-error">{errors.address}</p>
+              )}
             </div>
 
-            <div className="field">
-              <label>Email</label>
+            <div className="vendor-field">
+              <label>Business Email</label>
               <input
                 name="email"
                 value={form.email}
                 onChange={onChange}
                 onBlur={onBlur}
-                placeholder="example@domain.com"
+                placeholder="company@email.com"
               />
-              {showError("email") && <p className="error">{errors.email}</p>}
+              {showError("email") && (
+                <p className="vendor-error">{errors.email}</p>
+              )}
             </div>
 
-            <div className="field">
+            <div className="vendor-field">
+              <label>Business Registration Number</label>
+              <input
+                name="businessRegistrationNo"
+                value={form.businessRegistrationNo}
+                onChange={onChange}
+                onBlur={onBlur}
+                placeholder="PV12345678"
+              />
+              {showError("businessRegistrationNo") && (
+                <p className="vendor-error">{errors.businessRegistrationNo}</p>
+              )}
+            </div>
+
+            <div className="vendor-field">
               <label>Stall Type</label>
               <select
                 name="stallType"
@@ -208,17 +282,19 @@ export default function VendorRegister() {
                 onChange={onChange}
                 onBlur={onBlur}
               >
-                <option value=""></option>
+                <option value="">Select Stall Type</option>
                 <option value="Food">Food</option>
                 <option value="Merchandise">Merchandise</option>
                 <option value="Games">Games</option>
                 <option value="Services">Services</option>
                 <option value="Other">Other</option>
               </select>
-              {showError("stallType") && <p className="error">{errors.stallType}</p>}
+              {showError("stallType") && (
+                <p className="vendor-error">{errors.stallType}</p>
+              )}
             </div>
 
-            <div className="field">
+            <div className="vendor-field">
               <label>Password</label>
               <input
                 type="password"
@@ -226,11 +302,14 @@ export default function VendorRegister() {
                 value={form.password}
                 onChange={onChange}
                 onBlur={onBlur}
+                placeholder="Enter password"
               />
-              {showError("password") && <p className="error">{errors.password}</p>}
+              {showError("password") && (
+                <p className="vendor-error">{errors.password}</p>
+              )}
             </div>
 
-            <div className="field">
+            <div className="vendor-field">
               <label>Confirm Password</label>
               <input
                 type="password"
@@ -238,14 +317,15 @@ export default function VendorRegister() {
                 value={form.confirmPassword}
                 onChange={onChange}
                 onBlur={onBlur}
+                placeholder="Re-enter password"
               />
               {showError("confirmPassword") && (
-                <p className="error">{errors.confirmPassword}</p>
+                <p className="vendor-error">{errors.confirmPassword}</p>
               )}
             </div>
 
             <button
-              className="btn btn--primary btn--full"
+              className="vendor-submit-btn"
               type="submit"
               disabled={submitting}
             >

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
+import { useNavigate, Link } from "react-router-dom";
+import "./Login.css";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -32,12 +32,10 @@ export default function Login() {
         return;
       }
 
-      // store auth (simple version)
       localStorage.setItem("unipulse_token", data.token);
       localStorage.setItem("unipulse_role", data.role);
       localStorage.setItem("unipulse_user", JSON.stringify(data.user));
 
-      // redirect based on backend response
       navigate(data.redirectTo);
     } catch (err) {
       alert("Server error. Please try again.");
@@ -47,26 +45,42 @@ export default function Login() {
   }
 
   return (
-    <div className="page">
-     
-      <main className="container">
-        <section className="authCard">
-          <h1 className="authTitle">Login</h1>
-          <p className="authSubtitle">
-            Enter Your Credentials for Login
-          </p>
+    <div className="login-page">
+      <div className="login-page__bg"></div>
+      <div className="login-page__orb login-page__orb--one"></div>
+      <div className="login-page__orb login-page__orb--two"></div>
+      <div className="login-page__orb login-page__orb--three"></div>
 
-          <form className="form" onSubmit={onSubmit} noValidate>
-            <div className="field">
+      <div className="login-page__topbar">
+        <Link to="/" className="login-home-btn">
+          <span>&#8617;</span> Go Back
+        </Link>
+      </div>
+
+      <main className="login-layout">
+        <section className="login-info">
+          <h1 className="login-info__title">
+            Welcome back to <span>UniPulse</span>
+          </h1>
+
+        </section>
+
+        <section className="login-form-card">
+          <div className="login-form-card__header">
+            <h2>Login</h2>
+          </div>
+
+          <form className="login-form" onSubmit={onSubmit} noValidate>
+            <div className="login-field">
               <label>Username</label>
               <input
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
-                placeholder="Enter username"
+                placeholder="Enter username or email"
               />
             </div>
 
-            <div className="field">
+            <div className="login-field">
               <label>Password</label>
               <input
                 type="password"
@@ -76,9 +90,13 @@ export default function Login() {
               />
             </div>
 
-            <button className="btn btn--primary btn--full" disabled={submitting}>
+            <button className="login-submit-btn" disabled={submitting}>
               {submitting ? "Logging in..." : "Login"}
             </button>
+
+            <p className="login-footer">
+              New to UniPulse? <Link to="/signup">Create an account</Link>
+            </p>
           </form>
         </section>
       </main>
