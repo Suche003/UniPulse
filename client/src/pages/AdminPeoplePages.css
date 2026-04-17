@@ -412,3 +412,18 @@
     font-size: 1.9rem;
   }
 }
+
+.rating-display {
+  background: rgba(255, 215, 0, 0.15);
+  padding: 0.2rem 0.5rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  display: inline-block;
+  color: #ffd966;
+}
+
+.no-rating {
+  color: var(--muted);
+  font-size: 0.8rem;
+}

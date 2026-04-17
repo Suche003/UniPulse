@@ -14,6 +14,7 @@ const SponsorDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('requests');
   const [editingProfile, setEditingProfile] = useState(false);
+  const [avgRating, setAvgRating] = useState(0);
   const [profileForm, setProfileForm] = useState({
     name: '',
     description: '',
@@ -37,7 +38,11 @@ const SponsorDashboard = () => {
         apiRequest('/api/sponsorship-requests/my-requests'),
         apiRequest('/api/payments/my-payments')
       ]);
-      setRequests(requestsData);
+      // 🔽 SORT: newest requests first (by createdAt descending)
+      const sortedRequests = [...requestsData].sort((a, b) => 
+        new Date(b.createdAt) - new Date(a.createdAt)
+      );
+      setRequests(sortedRequests);
       setPayments(paymentsData);
     } catch (err) {
       toast.error('Failed to load data');
@@ -61,6 +66,8 @@ const SponsorDashboard = () => {
         socialLinks: sponsor.socialLinks || { linkedin: '', twitter: '', facebook: '', instagram: '' },
         contacts: sponsor.contacts || [],
       });
+      const ratingData = await apiRequest(`/api/ratings/average/${sponsor._id}/Sponsor`);
+      setAvgRating(ratingData.avgRating);
     } catch (err) {
       toast.error('Failed to load profile');
     }
@@ -91,12 +98,12 @@ const SponsorDashboard = () => {
       await apiRequest('/api/sponsors/profile', { 
         method: 'PUT', 
         body: formData,
-        headers: {}  // Let browser set Content-Type for FormData
+        headers: {}
       });
       
       toast.success('Profile updated successfully!');
       setEditingProfile(false);
-      fetchProfile(); // Refresh profile data
+      fetchProfile();
     } catch (err) {
       console.error('Update error:', err);
       toast.error(err.message || 'Failed to update profile');
@@ -125,13 +132,11 @@ const SponsorDashboard = () => {
     setProfileForm({ ...profileForm, contacts: newContacts });
   };
 
-  // Manual refresh button handler
   const handleRefresh = () => {
     setRefreshing(true);
     fetchData();
   };
 
-  // Calculate stats
   const totalRequests = requests.length;
   const acceptedRequests = requests.filter(r => r.status === 'accepted' || r.status === 'meeting_scheduled').length;
   const pendingRequests = requests.filter(r => r.status === 'pending').length;
@@ -146,11 +151,12 @@ const SponsorDashboard = () => {
         <div className="hero-content">
           <h1>Welcome back, {profile?.name} 👋</h1>
           <p>Manage your sponsorships, track payments, and grow your brand impact</p>
+          {avgRating > 0 && (
+            <div className="rating-badge">⭐ {avgRating.toFixed(1)} / 5 (average rating from clubs)</div>
+          )}
         </div>
         {profile?.status === 'pending' && (
-          <div className="alert">
-            ⏳ Your account is awaiting admin approval. You'll receive sponsorship requests once approved.
-          </div>
+          <div className="alert">⏳ Your account is awaiting admin approval.</div>
         )}
       </div>
 
@@ -201,12 +207,7 @@ const SponsorDashboard = () => {
         {activeTab === 'requests' && (
           <>
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
-              <button 
-                className="btn-sm" 
-                onClick={handleRefresh} 
-                disabled={refreshing}
-                style={{ minWidth: '100px' }}
-              >
+              <button className="btn-sm" onClick={handleRefresh} disabled={refreshing}>
                 {refreshing ? 'Refreshing...' : '🔄 Refresh'}
               </button>
             </div>
@@ -219,11 +220,11 @@ const SponsorDashboard = () => {
             ) : (
               <div className="requests-list">
                 {requests.map(req => (
-                  <SponsorshipDetail 
-                    key={req._id} 
-                    request={req} 
-                    onRefresh={fetchData} 
-                    userRole="sponsor" 
+                  <SponsorshipDetail
+                    key={req._id}
+                    request={req}
+                    onRefresh={fetchData}
+                    userRole="sponsor"
                   />
                 ))}
               </div>
@@ -271,7 +272,6 @@ const SponsorDashboard = () => {
         {activeTab === 'profile' && (
           <div className="profile-section">
             {!editingProfile ? (
-              // ========== VIEW MODE ==========
               <div className="profile-view">
                 <div className="profile-avatar">
                   {profile?.logo ? (
@@ -282,6 +282,9 @@ const SponsorDashboard = () => {
                 </div>
                 <div className="profile-details">
                   <h3>{profile?.name}</h3>
+                  {avgRating > 0 && (
+                    <div className="rating-display">⭐ {avgRating.toFixed(1)} / 5 (from clubs)</div>
+                  )}
                   <p className="profile-description">{profile?.description || 'No description provided'}</p>
                   <div className="profile-info-grid">
                     <div><span>📧</span> {profile?.contactEmail}</div>
@@ -315,31 +318,26 @@ const SponsorDashboard = () => {
                 <button className="btn-primary" onClick={() => setEditingProfile(true)}>✏️ Edit Profile</button>
               </div>
             ) : (
-              // ========== EDIT MODE ==========
               <form onSubmit={handleProfileUpdate} className="profile-form">
                 <h3>Edit Company Profile</h3>
-                
                 <div className="form-group">
                   <label>Organization Name *</label>
                   <input type="text" value={profileForm.name} onChange={e => setProfileForm({ ...profileForm, name: e.target.value })} required />
                 </div>
-                
                 <div className="form-group">
                   <label>Description</label>
-                  <textarea value={profileForm.description} onChange={e => setProfileForm({ ...profileForm, description: e.target.value })} rows="4" placeholder="Tell us about your company..." />
+                  <textarea value={profileForm.description} onChange={e => setProfileForm({ ...profileForm, description: e.target.value })} rows="4" />
                 </div>
-                
                 <div className="form-row">
                   <div className="form-group">
                     <label>Website</label>
-                    <input type="url" value={profileForm.website} onChange={e => setProfileForm({ ...profileForm, website: e.target.value })} placeholder="https://" />
+                    <input type="url" value={profileForm.website} onChange={e => setProfileForm({ ...profileForm, website: e.target.value })} />
                   </div>
                   <div className="form-group">
                     <label>Phone</label>
                     <input type="tel" value={profileForm.contactPhone} onChange={e => setProfileForm({ ...profileForm, contactPhone: e.target.value.replace(/\D/g, '') })} placeholder="10 digits" />
                   </div>
                 </div>
-                
                 <div className="form-group">
                   <label>Social Links</label>
                   <div className="form-row">
@@ -351,7 +349,6 @@ const SponsorDashboard = () => {
                     <input type="url" placeholder="Instagram" value={profileForm.socialLinks.instagram} onChange={e => setProfileForm({ ...profileForm, socialLinks: { ...profileForm.socialLinks, instagram: e.target.value } })} />
                   </div>
                 </div>
-                
                 <div className="form-group">
                   <label>Contact Persons</label>
                   {profileForm.contacts.map((c, idx) => (
@@ -364,17 +361,15 @@ const SponsorDashboard = () => {
                     <input type="text" placeholder="Name *" value={newContact.name} onChange={e => setNewContact({ ...newContact, name: e.target.value })} />
                     <input type="email" placeholder="Email *" value={newContact.email} onChange={e => setNewContact({ ...newContact, email: e.target.value })} />
                     <input type="text" placeholder="Phone" value={newContact.phone} onChange={e => setNewContact({ ...newContact, phone: e.target.value })} />
-                    <input type="text" placeholder="Role (e.g., Marketing Manager)" value={newContact.role} onChange={e => setNewContact({ ...newContact, role: e.target.value })} />
+                    <input type="text" placeholder="Role" value={newContact.role} onChange={e => setNewContact({ ...newContact, role: e.target.value })} />
                     <button type="button" className="btn-sm" onClick={addContact}>+ Add</button>
                   </div>
                 </div>
-                
                 <div className="form-group">
                   <label>Company Logo</label>
                   <input type="file" accept="image/*" onChange={e => setProfileForm({ ...profileForm, logo: e.target.files[0] })} />
                   <small>Recommended: Square image, max 2MB</small>
                 </div>
-                
                 <div className="actions">
                   <button type="submit" className="btn-primary">💾 Save Changes</button>
                   <button type="button" className="btn-secondary" onClick={() => setEditingProfile(false)}>Cancel</button>

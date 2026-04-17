@@ -565,3 +565,27 @@
     width: 100%;
   }
 }
+
+/* Rating badge in hero */
+.club-rating-badge {
+  margin-top: 0.75rem;
+  padding: 0.3rem 0.8rem;
+  background: rgba(255, 215, 0, 0.15);
+  border-radius: 30px;
+  font-size: 0.85rem;
+  display: inline-block;
+  color: #ffd966;
+}
+
+/* Rating stat card */
+.rating-stat {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.05));
+  border: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+.rating-stat small {
+  font-size: 0.7rem;
+  color: var(--muted);
+  margin-top: 4px;
+  display: block;
+}

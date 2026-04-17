@@ -11,6 +11,8 @@ import {
   acceptProposal,
   updateCoordination,
   uploadFile,
+  getClubRequests,        // ✅ import the controller function with sorting
+  recordPayment,          // ✅ import if you moved it to controller (optional)
 } from '../controllers/sponsorshipController.js';
 import SponsorshipRequest from '../models/SponsorshipRequest.js';
 import Payment from '../models/Payment.js';
@@ -39,16 +41,7 @@ router.get('/', requireRole('superadmin'), async (req, res) => {
 // ==================== Club Routes ====================
 router.post('/', requireRole('club'), createRequest);
 router.post('/detailed', requireRole('club'), createDetailedProposal);
-router.get('/my-club-requests', requireRole('club'), async (req, res) => {
-  try {
-    const requests = await SponsorshipRequest.find({ club: req.user.sub })
-      .populate('event', 'title date location')
-      .populate('sponsor', 'name contactEmail');
-    res.json(requests);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
+router.get('/my-club-requests', requireRole('club'), getClubRequests); // ✅ uses controller with sorting
 
 router.delete('/:requestId', requireRole('club'), async (req, res) => {
   try {
@@ -98,8 +91,8 @@ router.patch('/:requestId/accept-proposal', requireRole('sponsor'), acceptPropos
 router.patch('/:requestId/coordination', requireRole('sponsor'), updateCoordination);
 router.post('/:requestId/upload', requireRole('sponsor'), uploadFile);
 
-// Manual payment recording (sponsor)
-router.post('/:requestId/record-payment', requireRole('sponsor'), async (req, res) => {
+// Manual payment recording (sponsor) – using controller if available, else keep inline
+router.post('/:requestId/record-payment', requireRole('sponsor'), recordPayment || (async (req, res) => {
   try {
     const { amount, transactionId, notes } = req.body;
     const request = await SponsorshipRequest.findById(req.params.requestId);
@@ -133,7 +126,6 @@ router.post('/:requestId/record-payment', requireRole('sponsor'), async (req, re
     request.paymentStatus = 'paid';
     await request.save();
 
-    // Notify club via email
     const club = await Club.findById(request.club);
     if (club) {
       await sendEmail({
@@ -149,7 +141,7 @@ router.post('/:requestId/record-payment', requireRole('sponsor'), async (req, re
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
-});
+}));
 
 // ==================== Contract Management ====================
 router.patch('/:requestId/contract', requireRole('sponsor'), uploadContract);

@@ -10,6 +10,8 @@ const ClubDashboard = () => {
   const [pastEvents, setPastEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [avgRating, setAvgRating] = useState(0);
+  const [ratingCount, setRatingCount] = useState(0);
 
   const navigate = useNavigate();
 
@@ -19,6 +21,7 @@ const ClubDashboard = () => {
 
   useEffect(() => {
     fetchClubDashboardData();
+    fetchClubRating();
   }, []);
 
   const fetchClubDashboardData = async () => {
@@ -65,9 +68,21 @@ const ClubDashboard = () => {
     }
   };
 
+  const fetchClubRating = async () => {
+    if (!loggedInClubId) return;
+    try {
+      const res = await axios.get(
+        `http://localhost:5000/api/ratings/average/${loggedInClubId}/Club`
+      );
+      setAvgRating(res.data.avgRating);
+      setRatingCount(res.data.count);
+    } catch (err) {
+      console.error("Failed to fetch club rating:", err);
+    }
+  };
+
   const formatDate = (dateValue) => {
     if (!dateValue) return "No date available";
-
     const d = new Date(dateValue);
     return d.toLocaleDateString("en-GB", {
       day: "2-digit",
@@ -116,6 +131,11 @@ const ClubDashboard = () => {
         <section className="club-dashboard-hero">
           <div className="club-dashboard-hero__content">
             <h1>Welcome Back {clubName}!</h1>
+            {avgRating > 0 && (
+              <div className="club-rating-badge">
+                ⭐ {avgRating.toFixed(1)} / 5 ({ratingCount} {ratingCount === 1 ? 'review' : 'reviews'} from sponsors)
+              </div>
+            )}
           </div>
           <div className="club-dashboard-hero__glow"></div>
         </section>
@@ -147,6 +167,21 @@ const ClubDashboard = () => {
             <div className="club-mini-stat-card">
               <span className="club-mini-stat-card__label">Past Events</span>
               <strong>{pastEvents.length}</strong>
+            </div>
+
+            {/* Rating Stat Card */}
+            <div className="club-mini-stat-card rating-stat">
+              <span className="club-mini-stat-card__label">Sponsor Rating</span>
+              <strong>
+                {avgRating > 0 ? (
+                  <>⭐ {avgRating.toFixed(1)}</>
+                ) : (
+                  <>—</>
+                )}
+              </strong>
+              {ratingCount > 0 && (
+                <small>({ratingCount} {ratingCount === 1 ? 'review' : 'reviews'})</small>
+              )}
             </div>
           </div>
         </section>

@@ -1,4 +1,4 @@
-/* DetailedProposalForm.css – polished dark theme with visible dropdowns */
+/* DetailedProposalForm.css – Balanced Colors */
 
 .modal-overlay {
   position: fixed;
@@ -6,8 +6,8 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(8px);
+  background: rgba(8, 10, 25, 0.85);
+  backdrop-filter: blur(12px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -19,11 +19,11 @@
   max-width: 950px;
   width: 100%;
   max-height: 90vh;
-  background: linear-gradient(180deg, rgba(18, 24, 45, 0.95), rgba(12, 16, 30, 0.98));
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(180deg, rgba(20, 24, 45, 0.98), rgba(12, 16, 32, 0.98));
+  border: 1px solid rgba(100, 108, 255, 0.2);
   border-radius: 32px;
   overflow: hidden;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(16px);
   animation: slideUp 0.3s ease-out;
 }
@@ -33,12 +33,13 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* Header – softer gradient (purple → blue) */
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 1rem 1.8rem;
-  background: linear-gradient(90deg, #ff2f92, #8b3dff);
+  background: linear-gradient(90deg, #6c63ff, #3b82f6);
   color: white;
 }
 
@@ -46,6 +47,7 @@
   margin: 0;
   font-size: 1.4rem;
   font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .modal-close {
@@ -68,12 +70,13 @@
   transform: scale(1.05);
 }
 
+/* Progress steps – teal accents */
 .progress-steps {
   display: flex;
   justify-content: space-between;
   padding: 1rem 1.8rem;
   background: rgba(0, 0, 0, 0.3);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(100, 108, 255, 0.15);
   flex-wrap: wrap;
 }
 
@@ -92,20 +95,20 @@
   right: -50%;
   width: 100%;
   height: 2px;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(100, 108, 255, 0.25);
   z-index: 0;
 }
 
 .step.active:not(:last-child)::after,
 .step.completed:not(:last-child)::after {
-  background: #ff2f92;
+  background: #10b981; /* teal/green for completed */
 }
 
 .step-number {
   width: 36px;
   height: 36px;
   background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(100, 108, 255, 0.3);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -117,10 +120,10 @@
 }
 
 .step.active .step-number {
-  border-color: #ff2f92;
-  background: linear-gradient(135deg, #ff2f92, #8b3dff);
+  border-color: #3b82f6;
+  background: linear-gradient(135deg, #3b82f6, #6c63ff);
   color: white;
-  box-shadow: 0 0 0 3px rgba(255, 47, 146, 0.3);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
 }
 
 .step.completed .step-number {
@@ -132,23 +135,24 @@
 .step-label {
   font-size: 0.7rem;
   margin-top: 0.5rem;
-  color: rgba(232, 236, 255, 0.7);
+  color: rgba(200, 210, 255, 0.6);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .step.active .step-label {
-  color: #ff8ed0;
+  color: #60a5fa;
 }
 
+/* Form container */
 .detailed-form {
   padding: 1.8rem;
   overflow-y: auto;
   max-height: calc(85vh - 140px);
-  color: #f5f7ff;
+  color: #f0f3ff;
   scrollbar-width: thin;
-  scrollbar-color: #ff2f92 rgba(255,255,255,0.1);
+  scrollbar-color: #3b82f6 rgba(255,255,255,0.1);
 }
 
 .detailed-form::-webkit-scrollbar {
@@ -159,7 +163,7 @@
   border-radius: 10px;
 }
 .detailed-form::-webkit-scrollbar-thumb {
-  background: #ff2f92;
+  background: #3b82f6;
   border-radius: 10px;
 }
 
@@ -177,22 +181,22 @@
   font-size: 1.3rem;
   font-weight: 700;
   margin-bottom: 1.2rem;
-  color: #ffffff;
+  color: #e2e8ff;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  border-left: 3px solid #ff2f92;
+  border-left: 3px solid #3b82f6;
   padding-left: 0.75rem;
 }
 
-/* Inputs, selects, textareas */
+/* Inputs – cleaner */
 input, select, textarea {
   width: 100%;
   padding: 0.75rem 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(100, 108, 255, 0.25);
   border-radius: 16px;
   background: rgba(0, 0, 0, 0.4);
-  color: #f5f7ff;
+  color: #f0f3ff;
   font-size: 0.9rem;
   transition: all 0.2s;
   font-family: inherit;
@@ -200,22 +204,20 @@ input, select, textarea {
 
 input:focus, select:focus, textarea:focus {
   outline: none;
-  border-color: #ff2f92;
-  box-shadow: 0 0 0 3px rgba(255, 47, 146, 0.2);
-  background: rgba(255, 255, 255, 0.08);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  background: rgba(30, 40, 70, 0.6);
 }
 
-/* FIX: dropdown options visible */
 select option {
-  background-color: #1e1e2f;
-  color: #f5f7ff;
+  background-color: #1a1e2f;
+  color: #f0f3ff;
   padding: 10px;
 }
 
 select option:hover,
-select option:focus,
 select option:checked {
-  background: linear-gradient(90deg, #ff2f92, #8b3dff);
+  background: linear-gradient(90deg, #3b82f6, #6c63ff);
   color: white;
 }
 
@@ -225,17 +227,23 @@ textarea {
 
 /* Benefit & package items */
 .benefit-item, .package-item {
-  background: rgba(0, 0, 0, 0.35);
+  background: rgba(0, 0, 0, 0.3);
   border-radius: 20px;
   padding: 1rem 1.2rem;
   margin-bottom: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(100, 108, 255, 0.2);
   position: relative;
+  transition: all 0.2s;
+}
+
+.benefit-item:hover, .package-item:hover {
+  border-color: rgba(59, 130, 246, 0.4);
+  background: rgba(0, 0, 0, 0.4);
 }
 
 .benefit-item input, .benefit-item textarea,
 .package-item input, .package-item textarea {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.5);
   margin-bottom: 0.5rem;
 }
 
@@ -254,6 +262,7 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.2s;
 }
 
 .benefit-item button:hover, .package-item button:hover {
@@ -263,19 +272,19 @@ textarea {
 
 /* Add buttons */
 button[type="button"]:not(.modal-close):not(.btn-primary):not(.btn-secondary) {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.3);
   border-radius: 40px;
   padding: 0.5rem 1.2rem;
   font-size: 0.85rem;
   font-weight: 500;
   transition: all 0.2s;
-  color: #e2e8f0;
+  color: #90cdf4;
   cursor: pointer;
 }
 
 button[type="button"]:not(.modal-close):hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(59, 130, 246, 0.3);
   transform: translateY(-1px);
 }
 
@@ -290,7 +299,7 @@ button[type="button"]:not(.modal-close):hover {
 
 .package-selector label {
   font-weight: 600;
-  color: #f5f7ff;
+  color: #cbd5e1;
 }
 
 .package-selector select {
@@ -298,6 +307,7 @@ button[type="button"]:not(.modal-close):hover {
   min-width: 200px;
 }
 
+/* Two‑column rows */
 .form-row {
   display: flex;
   gap: 1.2rem;
@@ -308,18 +318,18 @@ button[type="button"]:not(.modal-close):hover {
   flex: 1;
 }
 
-/* Navigation buttons */
+/* Navigation buttons – balanced */
 .form-navigation {
   display: flex;
   justify-content: space-between;
   margin-top: 2rem;
   padding-top: 1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgba(100, 108, 255, 0.2);
   gap: 1rem;
 }
 
 .btn-primary {
-  background: linear-gradient(90deg, #ff2f92, #8b3dff);
+  background: linear-gradient(90deg, #3b82f6, #6c63ff);
   border: none;
   color: white;
   padding: 0.85rem 1.8rem;
@@ -331,12 +341,12 @@ button[type="button"]:not(.modal-close):hover {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(168, 85, 247, 0.5);
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.5);
 }
 
 .btn-primary:disabled {
@@ -345,9 +355,9 @@ button[type="button"]:not(.modal-close):hover {
 }
 
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #e2e8f0;
+  background: rgba(100, 108, 255, 0.1);
+  border: 1px solid rgba(100, 108, 255, 0.3);
+  color: #cbd5e1;
   padding: 0.85rem 1.8rem;
   border-radius: 40px;
   font-weight: 600;
@@ -360,9 +370,10 @@ button[type="button"]:not(.modal-close):hover {
 }
 
 .btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.25);
+  background: rgba(100, 108, 255, 0.2);
+  border-color: rgba(100, 108, 255, 0.5);
   transform: translateY(-1px);
+  color: white;
 }
 
 /* Responsive */

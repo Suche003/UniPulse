@@ -56,7 +56,8 @@ export const getSponsorRequests = async (req, res) => {
 
     const requests = await SponsorshipRequest.find({ sponsor: sponsorId })
       .populate('event', 'title date location')
-      .populate('club', 'clubName email');
+      .populate('club', 'clubName email')
+      .sort({ createdAt: -1 }); // ✅ Newest requests first
 
     console.log(`✅ Found ${requests.length} requests for sponsor`);
     res.json(requests);
@@ -311,6 +312,12 @@ export const updateCoordination = async (req, res) => {
         break;
       case 'promotionPlan':
         request.promotionPlan = { ...request.promotionPlan, ...data };
+        if (data.socialMediaPosts && Array.isArray(data.socialMediaPosts)) {
+          request.promotionPlan.socialMediaPosts = [
+            ...data.socialMediaPosts,
+            ...(request.promotionPlan.socialMediaPosts || [])
+          ];
+        }
         break;
       case 'eventDay':
         request.eventDayChecklist = { ...request.eventDayChecklist, ...data };
@@ -354,7 +361,7 @@ export const uploadFile = async (req, res) => {
       case 'photo':
         if (!request.postEventReport) request.postEventReport = {};
         if (!request.postEventReport.photos) request.postEventReport.photos = [];
-        request.postEventReport.photos.push(fileUrl);
+        request.postEventReport.photos.unshift(fileUrl); // ✅ Newest first
         break;
       case 'contract':
         request.agreementUrl = fileUrl;
@@ -362,7 +369,7 @@ export const uploadFile = async (req, res) => {
       case 'video':
         if (!request.postEventReport) request.postEventReport = {};
         if (!request.postEventReport.videos) request.postEventReport.videos = [];
-        request.postEventReport.videos.push(fileUrl);
+        request.postEventReport.videos.unshift(fileUrl); // ✅ Newest first
         break;
       default:
         return res.status(400).json({ message: 'Invalid file type' });
@@ -404,7 +411,6 @@ export const recordPayment = async (req, res) => {
     });
     await payment.save();
 
-    // Update sponsor's amountPaid and paymentStatus
     const sponsor = await Sponsor.findById(sponsorId);
     const totalPaid = (await Payment.aggregate([
       { $match: { sponsor: sponsor._id, status: 'completed' } },
@@ -432,6 +438,21 @@ export const recordPayment = async (req, res) => {
     res.status(201).json(payment);
   } catch (err) {
     console.error('❌ recordPayment error:', err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// ==================== Club Requests (with newest-first sorting) ====================
+export const getClubRequests = async (req, res) => {
+  try {
+    const clubId = req.user.sub;
+    const requests = await SponsorshipRequest.find({ club: clubId })
+      .populate('event', 'title date location')
+      .populate('sponsor', 'name contactEmail')
+      .sort({ createdAt: -1 }); // ✅ Newest requests first
+    res.json(requests);
+  } catch (err) {
+    console.error('❌ getClubRequests error:', err);
     res.status(500).json({ message: err.message });
   }
 };

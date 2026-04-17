@@ -11,6 +11,7 @@ export default function AllSponsors() {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [deletingId, setDeletingId] = useState(null);
 
   const token = localStorage.getItem("unipulse_token");
   const role = localStorage.getItem("unipulse_role");
@@ -44,9 +45,6 @@ export default function AllSponsors() {
       setSponsors(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("Fetch sponsors error:", err);
-      console.error("Response data:", err.response?.data);
-      console.error("Status:", err.response?.status);
-
       setError(err.response?.data?.message || "Failed to fetch sponsors.");
     } finally {
       setLoading(false);
@@ -57,24 +55,24 @@ export default function AllSponsors() {
     const confirmDelete = window.confirm(
       `Are you sure you want to delete ${sponsorName}?`
     );
-
     if (!confirmDelete) return;
 
     try {
+      setDeletingId(sponsorId);
       await axios.delete(`http://localhost:5000/api/sponsors/${sponsorId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (selectedSponsor && selectedSponsor._id === sponsorId) {
         setSelectedSponsor(null);
       }
 
-      fetchSponsors();
+      fetchSponsors(); // refresh list
     } catch (err) {
       console.error("Delete sponsor error:", err);
       alert(err.response?.data?.message || "Failed to delete sponsor.");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -84,7 +82,6 @@ export default function AllSponsors() {
 
   const filteredSponsors = useMemo(() => {
     const value = searchTerm.toLowerCase();
-
     return sponsors.filter((sponsor) => {
       return (
         sponsor?.name?.toLowerCase().includes(value) ||
@@ -107,7 +104,6 @@ export default function AllSponsors() {
           <div>
             <h1>All Sponsors List</h1>
           </div>
-
           <button
             className="admin-back-btn"
             onClick={() => navigate("/superadmin/control-panel")}
@@ -121,7 +117,6 @@ export default function AllSponsors() {
             <span className="stat-label">Total Sponsors</span>
             <h2>{sponsors.length}</h2>
           </div>
-
           <div className="glass-card stat-card">
             <span className="stat-label">Showing Results</span>
             <h2>{filteredSponsors.length}</h2>
@@ -136,16 +131,12 @@ export default function AllSponsors() {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="admin-search-input"
           />
-
           <button className="admin-refresh-btn" onClick={fetchSponsors}>
             Refresh
           </button>
         </div>
 
-        {loading && (
-          <div className="glass-card admin-message">Loading sponsors...</div>
-        )}
-
+        {loading && <div className="glass-card admin-message">Loading sponsors...</div>}
         {error && <div className="glass-card admin-error">{error}</div>}
 
         {!loading && !error && (
@@ -180,14 +171,12 @@ export default function AllSponsors() {
                           >
                             View
                           </button>
-
                           <button
                             className="table-delete-btn"
-                            onClick={() =>
-                              handleDeleteSponsor(sponsor._id, sponsor.name)
-                            }
+                            onClick={() => handleDeleteSponsor(sponsor._id, sponsor.name)}
+                            disabled={deletingId === sponsor._id}
                           >
-                            Delete
+                            {deletingId === sponsor._id ? "Deleting..." : "Delete"}
                           </button>
                         </div>
                       </td>
@@ -200,106 +189,47 @@ export default function AllSponsors() {
         )}
       </div>
 
+      {/* ========== DETAIL MODAL (CLEAR & WITH DELETE OPTION) ========== */}
       {selectedSponsor && (
-        <div
-          className="admin-modal-overlay"
-          onClick={() => setSelectedSponsor(null)}
-        >
-          <div
-            className="admin-modal glass-card"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="admin-modal-overlay" onClick={() => setSelectedSponsor(null)}>
+          <div className="admin-modal glass-card" onClick={(e) => e.stopPropagation()}>
             <div className="admin-modal-header">
               <div>
                 <h3>Sponsor Details</h3>
+                <p className="admin-modal-subtitle">Complete information about the sponsor.</p>
               </div>
-
-              <button
-                className="modal-close-btn"
-                onClick={() => setSelectedSponsor(null)}
-              >
+              <button className="modal-close-btn" onClick={() => setSelectedSponsor(null)}>
                 ✕
               </button>
             </div>
 
             <div className="details-grid">
-              <div className="detail-box">
-                <span>Name</span>
-                <p>{selectedSponsor.name || "N/A"}</p>
-              </div>
-
-              <div className="detail-box">
-                <span>Contact Email</span>
-                <p>{selectedSponsor.contactEmail || "N/A"}</p>
-              </div>
-
-              <div className="detail-box">
-                <span>Contact Phone</span>
-                <p>{selectedSponsor.contactPhone || "N/A"}</p>
-              </div>
-
-              <div className="detail-box">
-                <span>Website</span>
-                <p>{selectedSponsor.website || "N/A"}</p>
-              </div>
-
-              <div className="detail-box">
-                <span>Level</span>
-                <p>{selectedSponsor.level || "N/A"}</p>
-              </div>
-
-              <div className="detail-box">
-                <span>Status</span>
-                <p>{selectedSponsor.status || "N/A"}</p>
-              </div>
-
-              <div className="detail-box detail-box--full">
-                <span>Description</span>
-                <p>{selectedSponsor.description || "N/A"}</p>
-              </div>
-
-              <div className="detail-box">
-                <span>Total Amount</span>
-                <p>{selectedSponsor.totalAmount ?? "N/A"}</p>
-              </div>
-
-              <div className="detail-box">
-                <span>Amount Paid</span>
-                <p>{selectedSponsor.amountPaid ?? "N/A"}</p>
-              </div>
-
-              <div className="detail-box">
-                <span>Payment Status</span>
-                <p>{selectedSponsor.paymentStatus || "N/A"}</p>
-              </div>
-
-              <div className="detail-box">
-                <span>Created At</span>
-                <p>
-                  {selectedSponsor.createdAt
-                    ? new Date(selectedSponsor.createdAt).toLocaleString()
-                    : "N/A"}
-                </p>
-              </div>
-
-              <div className="detail-box">
-                <span>Updated At</span>
-                <p>
-                  {selectedSponsor.updatedAt
-                    ? new Date(selectedSponsor.updatedAt).toLocaleString()
-                    : "N/A"}
-                </p>
-              </div>
+              <div className="detail-box"><span>Name</span><p>{selectedSponsor.name || "N/A"}</p></div>
+              <div className="detail-box"><span>Contact Email</span><p>{selectedSponsor.contactEmail || "N/A"}</p></div>
+              <div className="detail-box"><span>Contact Phone</span><p>{selectedSponsor.contactPhone || "N/A"}</p></div>
+              <div className="detail-box"><span>Website</span><p>{selectedSponsor.website || "N/A"}</p></div>
+              <div className="detail-box"><span>Level</span><p>{selectedSponsor.level || "N/A"}</p></div>
+              <div className="detail-box"><span>Status</span><p>{selectedSponsor.status || "N/A"}</p></div>
+              <div className="detail-box detail-box--full"><span>Description</span><p>{selectedSponsor.description || "N/A"}</p></div>
+              <div className="detail-box"><span>Total Amount</span><p>${selectedSponsor.totalAmount ?? "N/A"}</p></div>
+              <div className="detail-box"><span>Amount Paid</span><p>${selectedSponsor.amountPaid ?? "N/A"}</p></div>
+              <div className="detail-box"><span>Payment Status</span><p>{selectedSponsor.paymentStatus || "N/A"}</p></div>
+              <div className="detail-box"><span>Created At</span><p>{selectedSponsor.createdAt ? new Date(selectedSponsor.createdAt).toLocaleString() : "N/A"}</p></div>
+              <div className="detail-box"><span>Updated At</span><p>{selectedSponsor.updatedAt ? new Date(selectedSponsor.updatedAt).toLocaleString() : "N/A"}</p></div>
             </div>
 
-            <div className="admin-modal-actions">
+            <div className="admin-modal-actions" style={{ marginTop: "1.5rem", justifyContent: "space-between" }}>
               <button
                 className="table-delete-btn"
-                onClick={() =>
-                  handleDeleteSponsor(selectedSponsor._id, selectedSponsor.name)
-                }
+                onClick={() => {
+                  handleDeleteSponsor(selectedSponsor._id, selectedSponsor.name);
+                  setSelectedSponsor(null); // close modal after delete
+                }}
               >
                 Delete Sponsor
+              </button>
+              <button className="table-action-btn" onClick={() => setSelectedSponsor(null)}>
+                Close
               </button>
             </div>
           </div>
