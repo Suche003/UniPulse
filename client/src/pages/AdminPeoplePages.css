@@ -62,6 +62,7 @@
   font-size: clamp(2rem, 4vw, 2.8rem);
   font-weight: 800;
   background: linear-gradient(90deg, #ffffff 0%, #f9a8d4 45%, #c084fc 100%);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -426,4 +427,64 @@
 .no-rating {
   color: var(--muted);
   font-size: 0.8rem;
+}
+
+/* Modal action buttons container */
+.admin-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;  /* podi paratharaya – buttons athara space */
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+/* Delete button specific style */
+.table-delete-btn {
+  background: linear-gradient(135deg, #ef4444, #b91c1c) !important;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 40px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.table-delete-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+  box-shadow: 0 6px 14px rgba(239, 68, 68, 0.4);
+}
+
+/* Close button (View button style) */
+.table-action-btn {
+  background: linear-gradient(135deg, #ec4899, #8b5cf6) !important;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 40px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+}
+
+.table-action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(139, 92, 246, 0.4);
+}
+
+/* Ensure buttons are not full width on modal */
+@media (max-width: 640px) {
+  .admin-modal-actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .table-delete-btn,
+  .table-action-btn {
+    width: 100%;
+    text-align: center;
+  }
 }
