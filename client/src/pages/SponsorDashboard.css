@@ -67,7 +67,6 @@
   color: #ffd966;
 }
 
-/* NEW: Rating badge in hero */
 .rating-badge {
   display: inline-block;
   margin-top: 0.75rem;
@@ -234,7 +233,7 @@
   font-weight: 600;
 }
 
-/* Profile View */
+/* Profile View (non-edit mode) */
 .profile-view {
   max-width: 800px;
   margin: 0 auto;
@@ -242,27 +241,31 @@
 }
 
 .profile-avatar {
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .profile-avatar img {
-  width: 130px;
-  height: 130px;
+  width: 160px;
+  height: 160px;
   border-radius: 50%;
   object-fit: cover;
   border: 4px solid var(--border);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  background: #1a1a24;
 }
 
 .default-avatar {
-  width: 130px;
-  height: 130px;
+  width: 160px;
+  height: 160px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--accent2), var(--accent));
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 3.5rem;
+  font-size: 4rem;
   color: white;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
@@ -281,7 +284,6 @@
   line-height: 1.6;
 }
 
-/* NEW: Rating display in profile */
 .rating-display {
   margin: 0.5rem 0;
   font-size: 0.9rem;
@@ -292,21 +294,35 @@
   border-radius: 30px;
 }
 
+/* Profile Info Grid – Each item on its own line (including website) */
 .profile-info-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
   margin: 1.5rem 0;
-  text-align: left;
   background: rgba(0, 0, 0, 0.3);
   padding: 1.2rem;
   border-radius: 24px;
+  text-align: left;
+}
+
+.profile-info-grid div {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .profile-info-grid div span {
   font-weight: 700;
-  margin-right: 0.5rem;
   color: var(--muted);
+  min-width: 70px;
+}
+
+.profile-info-grid div a,
+.profile-info-grid div strong {
+  color: var(--text);
+  word-break: break-all;
 }
 
 .social-links {
@@ -336,177 +352,261 @@
   background: rgba(124, 44, 255, 0.2);
 }
 
-/* Profile Form - Fixed overlapping styles */
+/* Move Edit Profile button lower */
+.profile-view .btn-primary {
+  margin-top: 2rem;
+}
+
+/* ========== EDIT PROFILE FORM – CLEAN & CLEAR ========== */
 .profile-form {
   max-width: 700px;
   margin: 0 auto;
 }
 
-.profile-form h3 {
+.form-card {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 20px;
+  padding: 1.5rem;
   margin-bottom: 1.5rem;
-  font-size: 1.5rem;
-  font-weight: 700;
+}
+
+.form-card h4 {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  color: var(--text);
+  border-left: 3px solid var(--accent);
+  padding-left: 0.75rem;
+}
+
+.field {
+  margin-bottom: 1rem;
+}
+
+.field label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+  font-size: 0.85rem;
   color: var(--text);
 }
 
-.profile-form .form-group {
-  margin-bottom: 1.5rem;
-}
-
-.profile-form .form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
+.field input,
+.field textarea {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: #1a1a24;
   color: var(--text);
   font-size: 0.9rem;
 }
 
-.profile-form input,
-.profile-form textarea,
-.profile-form select {
-  width: 100%;
-  padding: 0.85rem 1rem;
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  background: #1a1a24;
-  color: var(--text);
-  font-family: inherit;
-  transition: all 0.2s;
-  font-size: 0.95rem;
-  box-sizing: border-box;
-}
-
-.profile-form input:focus,
-.profile-form textarea:focus,
-.profile-form select:focus {
+.field input:focus,
+.field textarea:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(124, 44, 255, 0.2);
-  background: #22222e;
+  box-shadow: 0 0 0 2px rgba(124, 44, 255, 0.2);
 }
 
-/* Form row (two columns) */
-.profile-form .form-row {
+.field-row {
   display: flex;
   gap: 1rem;
   margin-bottom: 0;
-  flex-wrap: wrap;
 }
 
-.profile-form .form-row .form-group {
+.field-row .field {
   flex: 1;
-  min-width: 150px;
+  margin-bottom: 0;
 }
 
-/* Social links rows */
-.profile-form .social-row {
-  display: flex;
-  gap: 0.75rem;
-  margin-bottom: 0.75rem;
-  flex-wrap: wrap;
+.char-counter {
+  text-align: right;
+  font-size: 0.7rem;
+  color: var(--muted);
+  margin-top: 4px;
 }
 
-.profile-form .social-row input {
-  flex: 1;
-  min-width: 120px;
+.hint {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--muted);
+  margin-top: 4px;
 }
 
-/* Contact items */
-.profile-form .contact-item {
+.field-error {
+  color: #ff9aa9;
+  font-size: 0.7rem;
+  margin-top: 4px;
+}
+
+/* Contact Persons */
+.empty-contacts {
+  color: var(--muted);
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 0.5rem;
+}
+
+.contact-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  background: rgba(0, 0, 0, 0.3);
-  padding: 0.75rem 1rem;
-  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.7rem 1rem;
+  border-radius: 14px;
   margin-bottom: 0.5rem;
 }
 
-.profile-form .contact-item span {
-  flex: 1;
-  word-break: break-word;
-  color: var(--text);
+.contact-row small {
+  color: var(--muted);
+  font-size: 0.75rem;
 }
 
-.profile-form .contact-item button {
-  flex-shrink: 0;
+.btn-remove {
+  background: rgba(255, 70, 70, 0.2);
+  border: none;
+  color: #ff8888;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.75rem;
 }
 
-/* Add contact grid */
-.profile-form .add-contact {
+.btn-remove:hover {
+  background: rgba(255, 70, 70, 0.4);
+}
+
+.add-contact {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 0.75rem;
-  margin-top: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.5rem;
+  margin-top: 1rem;
+  align-items: end;
+}
+
+.add-contact input {
+  padding: 0.6rem 0.8rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: #1a1a24;
+  color: var(--text);
+  font-size: 0.85rem;
+}
+
+.btn-add {
+  background: linear-gradient(135deg, var(--accent2), var(--accent));
+  border: none;
+  color: white;
+  padding: 0.6rem 1rem;
+  border-radius: 40px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-add:hover {
+  transform: translateY(-1px);
+  opacity: 0.95;
+}
+
+/* Logo Upload – Clean */
+.logo-area {
+  display: flex;
+  flex-direction: column;
   align-items: center;
+  gap: 1rem;
 }
 
-.profile-form .add-contact input,
-.profile-form .add-contact button {
+.logo-preview {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin-bottom: 0.5rem;
+}
+
+.logo-preview img {
   width: 100%;
-  min-width: 0;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: #1a1a24;
 }
 
-/* Actions buttons */
-.profile-form .actions {
+.btn-remove-logo {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: rgba(255, 70, 70, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.btn-remove-logo:hover {
+  background: #ff4444;
+  transform: scale(1.05);
+}
+
+.btn-upload {
+  background: linear-gradient(135deg, var(--accent2), var(--accent));
+  border: none;
+  padding: 0.6rem 1.5rem;
+  border-radius: 40px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: white;
+  transition: all 0.2s;
+}
+
+.btn-upload:hover {
+  transform: translateY(-2px);
+  opacity: 0.95;
+}
+
+/* Form Actions */
+.form-actions {
   display: flex;
   gap: 1rem;
   margin-top: 1.5rem;
-  flex-wrap: wrap;
 }
 
-.profile-form .actions button {
+.btn-save, .btn-cancel {
   flex: 1;
-  min-width: 120px;
+  padding: 0.8rem;
+  border-radius: 40px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
 }
 
-/* Base buttons */
-.btn-primary {
+.btn-save {
   background: linear-gradient(135deg, var(--accent2), var(--accent));
-  color: white;
-  padding: 0.85rem 1.8rem;
   border: none;
-  border-radius: 50px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-size: 0.9rem;
+  color: white;
 }
 
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(124, 44, 255, 0.5);
+.btn-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
-.btn-secondary {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text);
-  padding: 0.85rem 1.8rem;
-  border: 1px solid var(--border);
-  border-radius: 50px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.15);
-}
-
-.btn-sm {
-  padding: 0.4rem 1rem;
-  font-size: 0.75rem;
-  border-radius: 50px;
+.btn-cancel {
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid var(--border);
-  cursor: pointer;
-  transition: all 0.2s;
   color: var(--text);
 }
 
-.btn-sm:hover {
+.btn-cancel:hover {
   background: rgba(255, 255, 255, 0.15);
 }
 
@@ -525,37 +625,32 @@
     padding: 0.6rem 1.2rem;
     font-size: 0.8rem;
   }
-  .profile-form .form-row {
+  .field-row {
     flex-direction: column;
-    gap: 0;
+    gap: 0.5rem;
   }
-  .profile-form .add-contact {
+  .add-contact {
     grid-template-columns: 1fr;
   }
-  .profile-form .contact-item {
+  .contact-row {
     flex-direction: column;
-    align-items: flex-start;
+    text-align: center;
+    gap: 0.5rem;
   }
-  .profile-form .contact-item button {
-    align-self: flex-end;
-  }
-  .profile-info-grid {
-    grid-template-columns: 1fr;
+  .form-actions {
+    flex-direction: column;
   }
   .stat-value {
     font-size: 1.8rem;
   }
-  .profile-form .social-row {
-    flex-direction: column;
-  }
-  .profile-form .actions {
-    flex-direction: column;
-  }
-  .profile-form .actions button {
-    width: 100%;
+  .profile-avatar img,
+  .default-avatar {
+    width: 120px;
+    height: 120px;
   }
 }
 
+/* Animation */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -571,168 +666,4 @@
 .offering-card,
 .sponsorship-detail-card {
   animation: fadeInUp 0.4s ease-out forwards;
-}
-
-/* ===== PROFILE FORM ENHANCEMENTS ===== */
-.profile-form {
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.profile-form .form-section {
-  margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid var(--border);
-}
-
-.profile-form .form-section:last-of-type {
-  border-bottom: none;
-  margin-bottom: 0;
-  padding-bottom: 0;
-}
-
-.form-section-title {
-  font-size: 1.2rem;
-  font-weight: 600;
-  margin-bottom: 1.25rem;
-  color: var(--text);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-/* social grid 2 columns */
-.profile-form .social-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1rem;
-}
-
-/* contact persons list */
-.contacts-list {
-  margin-bottom: 1.5rem;
-}
-
-.contact-card-item {
-  background: rgba(0, 0, 0, 0.25);
-  border-radius: 20px;
-  padding: 1rem;
-  margin-bottom: 0.75rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.contact-info {
-  flex: 1;
-}
-
-.contact-role {
-  font-size: 0.8rem;
-  color: var(--accent);
-  margin-left: 0.5rem;
-}
-
-.contact-details {
-  display: flex;
-  gap: 1rem;
-  font-size: 0.85rem;
-  color: var(--muted);
-  margin-top: 0.3rem;
-  flex-wrap: wrap;
-}
-
-.remove-contact-btn {
-  background: rgba(255, 70, 70, 0.15);
-  border-color: rgba(255, 70, 70, 0.3);
-  color: #ff8888;
-}
-
-.remove-contact-btn:hover {
-  background: rgba(255, 70, 70, 0.3);
-  color: #ffaaaa;
-}
-
-/* add new contact */
-.add-contact-section {
-  margin-top: 0.5rem;
-}
-
-.add-contact-section > label {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 0.75rem;
-  font-size: 0.9rem;
-  color: var(--text);
-}
-
-.add-contact-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 0.75rem;
-  align-items: end;
-}
-
-.btn-add-contact {
-  background: linear-gradient(135deg, var(--accent2), var(--accent));
-  border: none;
-  color: white;
-  padding: 0.7rem 1rem;
-  border-radius: 40px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  white-space: nowrap;
-}
-
-.btn-add-contact:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(124, 44, 255, 0.4);
-}
-
-/* action buttons row */
-.profile-form .form-actions {
-  display: flex;
-  gap: 1rem;
-  margin-top: 2rem;
-  padding-top: 1rem;
-  flex-wrap: wrap;
-}
-
-.profile-form .form-actions button {
-  flex: 1;
-  min-width: 140px;
-}
-
-/* required star */
-.required-star {
-  color: #ff6b6b;
-  margin-left: 3px;
-}
-
-/* responsive adjustments */
-@media (max-width: 640px) {
-  .add-contact-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .contact-card-item {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  .remove-contact-btn {
-    align-self: flex-end;
-  }
-  
-  .contact-details {
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-  
-  .profile-form .form-actions {
-    flex-direction: column;
-  }
 }
