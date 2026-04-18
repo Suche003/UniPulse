@@ -57,7 +57,7 @@ export const getSponsorRequests = async (req, res) => {
     const requests = await SponsorshipRequest.find({ sponsor: sponsorId })
       .populate('event', 'title date location')
       .populate('club', 'clubName email')
-      .sort({ createdAt: -1 }); // ✅ Newest requests first
+      .sort({ createdAt: -1 });
 
     console.log(`✅ Found ${requests.length} requests for sponsor`);
     res.json(requests);
@@ -121,7 +121,7 @@ export const respondToRequest = async (req, res) => {
 export const clubRespond = async (req, res) => {
   try {
     const { requestId } = req.params;
-    const { action, meetingSchedule } = req.body;
+    const { action, meetingSchedule, amount } = req.body;
     const clubId = req.user.sub;
 
     const request = await SponsorshipRequest.findById(requestId)
@@ -130,26 +130,43 @@ export const clubRespond = async (req, res) => {
     if (!request) return res.status(404).json({ message: 'Request not found' });
     if (request.club.toString() !== clubId) return res.status(403).json({ message: 'Not your request' });
 
+    // Handle different club actions
     if (request.status === 'countered' && action === 'accept_counter') {
+      // Accept sponsor's counter offer
       request.status = 'accepted';
       request.proposedAmount = request.counterAmount;
-    } else if (request.status === 'meeting_requested' && action === 'accept_meeting') {
+      request.agreedPackage = { name: 'Counter Offer', amount: request.counterAmount };
+    } 
+    else if (request.status === 'countered' && action === 'decline_counter') {
+      // Reject sponsor's counter offer
+      request.status = 'declined';
+    }
+    else if (request.status === 'countered' && action === 'counter') {
+      // Club sends a new counter offer
+      request.status = 'countered';
+      request.counterAmount = amount;   // club's new proposed amount
+      request.respondedBy = 'club';
+    }
+    else if (request.status === 'meeting_requested' && action === 'accept_meeting') {
       request.status = 'meeting_scheduled';
       if (meetingSchedule) {
         request.meetingSchedule = meetingSchedule;
       }
-    } else {
+    }
+    else {
       return res.status(400).json({ message: 'Invalid state or action' });
     }
+
     request.respondedBy = 'club';
     await request.save();
 
+    // Notify sponsor
     await Notification.create({
       userId: request.sponsor._id,
       userModel: 'Sponsor',
       title: 'Sponsorship request update',
-      message: `Your sponsorship request for event "${request.event.title}" has been ${action === 'accept_counter' ? 'accepted after counter' : 'meeting accepted'}.`,
-      type: 'success',
+      message: `Your sponsorship request for event "${request.event.title}" has been ${action}.`,
+      type: action === 'accept_counter' ? 'success' : 'info',
       relatedRequestId: request._id
     });
 
@@ -361,7 +378,7 @@ export const uploadFile = async (req, res) => {
       case 'photo':
         if (!request.postEventReport) request.postEventReport = {};
         if (!request.postEventReport.photos) request.postEventReport.photos = [];
-        request.postEventReport.photos.unshift(fileUrl); // ✅ Newest first
+        request.postEventReport.photos.unshift(fileUrl);
         break;
       case 'contract':
         request.agreementUrl = fileUrl;
@@ -369,7 +386,7 @@ export const uploadFile = async (req, res) => {
       case 'video':
         if (!request.postEventReport) request.postEventReport = {};
         if (!request.postEventReport.videos) request.postEventReport.videos = [];
-        request.postEventReport.videos.unshift(fileUrl); // ✅ Newest first
+        request.postEventReport.videos.unshift(fileUrl);
         break;
       default:
         return res.status(400).json({ message: 'Invalid file type' });
@@ -449,7 +466,7 @@ export const getClubRequests = async (req, res) => {
     const requests = await SponsorshipRequest.find({ club: clubId })
       .populate('event', 'title date location')
       .populate('sponsor', 'name contactEmail')
-      .sort({ createdAt: -1 }); // ✅ Newest requests first
+      .sort({ createdAt: -1 });
     res.json(requests);
   } catch (err) {
     console.error('❌ getClubRequests error:', err);

@@ -28,25 +28,23 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
   const [clubAvgRating, setClubAvgRating] = useState(0);
   const [clubRatingCount, setClubRatingCount] = useState(0);
 
-  // ========== Check if event is over (sponsor only) ==========
+  // ========== Allow rating anytime – no event date check ==========
   useEffect(() => {
     if (userRole !== 'sponsor') return;
-    if (!request.event || !request.event.date) return;
-    const eventDate = new Date(request.event.date);
-    const now = new Date();
-    if (eventDate < now) {
-      setCanRate(true);
-      const checkAlreadyRated = async () => {
-        try {
-          const ratings = await apiRequest(`/api/ratings?requestId=${request._id}`);
-          const myRating = ratings.find(r => r.ratedBy === request.sponsor?._id);
+    setCanRate(true);
+    const checkAlreadyRated = async () => {
+      try {
+        const ratings = await apiRequest(`/api/ratings?requestId=${request._id}`);
+        const sponsorId = request.sponsor?._id;
+        if (sponsorId) {
+          const myRating = ratings.find(r => r.ratedBy === sponsorId);
           if (myRating) setAlreadyRated(true);
-        } catch (err) {
-          console.error('Failed to check rating status');
         }
-      };
-      checkAlreadyRated();
-    }
+      } catch (err) {
+        console.error('Failed to check rating status');
+      }
+    };
+    checkAlreadyRated();
   }, [request, userRole]);
 
   // ========== Fetch club's average rating (public) ==========
@@ -75,11 +73,11 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
       setAlreadyRated(true);
       onRefresh();
     } catch (err) {
-      toast.error(err.message);
+      toast.error(err.message || 'Failed to submit rating');
     }
   };
 
-  // ========== Helper Functions ==========
+  // ========== Helper Functions (same as before) ==========
   const handleResponse = async (action, amount = null, meetingDetails = null) => {
     setActionLoading(true);
     try {
@@ -185,16 +183,22 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
     }
   };
 
-  const handleClubResponse = async (action, schedule = null) => {
+  const handleClubResponse = async (action, schedule = null, amount = null) => {
     setActionLoading(true);
     try {
       const body = { action };
       if (schedule) body.meetingSchedule = schedule;
+      if (amount) body.amount = amount;
       await apiRequest(`/api/sponsorship-requests/${request._id}/club-respond`, {
         method: 'PATCH',
         body,
       });
-      toast.success(`Meeting ${action === 'accept_meeting' ? 'accepted and scheduled' : 'declined'}`);
+      let msg = '';
+      if (action === 'accept_meeting') msg = 'Meeting accepted and scheduled';
+      else if (action === 'accept_counter') msg = 'Counter offer accepted';
+      else if (action === 'decline_counter') msg = 'Counter offer declined';
+      else if (action === 'counter') msg = 'Counter offer sent';
+      toast.success(msg);
       setShowMeetingScheduleForm(false);
       await onRefresh();
     } catch (err) {
@@ -305,6 +309,17 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
       const canPay = (request.status === 'accepted' || request.status === 'meeting_scheduled') && request.paymentStatus !== 'paid';
       return (
         <div className="coordination">
+          {request.status === 'countered' && (
+            <div className="section">
+              <h4>🔄 Counter Offer from Club</h4>
+              <p>Club has countered with: <strong>${request.counterAmount}</strong></p>
+              <div className="actions">
+                <button className="btn-sm btn-sm-success" onClick={() => handleResponse('accept')} disabled={actionLoading}>Accept Counter</button>
+                <button className="btn-sm btn-sm-danger" onClick={() => handleResponse('decline')} disabled={actionLoading}>Decline</button>
+                <button className="btn-sm" onClick={() => { const amt = prompt('Your counter amount:'); if(amt) handleResponse('counter', parseFloat(amt)); }} disabled={actionLoading}>Counter Again</button>
+              </div>
+            </div>
+          )}
           {request.meetingSchedule && request.meetingSchedule.date && (
             <div className="section">
               <h4>📅 Scheduled Meeting</h4>
@@ -363,7 +378,7 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
             <div className="actions">
               <button className="btn-sm btn-sm-success" onClick={() => handleClubResponse('accept_counter')} disabled={actionLoading}>Accept Counter</button>
               <button className="btn-sm btn-sm-danger" onClick={() => handleClubResponse('decline_counter')} disabled={actionLoading}>Decline</button>
-              <button className="btn-sm" onClick={() => { const amt = prompt('Your counter amount:'); if(amt) handleClubResponse('counter', parseFloat(amt)); }} disabled={actionLoading}>Counter Again</button>
+              <button className="btn-sm" onClick={() => { const amt = prompt('Your counter amount:'); if(amt) handleClubResponse('counter', null, parseFloat(amt)); }} disabled={actionLoading}>Counter Again</button>
             </div>
           </div>
         )}
@@ -444,8 +459,7 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
   };
 
   const showChat = ['accepted', 'meeting_scheduled', 'meeting_requested', 'agreement_signed', 'countered'].includes(request.status);
-  // Rating tab only for sponsors, after event ended, and not already rated
-  const showRating = userRole === 'sponsor' && canRate && !alreadyRated;
+  const showRating = userRole === 'sponsor' && !alreadyRated; // Always show rating tab for sponsors who haven't rated yet
 
   return (
     <div className="sponsorship-detail-card">
@@ -462,7 +476,7 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
       </div>
       <div className="detail-tabs">
         <button className={activeTab === 'proposal' ? 'active' : ''} onClick={() => setActiveTab('proposal')}>Proposal</button>
-        {(request.status === 'accepted' || request.status === 'meeting_scheduled' || request.status === 'meeting_requested') && (
+        {(request.status === 'accepted' || request.status === 'meeting_scheduled' || request.status === 'meeting_requested' || request.status === 'countered') && (
           <button className={activeTab === 'coordination' ? 'active' : ''} onClick={() => setActiveTab('coordination')}>Coordination</button>
         )}
         {showChat && (
