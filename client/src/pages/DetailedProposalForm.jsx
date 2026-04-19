@@ -6,7 +6,7 @@ import './DetailedProposalForm.css';
 const DetailedProposalForm = ({ sponsor, event: propEvent, onClose, onSuccess }) => {
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(propEvent?._id || '');
-  const [packagesList, setPackagesList] = useState([]); // predefined packages
+  const [packagesList, setPackagesList] = useState([]);
   const [formData, setFormData] = useState({
     introduction: '',
     eventPurpose: '',
@@ -26,7 +26,7 @@ const DetailedProposalForm = ({ sponsor, event: propEvent, onClose, onSuccess })
 
   useEffect(() => {
     if (!propEvent) fetchEvents();
-    fetchPackages(); // load predefined packages
+    fetchPackages();
   }, [propEvent]);
 
   const fetchEvents = async () => {
@@ -75,12 +75,10 @@ const DetailedProposalForm = ({ sponsor, event: propEvent, onClose, onSuccess })
   const addPackage = () => setFormData({ ...formData, packages: [...formData.packages, { name: '', amount: '', benefits: '' }] });
   const removePackage = (idx) => setFormData({ ...formData, packages: formData.packages.filter((_, i) => i !== idx) });
 
-  // Handle predefined package selection
   const handlePackageSelect = (pkgId) => {
     if (!pkgId) return;
     const selected = packagesList.find(p => p._id === pkgId);
     if (selected) {
-      // Add a new package entry with auto-filled values
       const newPackage = {
         name: selected.name,
         amount: selected.price,
@@ -183,12 +181,12 @@ const DetailedProposalForm = ({ sponsor, event: propEvent, onClose, onSuccess })
             <div key={sec} className={`step ${idx === currentSection ? 'active' : ''} ${idx < currentSection ? 'completed' : ''}`}>
               <div className="step-number">{idx + 1}</div>
               <div className="step-label">
-                {sec === 'intro' && 'Intro'}
-                {sec === 'purpose' && 'Purpose'}
-                {sec === 'benefits' && 'Benefits'}
-                {sec === 'packages' && 'Packages'}
+                {sec === 'intro' && 'INTRO'}
+                {sec === 'purpose' && 'PURPOSE'}
+                {sec === 'benefits' && 'BENEFITS'}
+                {sec === 'packages' && 'PACKAGES'}
                 {sec === 'cta' && 'CTA'}
-                {sec === 'contact' && 'Contact'}
+                {sec === 'contact' && 'CONTACT'}
               </div>
             </div>
           ))}
@@ -252,8 +250,6 @@ const DetailedProposalForm = ({ sponsor, event: propEvent, onClose, onSuccess })
           {currentSection === 3 && (
             <div className="form-section">
               <h3>💰 4. Sponsorship Packages</h3>
-              
-              {/* Predefined Package Selector */}
               <div className="package-selector">
                 <label>Add a predefined package:</label>
                 <select onChange={(e) => handlePackageSelect(e.target.value)} value="">
@@ -265,8 +261,6 @@ const DetailedProposalForm = ({ sponsor, event: propEvent, onClose, onSuccess })
                   ))}
                 </select>
               </div>
-
-              {/* Existing packages list */}
               {formData.packages.map((pkg, idx) => (
                 <div key={idx} className="package-item">
                   <input placeholder="Package Name (e.g., Gold)" value={pkg.name} onChange={(e) => handleChange('packages', 'name', e.target.value, idx)} required />

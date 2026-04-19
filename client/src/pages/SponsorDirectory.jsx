@@ -41,8 +41,20 @@ const SponsorDirectory = () => {
   const fetchSponsors = async () => {
     try {
       const data = await apiRequest('/api/sponsors/public');
-      setSponsors(data);
-      setFiltered(data);
+      // Fetch average rating for each sponsor
+      const sponsorsWithRatings = await Promise.all(
+        data.map(async (sponsor) => {
+          try {
+            const ratingData = await fetch(`http://localhost:5000/api/ratings/average/${sponsor._id}/Sponsor`)
+              .then(res => res.json());
+            return { ...sponsor, avgRating: ratingData.avgRating, ratingCount: ratingData.count };
+          } catch {
+            return { ...sponsor, avgRating: 0, ratingCount: 0 };
+          }
+        })
+      );
+      setSponsors(sponsorsWithRatings);
+      setFiltered(sponsorsWithRatings);
     } catch (err) {
       toast.error('Failed to load sponsors');
     } finally {
@@ -52,7 +64,6 @@ const SponsorDirectory = () => {
 
   const fetchEvents = async () => {
     try {
-      // Only fetch events belonging to the logged-in club? For now get all events.
       const data = await apiRequest('/api/events');
       setEvents(data);
     } catch (err) {
@@ -126,6 +137,12 @@ const SponsorDirectory = () => {
               />
             )}
             <h3>{sponsor.name}</h3>
+            {/* Display average rating */}
+            {sponsor.avgRating > 0 && (
+              <div className="sponsor-rating">
+                ⭐ {sponsor.avgRating.toFixed(1)} / 5 ({sponsor.ratingCount} {sponsor.ratingCount === 1 ? 'review' : 'reviews'})
+              </div>
+            )}
             <p className="sponsor-description">{sponsor.description?.slice(0, 100)}</p>
             <div className="sponsor-details">
               <span>📧 {sponsor.contactEmail}</span>
@@ -162,7 +179,6 @@ const SponsorDirectory = () => {
                   ))}
                 </select>
               </div>
-
               <div className="field">
                 <label>Proposed Amount ($) *</label>
                 <input
@@ -174,7 +190,6 @@ const SponsorDirectory = () => {
                   required
                 />
               </div>
-
               <div className="field">
                 <label>Message (optional)</label>
                 <textarea
@@ -186,7 +201,6 @@ const SponsorDirectory = () => {
                 />
                 <small>{form.message.length}/500 characters</small>
               </div>
-
               <div className="actions">
                 <button type="submit" className="btn-primary" disabled={submitting}>
                   {submitting ? 'Sending...' : 'Send Request'}

@@ -26,7 +26,24 @@ export default function AllClubsAd() {
 
       const res = await axios.get("http://localhost:5000/api/clubs");
       const safeData = Array.isArray(res.data) ? res.data : [];
-      setClubs(safeData);
+
+      // Fetch average rating for each club from public endpoint
+      const clubsWithRatings = await Promise.all(
+        safeData.map(async (club) => {
+          try {
+            const ratingRes = await axios.get(
+              `http://localhost:5000/api/ratings/average/${club._id}/Club`
+            );
+            const { avgRating, count } = ratingRes.data;
+            return { ...club, avgRating, ratingCount: count };
+          } catch (err) {
+            console.error(`Failed to fetch rating for club ${club._id}:`, err);
+            return { ...club, avgRating: 0, ratingCount: 0 };
+          }
+        })
+      );
+
+      setClubs(clubsWithRatings);
     } catch (err) {
       console.error(err);
       setError(
@@ -150,6 +167,7 @@ export default function AllClubsAd() {
                   <th>Club / Society Name</th>
                   <th>Email</th>
                   <th>Faculty</th>
+                  <th>Rating</th>
                   <th>Action</th>
                 </tr>
               </thead>
@@ -161,6 +179,15 @@ export default function AllClubsAd() {
                     <td>{club?.clubName || "-"}</td>
                     <td>{club?.email || "-"}</td>
                     <td>{club?.faculty || "-"}</td>
+                    <td>
+                      {club?.avgRating > 0 ? (
+                        <span className="rating-display">
+                          ⭐ {club.avgRating.toFixed(1)} ({club.ratingCount})
+                        </span>
+                      ) : (
+                        <span className="no-rating">No ratings yet</span>
+                      )}
+                    </td>
                     <td>
                       <div className="table-action-group">
                         <button
@@ -229,6 +256,17 @@ export default function AllClubsAd() {
               <div className="detail-box">
                 <span>Faculty</span>
                 <p>{selectedClub?.faculty || "-"}</p>
+              </div>
+
+              <div className="detail-box">
+                <span>Rating (from sponsors)</span>
+                <p>
+                  {selectedClub?.avgRating > 0 ? (
+                    <>⭐ {selectedClub.avgRating.toFixed(1)} / 5 ({selectedClub.ratingCount} {selectedClub.ratingCount === 1 ? 'review' : 'reviews'})</>
+                  ) : (
+                    "No ratings yet"
+                  )}
+                </p>
               </div>
 
               <div className="detail-box detail-box--full">

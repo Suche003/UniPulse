@@ -28,7 +28,7 @@ router.get('/', requireAuth, async (req, res) => {
   }
 });
 
-// Mark a notification as read
+// Mark a single notification as read
 router.patch('/:id/read', requireAuth, async (req, res) => {
   try {
     const userId = req.user.sub;
@@ -52,7 +52,7 @@ router.patch('/:id/read', requireAuth, async (req, res) => {
   }
 });
 
-// Mark all as read
+// Mark all notifications as read for the user
 router.patch('/read-all', requireAuth, async (req, res) => {
   try {
     const userId = req.user.sub;

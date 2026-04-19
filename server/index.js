@@ -18,12 +18,15 @@ import paymentRoutes from './routes/paymentRoutes.js';
 import offeringRoutes from './routes/offeringRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
 import paymentGatewayRoutes from './routes/paymentGatewayRoutes.js';
-import notificationRoutes from './routes/notificationRoutes.js'; // ✅ NEW
+import notificationRoutes from './routes/notificationRoutes.js';
 import clubRoutes from "./routes/clubRoute.js";
-
 import stallRoutes from "./routes/stallRoutes.js";
-import bookingStallRoutes from "./routes/bookingStallRoutes.js"; 
+import bookingStallRoutes from "./routes/bookingStallRoutes.js";
 import stallPaymentRoutes from "./routes/stallPaymentRoutes.js";
+import messageRoutes from './routes/messageRoutes.js';
+import ratingRoutes from './routes/ratingRoutes.js';
+import studentProfileRoutes from "./routes/studentProfileRoutes.js";
+
 import { errorHandler } from "./middleware/errorHandler.js";
 import { handleStripeWebhook } from "./controllers/paymentGatewayController.js";
 
@@ -34,8 +37,9 @@ import './models/SponsorshipPackage.js';
 import './models/SponsorshipRequest.js';
 import './models/Payment.js';
 import './models/SponsorOffering.js';
-import './models/Notification.js'; // ✅ NEW
-import studentProfileRoutes from "./routes/studentProfileRoutes.js";
+import './models/Notification.js';
+import './models/Message.js';
+import './models/Rating.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -46,7 +50,7 @@ const app = express();
 
 app.use(cors({ origin: "http://localhost:5173" }));
 
-// IMPORTANT: Stripe webhook endpoint must use raw body before express.json()
+// Stripe webhook endpoint must use raw body
 app.post('/api/payment-gateway/webhook', express.raw({ type: 'application/json' }), handleStripeWebhook);
 
 app.use(express.json());
@@ -69,21 +73,16 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/offerings', offeringRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/payment-gateway', paymentGatewayRoutes);
-app.use('/api/notifications', notificationRoutes); // ✅ NEW
+app.use('/api/notifications', notificationRoutes);
 app.use("/api/stalls", stallRoutes);
-app.use("/api/bookings", bookingStallRoutes); 
+app.use("/api/bookings", bookingStallRoutes);
 app.use("/api/stall-payment", stallPaymentRoutes);
-
-//Events
-app.use("/api/events", eventRoutes);
-app.use('/uploads', express.static('uploads'));
-
-//Clubs
 app.use("/api/clubs", clubRoutes);
+app.use("/api/students", studentProfileRoutes);
+app.use('/api/messages', messageRoutes);
+app.use('/api/ratings', ratingRoutes);
 
 app.use(errorHandler);
-
-app.use("/api/students", studentProfileRoutes);
 
 const PORT = process.env.PORT || 5000;
 

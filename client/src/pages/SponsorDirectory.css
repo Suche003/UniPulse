@@ -282,3 +282,14 @@
     padding: 1.5rem;
   }
 }
+
+/* Rating display on sponsor card */
+.sponsor-rating {
+  font-size: 0.85rem;
+  margin: 0.5rem 0;
+  color: #ffd966;
+  background: rgba(0, 0, 0, 0.2);
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+}
