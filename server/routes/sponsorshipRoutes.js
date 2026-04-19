@@ -11,14 +11,16 @@ import {
   acceptProposal,
   updateCoordination,
   uploadFile,
-  getClubRequests,        // ✅ import the controller function with sorting
-  recordPayment,          // ✅ import if you moved it to controller (optional)
+  getClubRequests,
+  recordPayment,
+  markMeetingCompleted,
 } from '../controllers/sponsorshipController.js';
 import SponsorshipRequest from '../models/SponsorshipRequest.js';
 import Payment from '../models/Payment.js';
 import Sponsor from '../models/Sponsor.js';
 import Club from '../models/Club.js';
 import { sendEmail } from '../utils/email.js';
+import Notification from '../models/Notification.js';
 
 const router = express.Router();
 
@@ -26,6 +28,7 @@ const router = express.Router();
 router.use(requireAuth);
 
 // ==================== Super Admin ====================
+// Get all sponsorship requests (superadmin only)
 router.get('/', requireRole('superadmin'), async (req, res) => {
   try {
     const requests = await SponsorshipRequest.find()
@@ -39,10 +42,16 @@ router.get('/', requireRole('superadmin'), async (req, res) => {
 });
 
 // ==================== Club Routes ====================
+// Create a simple sponsorship request (club)
 router.post('/', requireRole('club'), createRequest);
-router.post('/detailed', requireRole('club'), createDetailedProposal);
-router.get('/my-club-requests', requireRole('club'), getClubRequests); // ✅ uses controller with sorting
 
+// Create a detailed proposal (club)
+router.post('/detailed', requireRole('club'), createDetailedProposal);
+
+// Get all requests made by the logged-in club
+router.get('/my-club-requests', requireRole('club'), getClubRequests);
+
+// Cancel a pending request (club)
 router.delete('/:requestId', requireRole('club'), async (req, res) => {
   try {
     const request = await SponsorshipRequest.findById(req.params.requestId);
@@ -56,8 +65,10 @@ router.delete('/:requestId', requireRole('club'), async (req, res) => {
   }
 });
 
+// Club responds to counter offer or meeting request
 router.patch('/:requestId/club-respond', requireRole('club'), clubRespond);
 
+// Club provides payment instructions
 router.patch('/:requestId/payment-instructions', requireRole('club'), async (req, res) => {
   try {
     const request = await SponsorshipRequest.findById(req.params.requestId);
@@ -71,80 +82,33 @@ router.patch('/:requestId/payment-instructions', requireRole('club'), async (req
   }
 });
 
-router.patch('/:requestId/meeting-completed', requireRole('club'), async (req, res) => {
-  try {
-    const request = await SponsorshipRequest.findById(req.params.requestId);
-    if (!request) return res.status(404).json({ message: 'Request not found' });
-    if (request.club.toString() !== req.user.sub) return res.status(403).json({ message: 'Not your request' });
-    request.meetingCompleted = true;
-    await request.save();
-    res.json({ message: 'Meeting marked as completed' });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
+// Club marks meeting as completed
+router.patch('/:requestId/meeting-completed', requireRole('club'), markMeetingCompleted);
 
 // ==================== Sponsor Routes ====================
+// Get all requests received by the logged-in sponsor
 router.get('/my-requests', requireRole('sponsor'), getSponsorRequests);
+
+// Sponsor responds to a request (accept/decline/counter/meeting)
 router.patch('/:requestId/respond', requireRole('sponsor'), respondToRequest);
+
+// Sponsor accepts a detailed proposal
 router.patch('/:requestId/accept-proposal', requireRole('sponsor'), acceptProposal);
+
+// Sponsor updates coordination details (materials, promotion plan, etc.)
 router.patch('/:requestId/coordination', requireRole('sponsor'), updateCoordination);
+
+// Sponsor uploads a file (logo, contract, etc.)
 router.post('/:requestId/upload', requireRole('sponsor'), uploadFile);
 
-// Manual payment recording (sponsor) – using controller if available, else keep inline
-router.post('/:requestId/record-payment', requireRole('sponsor'), recordPayment || (async (req, res) => {
-  try {
-    const { amount, transactionId, notes } = req.body;
-    const request = await SponsorshipRequest.findById(req.params.requestId);
-    if (!request) return res.status(404).json({ message: 'Request not found' });
-    if (request.sponsor.toString() !== req.user.sub) return res.status(403).json({ message: 'Not your request' });
-    if (request.status !== 'accepted' && request.status !== 'meeting_scheduled') {
-      return res.status(400).json({ message: 'Request not accepted or meeting not scheduled' });
-    }
-
-    const payment = new Payment({
-      sponsorshipRequest: request._id,
-      sponsor: request.sponsor,
-      event: request.event,
-      amount,
-      transactionId,
-      notes,
-      status: 'completed',
-      paidAt: new Date()
-    });
-    await payment.save();
-
-    const sponsor = await Sponsor.findById(request.sponsor);
-    const totalPaid = (await Payment.aggregate([
-      { $match: { sponsor: sponsor._id, status: 'completed' } },
-      { $group: { _id: null, total: { $sum: '$amount' } } }
-    ]))[0]?.total || 0;
-    sponsor.amountPaid = totalPaid;
-    sponsor.paymentStatus = totalPaid >= sponsor.totalAmount ? 'paid' : totalPaid > 0 ? 'partial' : 'unpaid';
-    await sponsor.save();
-
-    request.paymentStatus = 'paid';
-    await request.save();
-
-    const club = await Club.findById(request.club);
-    if (club) {
-      await sendEmail({
-        to: club.email,
-        subject: 'Sponsorship Payment Received',
-        html: `<p><strong>${sponsor.name}</strong> has paid <strong>$${amount}</strong> for your event "${request.event.title}".</p>
-               <p>Transaction ID: ${transactionId || 'N/A'}</p>
-               <p>You can view the receipt in your dashboard.</p>`
-      });
-    }
-
-    res.status(201).json(payment);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-}));
+// Sponsor records a manual payment
+router.post('/:requestId/record-payment', requireRole('sponsor'), recordPayment);
 
 // ==================== Contract Management ====================
+// Sponsor uploads a contract URL
 router.patch('/:requestId/contract', requireRole('sponsor'), uploadContract);
+
+// Either party signs the contract
 router.patch('/:requestId/sign', requireAuth, requireRole(['sponsor', 'club']), signContract);
 
 export default router;

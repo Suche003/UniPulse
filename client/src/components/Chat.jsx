@@ -9,12 +9,32 @@ const Chat = ({ requestId, userRole }) => {
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
   const previousMessagesLength = useRef(0);
+  const previousLastMessageId = useRef(null);
+  const notificationShownRef = useRef(false);
 
   const fetchMessages = async () => {
     try {
       const data = await apiRequest(`/api/messages/${requestId}`);
       // Sort oldest first (ascending)
       const sorted = [...data].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+      
+      // Check for new messages (not from current user)
+      if (previousLastMessageId.current && previousLastMessageId.current !== sorted[sorted.length-1]?._id) {
+        const lastMessage = sorted[sorted.length-1];
+        // If last message is not from current user
+        const isOwn = (userRole === 'club' && lastMessage?.senderModel === 'Club') ||
+                      (userRole === 'sponsor' && lastMessage?.senderModel === 'Sponsor');
+        if (!isOwn && !notificationShownRef.current) {
+          toast.success(`💬 New message from ${lastMessage?.senderModel === 'Club' ? 'Club' : 'Sponsor'}`, {
+            duration: 4000,
+            icon: '💬',
+          });
+          notificationShownRef.current = true;
+          setTimeout(() => { notificationShownRef.current = false; }, 2000);
+        }
+      }
+      
+      previousLastMessageId.current = sorted[sorted.length-1]?._id;
       setMessages(sorted);
     } catch (err) {
       toast.error('Failed to load messages');
@@ -46,6 +66,8 @@ const Chat = ({ requestId, userRole }) => {
       });
       setNewMessage('');
       await fetchMessages();
+      // Reset notification flag after sending (so you don't get notified of your own message)
+      notificationShownRef.current = false;
     } catch (err) {
       toast.error('Failed to send message');
     } finally {
@@ -53,7 +75,6 @@ const Chat = ({ requestId, userRole }) => {
     }
   };
 
-  // Determine if a message is from the current logged-in user
   const isOwnMessage = (msg) => {
     if (userRole === 'club' && msg.senderModel === 'Club') return true;
     if (userRole === 'sponsor' && msg.senderModel === 'Sponsor') return true;
@@ -65,7 +86,6 @@ const Chat = ({ requestId, userRole }) => {
       <div className="chat-messages">
         {messages.map((msg, idx) => {
           const own = isOwnMessage(msg);
-          // Display sender name as "You" for own messages, otherwise "Sponsor" or "Club"
           const senderName = own ? 'You' : (msg.senderModel === 'Sponsor' ? 'Sponsor' : 'Club');
           return (
             <div key={idx} className={`chat-message ${own ? 'own' : 'other'}`}>

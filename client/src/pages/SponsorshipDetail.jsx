@@ -19,6 +19,7 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
     location: '',
     notes: ''
   });
+  const [unreadMessages, setUnreadMessages] = useState(0);
 
   // Rating states (sponsor only)
   const [canRate, setCanRate] = useState(false);
@@ -28,7 +29,31 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
   const [clubAvgRating, setClubAvgRating] = useState(0);
   const [clubRatingCount, setClubRatingCount] = useState(0);
 
-  // ========== Allow rating anytime – no event date check ==========
+  // ========== Fetch unread message count ==========
+  const fetchUnreadCount = async () => {
+    try {
+      const res = await apiRequest(`/api/messages/unread/${request._id}`);
+      setUnreadMessages(res.unreadCount);
+    } catch (err) {
+      console.error('Failed to fetch unread count');
+    }
+  };
+
+  useEffect(() => {
+    // Fetch unread count every 10 seconds
+    fetchUnreadCount();
+    const interval = setInterval(fetchUnreadCount, 10000);
+    return () => clearInterval(interval);
+  }, [request._id]);
+
+  // Reset unread count when chat tab is opened
+  useEffect(() => {
+    if (activeTab === 'chat') {
+      setUnreadMessages(0);
+    }
+  }, [activeTab]);
+
+  // ========== Allow rating anytime ==========
   useEffect(() => {
     if (userRole !== 'sponsor') return;
     setCanRate(true);
@@ -77,7 +102,7 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
     }
   };
 
-  // ========== Helper Functions (same as before) ==========
+  // ========== Helper Functions ==========
   const handleResponse = async (action, amount = null, meetingDetails = null) => {
     setActionLoading(true);
     try {
@@ -459,7 +484,7 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
   };
 
   const showChat = ['accepted', 'meeting_scheduled', 'meeting_requested', 'agreement_signed', 'countered'].includes(request.status);
-  const showRating = userRole === 'sponsor' && !alreadyRated; // Always show rating tab for sponsors who haven't rated yet
+  const showRating = userRole === 'sponsor' && !alreadyRated;
 
   return (
     <div className="sponsorship-detail-card">
@@ -480,7 +505,9 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
           <button className={activeTab === 'coordination' ? 'active' : ''} onClick={() => setActiveTab('coordination')}>Coordination</button>
         )}
         {showChat && (
-          <button className={activeTab === 'chat' ? 'active' : ''} onClick={() => setActiveTab('chat')}>💬 Chat</button>
+          <button className={activeTab === 'chat' ? 'active' : ''} onClick={() => setActiveTab('chat')}>
+            💬 Chat {unreadMessages > 0 && <span className="unread-badge">{unreadMessages}</span>}
+          </button>
         )}
         {showRating && (
           <button className={activeTab === 'rate' ? 'active' : ''} onClick={() => setActiveTab('rate')}>⭐ Rate Club</button>

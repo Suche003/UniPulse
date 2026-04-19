@@ -1,4 +1,5 @@
 import Sponsor from "../models/Sponsor.js";
+import Notification from "../models/Notification.js";
 import multer from "multer";
 import fs from "fs";
 import path from "path";
@@ -149,7 +150,7 @@ export const deleteSponsor = async (req, res) => {
   }
 };
 
-// Update sponsor status (approve/reject)
+// Update sponsor status (approve/reject) – ADMIN only
 export const updateSponsorStatus = async (req, res) => {
   try {
     const { status } = req.body;
@@ -163,6 +164,26 @@ export const updateSponsorStatus = async (req, res) => {
       { new: true }
     );
     if (!sponsor) return res.status(404).json({ message: "Sponsor not found" });
+
+    // 🔔 Create notification for sponsor
+    let title = '';
+    let message = '';
+    if (status === 'approved') {
+      title = 'Sponsor Account Approved';
+      message = `Your sponsor account has been approved. You can now log in and start receiving sponsorship requests.`;
+    } else if (status === 'rejected') {
+      title = 'Sponsor Account Rejected';
+      message = `Your sponsor account was rejected. Please contact support for more information.`;
+    }
+    if (title && message) {
+      await Notification.create({
+        userId: sponsor._id,
+        userModel: 'Sponsor',
+        title,
+        message,
+        type: status === 'approved' ? 'success' : 'error',
+      });
+    }
 
     return res.json(sponsor);
   } catch (error) {
@@ -181,6 +202,16 @@ export const updateSponsorPayment = async (req, res) => {
       { new: true }
     );
     if (!sponsor) return res.status(404).json({ message: "Sponsor not found" });
+
+    // 🔔 Notify sponsor about payment update
+    await Notification.create({
+      userId: sponsor._id,
+      userModel: 'Sponsor',
+      title: 'Payment Information Updated',
+      message: `Your payment status has been updated to "${paymentStatus}". Total paid: $${amountPaid || 0}.`,
+      type: 'info',
+    });
+
     return res.json(sponsor);
   } catch (error) {
     console.error("❌ Error in updateSponsorPayment:", error);
@@ -245,13 +276,11 @@ export const updateMyProfile = async (req, res) => {
 
     // Handle logo upload or removal
     if (req.body.removeLogo === "true") {
-      // Delete old logo file if exists
       if (existingSponsor.logo && fs.existsSync(existingSponsor.logo)) {
         fs.unlinkSync(existingSponsor.logo);
       }
       updateData.logo = "";
     } else if (req.file) {
-      // Delete old logo file before saving new one
       if (existingSponsor.logo && fs.existsSync(existingSponsor.logo)) {
         fs.unlinkSync(existingSponsor.logo);
       }

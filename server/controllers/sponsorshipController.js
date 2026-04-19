@@ -32,6 +32,7 @@ export const createRequest = async (req, res) => {
 
     await request.save();
 
+    // 🔔 Notify sponsor
     await Notification.create({
       userId: sponsor._id,
       userModel: 'Sponsor',
@@ -52,14 +53,10 @@ export const createRequest = async (req, res) => {
 export const getSponsorRequests = async (req, res) => {
   try {
     const sponsorId = req.user.sub;
-    console.log(`📋 Fetching requests for sponsor ID: ${sponsorId}`);
-
     const requests = await SponsorshipRequest.find({ sponsor: sponsorId })
       .populate('event', 'title date location')
       .populate('club', 'clubName email')
       .sort({ createdAt: -1 });
-
-    console.log(`✅ Found ${requests.length} requests for sponsor`);
     res.json(requests);
   } catch (err) {
     console.error('❌ getSponsorRequests error:', err);
@@ -79,21 +76,32 @@ export const respondToRequest = async (req, res) => {
     if (!request) return res.status(404).json({ message: 'Request not found' });
     if (request.sponsor.toString() !== sponsorId) return res.status(403).json({ message: 'Not your request' });
 
+    let notificationTitle = '';
+    let notificationMessage = '';
+
     switch (action) {
       case 'accept':
         request.status = 'accepted';
         if (amount) request.counterAmount = amount;
+        notificationTitle = 'Sponsorship request accepted';
+        notificationMessage = `Your sponsorship request for event "${request.event.title}" has been accepted.`;
         break;
       case 'decline':
         request.status = 'declined';
+        notificationTitle = 'Sponsorship request declined';
+        notificationMessage = `Your sponsorship request for event "${request.event.title}" has been declined.`;
         break;
       case 'counter':
         request.status = 'countered';
         request.counterAmount = amount;
+        notificationTitle = 'Counter offer received';
+        notificationMessage = `You have received a counter offer of $${amount} for event "${request.event.title}".`;
         break;
       case 'meeting':
         request.status = 'meeting_requested';
         request.meetingDetails = meetingDetails;
+        notificationTitle = 'Meeting requested';
+        notificationMessage = `The sponsor has requested a meeting for event "${request.event.title}". Details: ${meetingDetails}`;
         break;
       default:
         return res.status(400).json({ message: 'Invalid action' });
@@ -101,14 +109,17 @@ export const respondToRequest = async (req, res) => {
     request.respondedBy = 'sponsor';
     await request.save();
 
-    await Notification.create({
-      userId: request.club._id,
-      userModel: 'Club',
-      title: `Sponsorship request ${action}`,
-      message: `Your sponsorship request for event "${request.event.title}" has been ${action}${action === 'counter' ? ` with a counter offer of $${amount}` : ''}.`,
-      type: action === 'accept' ? 'success' : 'info',
-      relatedRequestId: request._id
-    });
+    // 🔔 Notify club
+    if (notificationTitle && notificationMessage) {
+      await Notification.create({
+        userId: request.club._id,
+        userModel: 'Club',
+        title: notificationTitle,
+        message: notificationMessage,
+        type: action === 'accept' ? 'success' : 'info',
+        relatedRequestId: request._id
+      });
+    }
 
     console.log(`✅ Sponsor responded with ${action} to request ${requestId}`);
     res.json(request);
@@ -130,28 +141,33 @@ export const clubRespond = async (req, res) => {
     if (!request) return res.status(404).json({ message: 'Request not found' });
     if (request.club.toString() !== clubId) return res.status(403).json({ message: 'Not your request' });
 
-    // Handle different club actions
+    let notificationTitle = '';
+    let notificationMessage = '';
+
     if (request.status === 'countered' && action === 'accept_counter') {
-      // Accept sponsor's counter offer
       request.status = 'accepted';
       request.proposedAmount = request.counterAmount;
       request.agreedPackage = { name: 'Counter Offer', amount: request.counterAmount };
-    } 
+      notificationTitle = 'Counter offer accepted';
+      notificationMessage = `The club has accepted your counter offer of $${request.counterAmount} for event "${request.event.title}".`;
+    }
     else if (request.status === 'countered' && action === 'decline_counter') {
-      // Reject sponsor's counter offer
       request.status = 'declined';
+      notificationTitle = 'Counter offer declined';
+      notificationMessage = `The club has declined your counter offer for event "${request.event.title}".`;
     }
     else if (request.status === 'countered' && action === 'counter') {
-      // Club sends a new counter offer
       request.status = 'countered';
-      request.counterAmount = amount;   // club's new proposed amount
+      request.counterAmount = amount;
       request.respondedBy = 'club';
+      notificationTitle = 'New counter offer from club';
+      notificationMessage = `The club has sent a new counter offer of $${amount} for event "${request.event.title}".`;
     }
     else if (request.status === 'meeting_requested' && action === 'accept_meeting') {
       request.status = 'meeting_scheduled';
-      if (meetingSchedule) {
-        request.meetingSchedule = meetingSchedule;
-      }
+      if (meetingSchedule) request.meetingSchedule = meetingSchedule;
+      notificationTitle = 'Meeting accepted and scheduled';
+      notificationMessage = `The club has accepted your meeting request for event "${request.event.title}" and scheduled it on ${meetingSchedule?.date} at ${meetingSchedule?.time}.`;
     }
     else {
       return res.status(400).json({ message: 'Invalid state or action' });
@@ -160,15 +176,17 @@ export const clubRespond = async (req, res) => {
     request.respondedBy = 'club';
     await request.save();
 
-    // Notify sponsor
-    await Notification.create({
-      userId: request.sponsor._id,
-      userModel: 'Sponsor',
-      title: 'Sponsorship request update',
-      message: `Your sponsorship request for event "${request.event.title}" has been ${action}.`,
-      type: action === 'accept_counter' ? 'success' : 'info',
-      relatedRequestId: request._id
-    });
+    // 🔔 Send notification to sponsor
+    if (notificationTitle && notificationMessage) {
+      await Notification.create({
+        userId: request.sponsor._id,
+        userModel: 'Sponsor',
+        title: notificationTitle,
+        message: notificationMessage,
+        type: 'info',
+        relatedRequestId: request._id
+      });
+    }
 
     console.log(`✅ Club responded with ${action} to request ${requestId}`);
     res.json(request);
@@ -238,9 +256,7 @@ export const createDetailedProposal = async (req, res) => {
     if (!event) return res.status(404).json({ message: 'Event not found' });
 
     const sponsor = await Sponsor.findById(sponsorId);
-    if (!sponsor) {
-      return res.status(404).json({ message: 'Sponsor not found' });
-    }
+    if (!sponsor) return res.status(404).json({ message: 'Sponsor not found' });
     if (sponsor.status !== 'approved') {
       return res.status(400).json({ message: 'Sponsor is not approved yet' });
     }
@@ -256,6 +272,7 @@ export const createDetailedProposal = async (req, res) => {
 
     await request.save();
 
+    // 🔔 Notify sponsor
     await Notification.create({
       userId: sponsor._id,
       userModel: 'Sponsor',
@@ -290,6 +307,7 @@ export const acceptProposal = async (req, res) => {
     await request.save();
 
     const club = await Club.findById(request.club);
+    // 🔔 Notify club
     await Notification.create({
       userId: club._id,
       userModel: 'Club',
@@ -440,6 +458,16 @@ export const recordPayment = async (req, res) => {
     request.paymentStatus = 'paid';
     await request.save();
 
+    // 🔔 Notify sponsor of successful payment
+    await Notification.create({
+      userId: sponsor._id,
+      userModel: 'Sponsor',
+      title: 'Payment Successful',
+      message: `Your payment of $${amount} for event "${request.event.title}" has been recorded.`,
+      type: 'success',
+      relatedRequestId: request._id
+    });
+
     const club = await Club.findById(request.club);
     if (club) {
       await sendEmail({
@@ -470,6 +498,37 @@ export const getClubRequests = async (req, res) => {
     res.json(requests);
   } catch (err) {
     console.error('❌ getClubRequests error:', err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// ==================== Meeting completed (club marks) ====================
+export const markMeetingCompleted = async (req, res) => {
+  try {
+    const { requestId } = req.params;
+    const clubId = req.user.sub;
+
+    const request = await SponsorshipRequest.findById(requestId)
+      .populate('event', 'title');
+    if (!request) return res.status(404).json({ message: 'Request not found' });
+    if (request.club.toString() !== clubId) return res.status(403).json({ message: 'Not your request' });
+
+    request.meetingCompleted = true;
+    await request.save();
+
+    // 🔔 Notify sponsor that meeting is completed
+    await Notification.create({
+      userId: request.sponsor,
+      userModel: 'Sponsor',
+      title: 'Meeting Completed',
+      message: `The meeting for event "${request.event.title}" has been marked as completed by the club.`,
+      type: 'success',
+      relatedRequestId: request._id
+    });
+
+    res.json({ message: 'Meeting marked as completed' });
+  } catch (err) {
+    console.error('❌ markMeetingCompleted error:', err);
     res.status(500).json({ message: err.message });
   }
 };

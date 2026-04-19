@@ -20,7 +20,6 @@ router.get('/:requestId', async (req, res) => {
       return res.status(403).json({ message: 'Forbidden' });
     }
 
-    // ✅ Sort by createdAt descending (newest first)
     const messages = await Message.find({ requestId }).sort({ createdAt: -1 });
     
     // Mark messages as read where user is receiver
@@ -34,7 +33,24 @@ router.get('/:requestId', async (req, res) => {
   }
 });
 
-// Send a new message (unchanged)
+// Get unread message count for a request (for the logged-in user)
+router.get('/unread/:requestId', async (req, res) => {
+  try {
+    const { requestId } = req.params;
+    const userId = req.user.sub;
+
+    const unreadCount = await Message.countDocuments({
+      requestId,
+      receiverId: userId,
+      read: false
+    });
+    res.json({ unreadCount });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Send a new message
 router.post('/', async (req, res) => {
   try {
     const { requestId, content } = req.body;
