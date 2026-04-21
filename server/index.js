@@ -36,7 +36,6 @@ import bookingStallRoutes from "./routes/bookingStallRoutes.js";
 import stallPaymentRoutes from "./routes/stallPaymentRoutes.js";
 import messageRoutes from './routes/messageRoutes.js';
 import ratingRoutes from './routes/ratingRoutes.js';
-import studentProfileRoutes from "./routes/studentProfileRoutes.js";
 
 import { errorHandler } from "./middleware/errorHandler.js";
 import { handleStripeWebhook } from "./controllers/paymentGatewayController.js";
