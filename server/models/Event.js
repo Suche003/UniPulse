@@ -10,13 +10,20 @@ const eventSchema = new mongoose.Schema(
       type: String,
       required: true,
       minlength: 3,
-      match: [/^[A-Za-z0-9\s]+$/, "Title can only contain letters, numbers and spaces"],
+      match: [
+        /^[A-Za-z0-9\s]+$/,
+        "Title can only contain letters, numbers and spaces",
+      ],
     },
 
     description: {
       type: String,
       maxlength: 1000,
-      match: [/^[A-Za-z0-9\s.,'’\-()&/]+$/, "Description contains invalid characters"],
+      
+      match: [
+        /^[A-Za-z0-9\s.,'’\-()&/]+$/,
+        "Description contains invalid characters",
+      ],
     },
 
     date: {
@@ -51,6 +58,24 @@ const eventSchema = new mongoose.Schema(
       enum: ["pending", "approved", "rejected"],
       default: "pending",
     },
+
+    rejectReason: {
+  type: String,
+  default: ""
+},
+    goingStudents: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Student",
+      },
+    ],
+
+    purchasedStudents: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Student",
+      },
+    ],
   },
   { timestamps: true }
 );

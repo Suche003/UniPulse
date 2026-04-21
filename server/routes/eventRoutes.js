@@ -9,6 +9,8 @@ import {
   rejectEvent,
   getAllEvents,
   getMyClubEvents,
+  updateEvent,
+   getEventById,
 } from "../controllers/eventController.js";
 
 const router = express.Router();
@@ -62,5 +64,19 @@ router.put("/approve/:id", approveEvent);
 
 // REJECT EVENT
 router.put("/reject/:id", rejectEvent);
+
+//UPDATE EVENT
+// UPDATE EVENT
+router.put(
+  "/update/:id",
+  upload.fields([
+    { name: "pdf", maxCount: 1 },
+    { name: "image", maxCount: 1 },
+  ]),
+  updateEvent
+);
+
+//GET EVENT BY ID
+router.get("/:id", getEventById); 
 
 export default router;
