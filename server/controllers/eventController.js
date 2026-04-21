@@ -116,12 +116,24 @@ export const approveEvent = async (req, res) => {
 // REJECT EVENT
 export const rejectEvent = async (req, res) => {
   try {
+    console.log(req.body);
+    const { reason } = req.body;
+
+    if (!reason) {
+      return res.status(400).json({ message: "Reject reason is required" });
+    }
+
     const updated = await Event.findByIdAndUpdate(
       req.params.id,
-      { status: "rejected" },
+      { 
+        status: "rejected",
+        rejectReason: reason
+      },
       { new: true }
     );
+
     if (!updated) return res.status(404).json({ message: "Event not found" });
+
     res.json(updated);
   } catch (err) {
     console.error(err);

@@ -178,6 +178,12 @@ const ClubDashboard = () => {
               >
                 Delete
               </button>
+              
+    {event.rejectReason && (
+      <p className="club-reject-reason" style={{ color: "red", fontWeight: "bold" }}>
+        <span>Reason:</span> {event.rejectReason}
+      </p>
+    )}
             </>
           ) : (
             <button type="button" className="club-action-btn">
