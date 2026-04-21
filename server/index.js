@@ -77,6 +77,8 @@ app.use("/api/stall-payment", stallPaymentRoutes);
 //Events
 app.use("/api/events", eventRoutes);
 app.use('/uploads', express.static('uploads'));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
 
 //Clubs
 app.use("/api/clubs", clubRoutes);

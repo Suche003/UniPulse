@@ -10,6 +10,7 @@ export default function AdminPendingEvents() {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const fetchPendingEvents = async () => {
     try {
@@ -31,6 +32,22 @@ export default function AdminPendingEvents() {
   useEffect(() => {
     fetchPendingEvents();
   }, []);
+
+  const filteredEvents = events.filter((event) => {
+  const key = searchTerm.toLowerCase();
+
+  const title = event.title?.toLowerCase() || "";
+  const location = event.location?.toLowerCase() || "";
+  const date = event.date
+    ? new Date(event.date).toLocaleDateString().toLowerCase()
+    : "";
+
+  return (
+    title.includes(key) ||
+    location.includes(key) ||
+    date.includes(key)
+  );
+});
 
   const handleApprove = async (id) => {
     try {
@@ -74,6 +91,16 @@ export default function AdminPendingEvents() {
           </button>
         </div>
 
+ <div className="pending-search-container">
+  <input
+    type="text"
+    placeholder="Search by name, location, or date..."
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)}
+    className="pending-search-input"
+  />
+</div>
+
         {error && <div className="pending-events-alert pending-events-alert--error">{error}</div>}
         {message && (
           <div className="pending-events-alert pending-events-alert--success">
@@ -85,7 +112,7 @@ export default function AdminPendingEvents() {
           <div className="pending-events-empty-card">No pending events found.</div>
         ) : (
           <div className="pending-events-grid">
-            {events.map((event) => (
+            {filteredEvents.map((event) => (
               <div key={event._id} className="pending-event-card">
                 <div className="pending-event-card__row">
                   <div className="pending-event-card__name">

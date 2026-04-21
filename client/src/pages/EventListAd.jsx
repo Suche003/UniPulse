@@ -18,7 +18,6 @@ const EventList = () => {
   const fetchEvents = async () => {
     try {
       setLoading(true);
-
       const res = await axios.get("http://localhost:5000/api/events");
       const safeData = Array.isArray(res.data) ? res.data : [];
 
@@ -56,23 +55,33 @@ const EventList = () => {
   };
 
   const filteredEvents = useMemo(() => {
-    const term = search.trim().toLowerCase();
-    if (!term) return events;
+  const term = search.trim().toLowerCase();
+  if (!term) return events;
 
-    return events.filter((event) => {
-      const title = event?.title || "";
-      const location = event?.location || "";
-      const description = event?.description || "";
-      const clubid = event?.clubid || "";
+  return events.filter((event) => {
+    const title = event?.title || "";
+    const location = event?.location || "";
+    const description = event?.description || "";
+    const clubid = event?.clubid || "";
 
-      return (
-        title.toLowerCase().includes(term) ||
-        location.toLowerCase().includes(term) ||
-        description.toLowerCase().includes(term) ||
-        clubid.toLowerCase().includes(term)
-      );
-    });
-  }, [events, search]);
+    const dateText = event?.date
+      ? new Date(event.date).toLocaleDateString("en-GB").toLowerCase()
+      : "";
+
+    const isoDate = event?.date
+      ? new Date(event.date).toISOString().toLowerCase()
+      : "";
+
+    return (
+      title.toLowerCase().includes(term) ||
+      location.toLowerCase().includes(term) ||
+      description.toLowerCase().includes(term) ||
+      clubid.toLowerCase().includes(term) ||
+      dateText.includes(term) ||
+      isoDate.includes(term)
+    );
+  });
+}, [events, search]);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -91,10 +100,12 @@ const EventList = () => {
     return eventDate < today;
   });
 
-  const renderEventCard = (event) => {
-    const imageSrc = event?.image
-      ? `http://localhost:5000/api/events/${event.image}`
-      : "/placeholder.jpg";
+  const renderEventCard = (event, showUnpublish = false) => {
+    // ✅ FIXED IMAGE LOGIC
+    const imageSrc =
+      event?.image && event.image.trim() !== ""
+        ? `http://localhost:5000/uploads/${event.image}`
+        : "https://via.placeholder.com/300x200?text=Event+Image";
 
     return (
       <div className="admin-event-card glass-card-events" key={event._id}>
@@ -104,13 +115,12 @@ const EventList = () => {
             alt={event.title}
             className="admin-event-card__image"
             onError={(e) => {
-              e.currentTarget.src = "/placeholder.jpg";
+              e.currentTarget.src =
+                "https://via.placeholder.com/300x200?text=Event+Image";
             }}
           />
           <span className="admin-event-status">
-            {(event?.date && new Date(event.date) < today)
-              ? "Finished"
-              : "Upcoming"}
+            {new Date(event.date) < today ? "Finished" : "Upcoming"}
           </span>
         </div>
 
@@ -146,13 +156,15 @@ const EventList = () => {
               View
             </button>
 
-            <button
-              type="button"
-              className="admin-event-delete-btn"
-              onClick={() => handleDelete(event._id)}
-            >
-              Unpublish
-            </button>
+            {showUnpublish && (
+              <button
+                type="button"
+                className="admin-event-delete-btn"
+                onClick={() => handleDelete(event._id)}
+              >
+                Unpublish
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -226,7 +238,7 @@ const EventList = () => {
                 </div>
               ) : (
                 <div className="admin-events-grid">
-                  {upcomingEvents.map((event) => renderEventCard(event))}
+                  {upcomingEvents.map((event) => renderEventCard(event, false))}
                 </div>
               )}
             </section>
@@ -243,7 +255,7 @@ const EventList = () => {
                 </div>
               ) : (
                 <div className="admin-events-grid">
-                  {finishedEvents.map((event) => renderEventCard(event))}
+                  {finishedEvents.map((event) => renderEventCard(event, true))}
                 </div>
               )}
             </section>

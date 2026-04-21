@@ -8,11 +8,12 @@ const ClubDashboard = () => {
   const [approvedUpcomingEvents, setApprovedUpcomingEvents] = useState([]);
   const [pendingEventRequests, setPendingEventRequests] = useState([]);
   const [pastEvents, setPastEvents] = useState([]);
+  const [rejectedEvents, setRejectedEvents] = useState([]); // ✅ NEW
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const navigate = useNavigate();
-
   const user = JSON.parse(localStorage.getItem("unipulse_user")) || {};
   const clubName = user?.clubName || user?.name || "Club";
   const loggedInClubId = user?._id || user?.id || user?.clubid || "";
@@ -54,9 +55,16 @@ const ClubDashboard = () => {
         return event.status === "approved" && eventDate < now;
       });
 
+      // ✅ NEW (no change to existing logic)
+      const rejected = myEvents.filter((event) => {
+        return event.status === "rejected";
+      });
+
       setApprovedUpcomingEvents(approvedUpcoming);
       setPendingEventRequests(pendingRequests);
       setPastEvents(completedPast);
+      setRejectedEvents(rejected); // ✅ NEW
+
     } catch (err) {
       console.error("Error fetching club dashboard data:", err);
       setError("Failed to load dashboard data.");
@@ -76,18 +84,115 @@ const ClubDashboard = () => {
     });
   };
 
-  const getStudentCount = () => {
-    return 0;
-  };
+  const getStudentCount = () => 0;
 
   const handleLogout = () => {
     logout();
     navigate("/login");
   };
 
+  // ✅ NEW delete function
+  const handleDelete = async (eventId) => {
+    try {
+      await axios.delete(`http://localhost:5000/api/events/${eventId}`);
+      fetchClubDashboardData();
+    } catch (err) {
+      console.error("Error deleting event:", err);
+    }
+  };
+
+  const renderEventCard = (event, type = "approved") => {
+    const eventId =
+      event._id || event.id || Math.random().toString(36).substr(2, 9);
+    const title = event.title || "Untitled Event";
+    const date = formatDate(event.date);
+    const location = event.location || "Not specified";
+    const status = event.status || type;
+
+    return (
+      <div className="club-event-card" key={eventId}>
+        <div className="club-event-card__top">
+          <span className={`club-event-badge ${type}`}>{status}</span>
+          <h3>{title}</h3>
+        </div>
+
+        <div className="club-event-meta">
+          <p>
+            <span>Event ID:</span> {event.eventid || "N/A"}
+          </p>
+          <p>
+            <span>Date:</span> {date}
+          </p>
+          <p>
+            <span>Location:</span> {location}
+          </p>
+
+          {type === "approved" && (
+            <p>
+              <span>Students Coming:</span> {getStudentCount()}
+            </p>
+          )}
+
+          {type === "pending" && (
+            <p>
+              <span>Status:</span> {status}
+            </p>
+          )}
+        </div>
+
+        <div className="club-event-card__actions">
+          {type === "pending" ? (
+            <>
+              <Link
+                to={`/events/view/${eventId}`}
+                className="club-action-btn secondary"
+              >
+                View Request
+              </Link>
+              <Link
+                to={`/events/update/${eventId}`}
+                className="club-action-btn secondary"
+              >
+                Update Event
+              </Link>
+            </>
+          ) : type === "approved" ? (
+            <Link
+              to={`/events/view/${eventId}`}
+              className="club-action-btn"
+            >
+              View Event
+            </Link>
+          ) : type === "rejected" ? ( // ✅ NEW
+            <>
+              <Link
+                to={`/events/view/${eventId}`}
+                className="club-action-btn secondary"
+              >
+                View Request
+              </Link>
+              <button
+                type="button"
+                className="club-action-btn danger"
+                onClick={() => handleDelete(eventId)}
+              >
+                Delete
+              </button>
+            </>
+          ) : (
+            <button type="button" className="club-action-btn">
+              Generate Report
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="club-dashboard-page">
       <div className="club-dashboard-container">
+
         {/* NAVBAR */}
         <header className="club-dashboard-navbar">
           <div className="club-dashboard-navbar__left">
@@ -99,7 +204,10 @@ const ClubDashboard = () => {
           </div>
 
           <div className="club-dashboard-navbar__right">
-            <Link to="/club/profile" className="club-nav-btn club-nav-btn--profile">
+            <Link
+              to="/club/profile"
+              className="club-nav-btn club-nav-btn--profile"
+            >
               Profile
             </Link>
             <button
@@ -120,6 +228,17 @@ const ClubDashboard = () => {
           <div className="club-dashboard-hero__glow"></div>
         </section>
 
+        {/* SEARCH BAR */}
+<div className="club-search-container">
+  <input
+    type="text"
+    placeholder="Search events (title / location / ID/Date)..."
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)}
+    className="club-search-input"
+  />
+</div>
+
         {/* QUICK ACTIONS */}
         <section className="club-top-actions-section">
           <div className="club-section-header">
@@ -135,165 +254,160 @@ const ClubDashboard = () => {
             </Link>
 
             <div className="club-mini-stat-card">
-              <span className="club-mini-stat-card__label">Upcoming Approved</span>
+              <span className="club-mini-stat-card__label">
+                Upcoming Approved
+              </span>
               <strong>{approvedUpcomingEvents.length}</strong>
             </div>
 
             <div className="club-mini-stat-card">
-              <span className="club-mini-stat-card__label">Pending Requests</span>
+              <span className="club-mini-stat-card__label">
+                Pending Requests
+              </span>
               <strong>{pendingEventRequests.length}</strong>
             </div>
 
             <div className="club-mini-stat-card">
-              <span className="club-mini-stat-card__label">Past Events</span>
+              <span className="club-mini-stat-card__label">
+                Past Events
+              </span>
               <strong>{pastEvents.length}</strong>
             </div>
           </div>
         </section>
 
         {loading && (
-          <div className="club-info-message">Loading dashboard data...</div>
+          <div className="club-info-message">
+            Loading dashboard data...
+          </div>
         )}
-
         {error && !loading && (
           <div className="club-error-message">{error}</div>
         )}
 
         {!loading && !error && (
           <>
+            {/* APPROVED */}
             <section className="club-dashboard-section">
               <div className="club-section-header">
-                <h2>Upcoming Events</h2>
+                <h2>Approved Events</h2>
               </div>
-
               {approvedUpcomingEvents.length === 0 ? (
                 <div className="club-empty-card">
                   No approved upcoming events found.
                 </div>
               ) : (
                 <div className="club-event-grid">
-                  {approvedUpcomingEvents.map((event) => (
-                    <div className="club-event-card" key={event._id}>
-                      <div className="club-event-card__top">
-                        <span className="club-event-badge approved">Approved</span>
-                        <h3>{event.title || "Untitled Event"}</h3>
-                      </div>
-
-                      <div className="club-event-meta">
-                        <p>
-                          <span>Event ID:</span> {event.eventid}
-                        </p>
-                        <p>
-                          <span>Date:</span> {formatDate(event.date)}
-                        </p>
-                        <p>
-                          <span>Location:</span> {event.location || "Not specified"}
-                        </p>
-                        <p>
-                          <span>Students Coming:</span> {getStudentCount()}
-                        </p>
-                      </div>
-
-                      <div className="club-event-card__actions">
-                        <Link
-                          to={`/events/${event._id}`}
-                          className="club-action-btn"
-                        >
-                          View Event
-                        </Link>
-                      </div>
-                    </div>
-                  ))}
+                  {approvedUpcomingEvents
+  .filter((event) =>
+    event.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    event.location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+   (event.eventid && event.eventid.toString().toLowerCase().includes(searchTerm.toLowerCase()))||
+   (event.date &&
+  (
+    new Date(event.date).toLocaleDateString("en-GB").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    new Date(event.date).toISOString().toLowerCase().includes(searchTerm.toLowerCase())
+  )
+)
+  )
+  .map((event) =>
+    renderEventCard(event, "approved")
+  )}
                 </div>
               )}
             </section>
 
+            {/* PENDING */}
             <section className="club-dashboard-section">
               <div className="club-section-header">
-                <h2>Upcoming Event Requests</h2>
+                <h2>Pending Events </h2>
               </div>
-
               {pendingEventRequests.length === 0 ? (
                 <div className="club-empty-card">
                   No upcoming event requests found.
                 </div>
               ) : (
                 <div className="club-event-grid">
-                  {pendingEventRequests.map((event) => (
-                    <div className="club-event-card" key={event._id}>
-                      <div className="club-event-card__top">
-                        <span className="club-event-badge pending">Pending</span>
-                        <h3>{event.title || "Untitled Event"}</h3>
-                      </div>
-
-                      <div className="club-event-meta">
-                        <p>
-                          <span>Event ID:</span> {event.eventid}
-                        </p>
-                        <p>
-                          <span>Date:</span> {formatDate(event.date)}
-                        </p>
-                        <p>
-                          <span>Location:</span> {event.location || "Not specified"}
-                        </p>
-                        <p>
-                          <span>Status:</span> {event.status}
-                        </p>
-                      </div>
-
-                      <div className="club-event-card__actions">
-                        <Link
-                          to={`/events/${event._id}`}
-                          className="club-action-btn secondary"
-                        >
-                          View Request
-                        </Link>
-                      </div>
-                    </div>
-                  ))}
+                  {pendingEventRequests
+  .filter((event) =>
+    event.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    event.location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (event.eventid && event.eventid.toString().toLowerCase().includes(searchTerm.toLowerCase()))||
+   (event.date &&
+  (
+    new Date(event.date).toLocaleDateString("en-GB").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    new Date(event.date).toISOString().toLowerCase().includes(searchTerm.toLowerCase())
+  )
+)
+  )
+  .map((event) =>
+    renderEventCard(event, "pending")
+  )}
                 </div>
               )}
             </section>
 
+            {/* ✅ REJECTED NEW */}
+            <section className="club-dashboard-section">
+              <div className="club-section-header">
+                <h2>Rejected Events</h2>
+              </div>
+              {rejectedEvents.length === 0 ? (
+                <div className="club-empty-card">
+                  No rejected events found.
+                </div>
+              ) : (
+                <div className="club-event-grid">
+                  {rejectedEvents
+  .filter((event) =>
+    event.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    event.location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (event.eventid && event.eventid.toString().toLowerCase().includes(searchTerm.toLowerCase()))||
+    (event.date &&
+  (
+    new Date(event.date).toLocaleDateString("en-GB").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    new Date(event.date).toISOString().toLowerCase().includes(searchTerm.toLowerCase())
+  )
+)
+  )
+  .map((event) =>
+    renderEventCard(event, "rejected")
+  )}
+                </div>
+              )}
+            </section>
+
+            {/* PAST */}
             <section className="club-dashboard-section">
               <div className="club-section-header">
                 <h2>Past Events</h2>
               </div>
-
               {pastEvents.length === 0 ? (
-                <div className="club-empty-card">No past events found.</div>
+                <div className="club-empty-card">
+                  No past events found.
+                </div>
               ) : (
                 <div className="club-event-grid">
-                  {pastEvents.map((event) => (
-                    <div className="club-event-card" key={event._id}>
-                      <div className="club-event-card__top">
-                        <span className="club-event-badge past">Past Event</span>
-                        <h3>{event.title || "Untitled Event"}</h3>
-                      </div>
-
-                      <div className="club-event-meta">
-                        <p>
-                          <span>Event ID:</span> {event.eventid}
-                        </p>
-                        <p>
-                          <span>Date:</span> {formatDate(event.date)}
-                        </p>
-                        <p>
-                          <span>Location:</span> {event.location || "Not specified"}
-                        </p>
-                      </div>
-
-                      <div className="club-event-card__actions">
-                        <button type="button" className="club-action-btn">
-                          Generate Report
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+                  {pastEvents
+  .filter((event) =>
+    event.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    event.location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+   (event.eventid && event.eventid.toString().toLowerCase().includes(searchTerm.toLowerCase()))||
+   (event.date &&
+  (
+    new Date(event.date).toLocaleDateString("en-GB").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    new Date(event.date).toISOString().toLowerCase().includes(searchTerm.toLowerCase())
+  )
+)
+  )
+  .map((event) =>
+    renderEventCard(event, "past")
+  )}
                 </div>
               )}
             </section>
 
+            {/* SPONSORSHIP */}
             <section className="club-dashboard-section">
               <div className="club-section-header">
                 <h2>Sponsorship Management</h2>

@@ -128,3 +128,59 @@ export const rejectEvent = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+
+
+// GET Event by ID
+export const getEventById = async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.id);
+
+    if (!event) return res.status(404).json({ message: "Event not found" });
+
+    res.status(200).json({ data: event });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Update Event Controller
+export const updateEvent = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Find existing event
+    const event = await Event.findById(id);
+    if (!event) return res.status(404).json({ message: "Event not found" });
+
+    // Update fields
+    event.title = req.body.title || event.title;
+    event.description = req.body.description || event.description;
+    event.date = req.body.date || event.date;
+    event.location = req.body.location || event.location;
+
+    // FormData sends booleans as string
+    if (req.body.ispaid !== undefined) {
+      event.ispaid = req.body.ispaid === "true" || req.body.ispaid === true;
+    }
+
+    if (req.body.ticketPrice !== undefined) {
+      event.ticketPrice = Number(req.body.ticketPrice);
+    }
+
+    // Only update files if uploaded
+    if (req.files?.pdf) event.pdf = req.files.pdf[0].path;
+    if (req.files?.image) event.image = req.files.image[0].path;
+
+    // Save the updated event
+    const updatedEvent = await event.save();
+
+    res.status(200).json({
+      message: "Event updated successfully",
+      data: updatedEvent,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: err.message });
+  }
+};

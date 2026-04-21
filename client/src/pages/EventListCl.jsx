@@ -32,7 +32,7 @@ const EventListCl = () => {
               <img
                 src={
                   event.image
-                    ? `http://localhost:5000/api/events/${event.image}`
+                    ? `http://localhost:5000/uploads/${event.image}`
                     : "/placeholder.jpg"
                 }
                 alt={event.title}
