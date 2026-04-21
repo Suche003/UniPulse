@@ -19,6 +19,7 @@ const eventSchema = new mongoose.Schema(
     description: {
       type: String,
       maxlength: 1000,
+      
       match: [
         /^[A-Za-z0-9\s.,'’\-()&/]+$/,
         "Description contains invalid characters",
@@ -58,6 +59,10 @@ const eventSchema = new mongoose.Schema(
       default: "pending",
     },
 
+    rejectReason: {
+  type: String,
+  default: ""
+},
     goingStudents: [
       {
         type: mongoose.Schema.Types.ObjectId,

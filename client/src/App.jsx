@@ -10,6 +10,8 @@ import Login from "./pages/Login";
 import EventForm from "./pages/EventFormPage";
 import EventListAd from "./pages/EventListAd";
 import PackageManagement from "./pages/PackageManagement";
+import UpdateEventForm from "./pages/UpdateEventForm";
+import ViewEvent from "./pages/ViewEvent";
 
 import AllClubs from "./pages/AllClubAd";
 
@@ -27,7 +29,6 @@ import EventListAdmin from "./pages/EventListAd";
 import ClubForm from "./pages/ClubCreateForm";
 import ClubDashboard from "./pages/ClubDashboard";
 import ClubEvent from "./pages/EventListCl";
-import UpdateEvent from "./pages/UpdateEvent";
 import ViewClub from "./pages/ViewClubs";
 
 import Stalls from "./pages/Stalls";
@@ -107,13 +108,14 @@ export default function App() {
             <Route path="/club/dashboard" element={<ClubDashboard />} />
             <Route path="/club/clubrequest" element={<EventForm />} />
             <Route path="/club/clubeventlist" element={<ClubEvent />} />
-            <Route path="/club/update-event/:id" element={<UpdateEvent />} />
+            <Route path="/events/view/:id" element={<ViewEvent />} />
             <Route path="/club/viewall" element={<ViewClub />} />
 
             <Route path="/club/sponsors" element={<SponsorDirectory />} />
             <Route path="/club/marketplace" element={<SponsorMarketplace />} />
             <Route path="/club/requests" element={<ClubRequests />} />
             <Route path="/club/payments" element={<ClubPayments />} />
+            <Route path="/events/update/:id" element={<UpdateEventForm />} />
           </Route>
 
           {/* Sponsor only */}

@@ -116,13 +116,82 @@ export const approveEvent = async (req, res) => {
 // REJECT EVENT
 export const rejectEvent = async (req, res) => {
   try {
+    console.log(req.body);
+    const { reason } = req.body;
+
+    if (!reason) {
+      return res.status(400).json({ message: "Reject reason is required" });
+    }
+
     const updated = await Event.findByIdAndUpdate(
       req.params.id,
-      { status: "rejected" },
+      { 
+        status: "rejected",
+        rejectReason: reason
+      },
       { new: true }
     );
+
     if (!updated) return res.status(404).json({ message: "Event not found" });
+
     res.json(updated);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
+
+// GET Event by ID
+export const getEventById = async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.id);
+
+    if (!event) return res.status(404).json({ message: "Event not found" });
+
+    res.status(200).json({ data: event });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Update Event Controller
+export const updateEvent = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const event = await Event.findById(id);
+    if (!event) return res.status(404).json({ message: "Event not found" });
+
+    event.title = req.body.title || event.title;
+    event.description = req.body.description || event.description;
+    event.date = req.body.date || event.date;
+    event.location = req.body.location || event.location;
+
+    if (req.body.ispaid !== undefined) {
+      event.ispaid = req.body.ispaid === "true" || req.body.ispaid === true;
+    }
+
+    if (req.body.ticketPrice !== undefined) {
+      event.ticketPrice = Number(req.body.ticketPrice);
+    }
+
+    // ✅ FIX: use filename (same as createEvent)
+    if (req.files?.pdf) {
+      event.pdf = req.files.pdf[0].filename;
+    }
+
+    if (req.files?.image) {
+      event.image = req.files.image[0].filename;
+    }
+
+    const updatedEvent = await event.save();
+
+    res.status(200).json({
+      message: "Event updated successfully",
+      data: updatedEvent,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: err.message });
