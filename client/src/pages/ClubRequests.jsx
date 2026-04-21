@@ -32,7 +32,6 @@ const ClubRequests = () => {
       {requests.length === 0 ? (
         <div className="empty-state">
           <p>No requests sent yet.</p>
-          <a href="/club/marketplace" className="btn-primary">Browse Marketplace</a>
         </div>
       ) : (
         <div className="requests-list">

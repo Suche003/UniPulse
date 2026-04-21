@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { apiRequest } from '../api/api';
 import toast from 'react-hot-toast';
+import Chat from '../components/Chat';
 import './SponsorshipDetail.css';
 
 const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
@@ -18,8 +19,90 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
     location: '',
     notes: ''
   });
+  const [unreadMessages, setUnreadMessages] = useState(0);
 
-  // ==================== Helper Functions ====================
+  // Rating states (sponsor only)
+  const [canRate, setCanRate] = useState(false);
+  const [alreadyRated, setAlreadyRated] = useState(false);
+  const [ratingValue, setRatingValue] = useState(5);
+  const [reviewText, setReviewText] = useState('');
+  const [clubAvgRating, setClubAvgRating] = useState(0);
+  const [clubRatingCount, setClubRatingCount] = useState(0);
+
+  // ========== Fetch unread message count ==========
+  const fetchUnreadCount = async () => {
+    try {
+      const res = await apiRequest(`/api/messages/unread/${request._id}`);
+      setUnreadMessages(res.unreadCount);
+    } catch (err) {
+      console.error('Failed to fetch unread count');
+    }
+  };
+
+  useEffect(() => {
+    // Fetch unread count every 10 seconds
+    fetchUnreadCount();
+    const interval = setInterval(fetchUnreadCount, 10000);
+    return () => clearInterval(interval);
+  }, [request._id]);
+
+  // Reset unread count when chat tab is opened
+  useEffect(() => {
+    if (activeTab === 'chat') {
+      setUnreadMessages(0);
+    }
+  }, [activeTab]);
+
+  // ========== Allow rating anytime ==========
+  useEffect(() => {
+    if (userRole !== 'sponsor') return;
+    setCanRate(true);
+    const checkAlreadyRated = async () => {
+      try {
+        const ratings = await apiRequest(`/api/ratings?requestId=${request._id}`);
+        const sponsorId = request.sponsor?._id;
+        if (sponsorId) {
+          const myRating = ratings.find(r => r.ratedBy === sponsorId);
+          if (myRating) setAlreadyRated(true);
+        }
+      } catch (err) {
+        console.error('Failed to check rating status');
+      }
+    };
+    checkAlreadyRated();
+  }, [request, userRole]);
+
+  // ========== Fetch club's average rating (public) ==========
+  useEffect(() => {
+    const fetchClubRating = async () => {
+      if (!request.club?._id) return;
+      try {
+        const res = await fetch(`http://localhost:5000/api/ratings/average/${request.club._id}/Club`);
+        const data = await res.json();
+        setClubAvgRating(data.avgRating);
+        setClubRatingCount(data.count);
+      } catch (err) {
+        console.error('Failed to fetch club rating');
+      }
+    };
+    fetchClubRating();
+  }, [request.club]);
+
+  const submitRating = async () => {
+    try {
+      await apiRequest('/api/ratings', {
+        method: 'POST',
+        body: { requestId: request._id, rating: ratingValue, review: reviewText }
+      });
+      toast.success('Thank you for rating the club!');
+      setAlreadyRated(true);
+      onRefresh();
+    } catch (err) {
+      toast.error(err.message || 'Failed to submit rating');
+    }
+  };
+
+  // ========== Helper Functions ==========
   const handleResponse = async (action, amount = null, meetingDetails = null) => {
     setActionLoading(true);
     try {
@@ -31,7 +114,7 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
         body,
       });
       toast.success(`Request ${action}d`);
-      onRefresh();
+      await onRefresh();
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -55,7 +138,7 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
         body: { selectedPackage, paymentDeadline: null, materialsNeeded }
       });
       toast.success('Proposal accepted! Coordination started.');
-      onRefresh();
+      await onRefresh();
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -81,7 +164,7 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
           headers: {},
         });
         toast.success('File uploaded');
-        onRefresh();
+        await onRefresh();
       } catch (err) {
         toast.error(err.message);
       } finally {
@@ -99,7 +182,7 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
         body: { type, data }
       });
       toast.success('Updated');
-      onRefresh();
+      await onRefresh();
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -117,7 +200,7 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
       });
       toast.success('Payment instructions saved');
       setEditingInstructions(false);
-      onRefresh();
+      await onRefresh();
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -125,18 +208,24 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
     }
   };
 
-  const handleClubResponse = async (action, schedule = null) => {
+  const handleClubResponse = async (action, schedule = null, amount = null) => {
     setActionLoading(true);
     try {
       const body = { action };
       if (schedule) body.meetingSchedule = schedule;
+      if (amount) body.amount = amount;
       await apiRequest(`/api/sponsorship-requests/${request._id}/club-respond`, {
         method: 'PATCH',
         body,
       });
-      toast.success(`Meeting ${action === 'accept_meeting' ? 'accepted and scheduled' : 'declined'}`);
+      let msg = '';
+      if (action === 'accept_meeting') msg = 'Meeting accepted and scheduled';
+      else if (action === 'accept_counter') msg = 'Counter offer accepted';
+      else if (action === 'decline_counter') msg = 'Counter offer declined';
+      else if (action === 'counter') msg = 'Counter offer sent';
+      toast.success(msg);
       setShowMeetingScheduleForm(false);
-      onRefresh();
+      await onRefresh();
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -152,7 +241,7 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
         body: { meetingCompleted: true }
       });
       toast.success('Meeting marked as completed');
-      onRefresh();
+      await onRefresh();
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -172,7 +261,7 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
         body: { amount: parseFloat(paymentAmount), transactionId, notes: paymentNotes }
       });
       toast.success('Payment recorded successfully');
-      onRefresh();
+      await onRefresh();
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -180,8 +269,9 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
     }
   };
 
-  // ==================== Render Proposal ====================
+  // ========== Render Proposal Tab ==========
   const renderProposal = () => {
+    const pdfUrl = request.event?.pdf ? `http://localhost:5000/uploads/${request.event.pdf}` : null;
     if (!request.proposal) {
       return (
         <div className="proposal-details">
@@ -189,18 +279,21 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
             <h4>Event</h4>
             <p><strong>{request.event?.title || 'Event'}</strong></p>
             <p>Proposed Amount: ${request.proposedAmount}</p>
+            {pdfUrl && (
+              <div className="pdf-viewer">
+                <a href={pdfUrl} target="_blank" rel="noopener noreferrer" className="btn-sm">
+                  📄 View Event Proposal PDF
+                </a>
+              </div>
+            )}
           </div>
-          {request.status === 'pending' && (
+          {userRole === 'sponsor' && request.status === 'pending' && (
             <div className="actions">
               <button className="btn-sm btn-sm-success" onClick={() => handleResponse('accept')} disabled={actionLoading}>Accept</button>
               <button className="btn-sm btn-sm-danger" onClick={() => handleResponse('decline')} disabled={actionLoading}>Decline</button>
               <button className="btn-sm" onClick={() => { const amt = prompt('Counter amount:'); if(amt) handleResponse('counter', parseFloat(amt)); }} disabled={actionLoading}>Counter</button>
               <button className="btn-sm" onClick={() => { const details = prompt('Meeting details:'); if(details) handleResponse('meeting', null, details); }} disabled={actionLoading}>Request Meeting</button>
-            </div>
-          )}
-          {request.status === 'pending' && !request.agreementSigned && (
-            <div className="actions">
-              <button className="btn-primary" onClick={handleAcceptProposal} disabled={actionLoading}>Start Coordination</button>
+              <button className="btn-primary" onClick={handleAcceptProposal} disabled={actionLoading}>Accept Proposal & Start Coordination</button>
             </div>
           )}
         </div>
@@ -215,13 +308,19 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
         <div className="section"><h4>Packages</h4>{request.proposal.packages?.map((p,i)=><div key={i}><strong>{p.name}</strong> – ${p.amount}<br/>{p.benefits}</div>)}</div>
         <div className="section"><h4>Call to Action</h4><p>{request.proposal.callToAction}</p></div>
         <div className="section"><h4>Contact</h4><p>{request.proposal.contact?.name} | {request.proposal.contact?.email}</p></div>
-        {request.status === 'pending' && (
+        {pdfUrl && (
+          <div className="section pdf-viewer">
+            <a href={pdfUrl} target="_blank" rel="noopener noreferrer" className="btn-sm">
+              📄 Download Event Proposal PDF
+            </a>
+          </div>
+        )}
+        {userRole === 'sponsor' && request.status === 'pending' && (
           <div className="actions">
             <button className="btn-sm btn-sm-success" onClick={() => handleResponse('accept')} disabled={actionLoading}>Accept</button>
             <button className="btn-sm btn-sm-danger" onClick={() => handleResponse('decline')} disabled={actionLoading}>Decline</button>
             <button className="btn-sm" onClick={() => { const amt = prompt('Counter amount:'); if(amt) handleResponse('counter', parseFloat(amt)); }} disabled={actionLoading}>Counter</button>
             <button className="btn-sm" onClick={() => { const details = prompt('Meeting details:'); if(details) handleResponse('meeting', null, details); }} disabled={actionLoading}>Request Meeting</button>
-            {/* Show "Accept Proposal & Start Coordination" only when pending and proposal exists */}
             <button className="btn-primary" onClick={handleAcceptProposal} disabled={actionLoading}>Accept Proposal & Start Coordination</button>
           </div>
         )}
@@ -229,13 +328,23 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
     );
   };
 
-  // ==================== Coordination Tab (Role‑based) ====================
+  // ========== Coordination Tab ==========
   const renderCoordination = () => {
     if (userRole === 'sponsor') {
       const canPay = (request.status === 'accepted' || request.status === 'meeting_scheduled') && request.paymentStatus !== 'paid';
       return (
         <div className="coordination">
-          {/* Display scheduled meeting if exists */}
+          {request.status === 'countered' && (
+            <div className="section">
+              <h4>🔄 Counter Offer from Club</h4>
+              <p>Club has countered with: <strong>${request.counterAmount}</strong></p>
+              <div className="actions">
+                <button className="btn-sm btn-sm-success" onClick={() => handleResponse('accept')} disabled={actionLoading}>Accept Counter</button>
+                <button className="btn-sm btn-sm-danger" onClick={() => handleResponse('decline')} disabled={actionLoading}>Decline</button>
+                <button className="btn-sm" onClick={() => { const amt = prompt('Your counter amount:'); if(amt) handleResponse('counter', parseFloat(amt)); }} disabled={actionLoading}>Counter Again</button>
+              </div>
+            </div>
+          )}
           {request.meetingSchedule && request.meetingSchedule.date && (
             <div className="section">
               <h4>📅 Scheduled Meeting</h4>
@@ -245,7 +354,6 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
               {request.meetingSchedule.notes && <p><strong>Notes:</strong> {request.meetingSchedule.notes}</p>}
             </div>
           )}
-
           <div className="section">
             <h4>📦 Materials Needed</h4>
             {request.materials ? (
@@ -258,7 +366,6 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
               </ul>
             ) : <p>No materials requested.</p>}
           </div>
-
           <div className="section">
             <h4>💳 Payment Information</h4>
             <div>
@@ -270,28 +377,15 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
               {(!request.paymentInstructions || Object.keys(request.paymentInstructions).length === 0) && <p>Club has not provided payment instructions yet.</p>}
             </div>
           </div>
-
           {canPay && (
             <div className="section">
               <h4>💰 Record Payment (Manual)</h4>
-              <div className="field">
-                <label>Amount ($)</label>
-                <input type="number" value={paymentAmount} onChange={e => setPaymentAmount(e.target.value)} />
-              </div>
-              <div className="field">
-                <label>Transaction ID</label>
-                <input value={transactionId} onChange={e => setTransactionId(e.target.value)} />
-              </div>
-              <div className="field">
-                <label>Notes (optional)</label>
-                <textarea value={paymentNotes} onChange={e => setPaymentNotes(e.target.value)} rows="2" />
-              </div>
-              <button className="btn-primary" onClick={handleRecordPayment} disabled={actionLoading}>
-                Mark as Paid
-              </button>
+              <div className="field"><label>Amount ($)</label><input type="number" value={paymentAmount} onChange={e => setPaymentAmount(e.target.value)} /></div>
+              <div className="field"><label>Transaction ID</label><input value={transactionId} onChange={e => setTransactionId(e.target.value)} /></div>
+              <div className="field"><label>Notes (optional)</label><textarea value={paymentNotes} onChange={e => setPaymentNotes(e.target.value)} rows="2" /></div>
+              <button className="btn-primary" onClick={handleRecordPayment} disabled={actionLoading}>Mark as Paid</button>
             </div>
           )}
-
           <div className="section"><h4>📢 Promotion Plan</h4><p>{request.promotionPlan ? JSON.stringify(request.promotionPlan) : 'Not yet filled by club'}</p></div>
           <div className="section"><h4>📅 Event Day Checklist</h4><p>{request.eventDayChecklist ? JSON.stringify(request.eventDayChecklist) : 'Not yet filled'}</p></div>
           <div className="section"><h4>📸 Post‑Event Report</h4><p>{request.postEventReport ? JSON.stringify(request.postEventReport) : 'After event'}</p></div>
@@ -302,6 +396,17 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
     // Club view
     return (
       <div className="coordination">
+        {request.status === 'countered' && (
+          <div className="section">
+            <h4>🔄 Counter Offer Received</h4>
+            <p>Sponsor has countered with: <strong>${request.counterAmount}</strong></p>
+            <div className="actions">
+              <button className="btn-sm btn-sm-success" onClick={() => handleClubResponse('accept_counter')} disabled={actionLoading}>Accept Counter</button>
+              <button className="btn-sm btn-sm-danger" onClick={() => handleClubResponse('decline_counter')} disabled={actionLoading}>Decline</button>
+              <button className="btn-sm" onClick={() => { const amt = prompt('Your counter amount:'); if(amt) handleClubResponse('counter', null, parseFloat(amt)); }} disabled={actionLoading}>Counter Again</button>
+            </div>
+          </div>
+        )}
         {request.status === 'meeting_requested' && (
           <div className="section">
             <h4>📅 Meeting Request from Sponsor</h4>
@@ -314,10 +419,10 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
             ) : (
               <div className="meeting-schedule-form">
                 <h5>Set Meeting Schedule</h5>
-                <input type="date" placeholder="Date" value={meetingSchedule.date} onChange={e => setMeetingSchedule({...meetingSchedule, date: e.target.value})} />
-                <input type="time" placeholder="Time" value={meetingSchedule.time} onChange={e => setMeetingSchedule({...meetingSchedule, time: e.target.value})} />
-                <input placeholder="Location (e.g., Zoom, Room 101)" value={meetingSchedule.location} onChange={e => setMeetingSchedule({...meetingSchedule, location: e.target.value})} />
-                <textarea placeholder="Additional notes" value={meetingSchedule.notes} onChange={e => setMeetingSchedule({...meetingSchedule, notes: e.target.value})} rows="2" />
+                <input type="date" value={meetingSchedule.date} onChange={e => setMeetingSchedule({...meetingSchedule, date: e.target.value})} />
+                <input type="time" value={meetingSchedule.time} onChange={e => setMeetingSchedule({...meetingSchedule, time: e.target.value})} />
+                <input placeholder="Location" value={meetingSchedule.location} onChange={e => setMeetingSchedule({...meetingSchedule, location: e.target.value})} />
+                <textarea placeholder="Notes" value={meetingSchedule.notes} onChange={e => setMeetingSchedule({...meetingSchedule, notes: e.target.value})} rows="2" />
                 <div className="actions">
                   <button className="btn-sm btn-sm-success" onClick={() => handleClubResponse('accept_meeting', meetingSchedule)} disabled={actionLoading}>Confirm Schedule</button>
                   <button className="btn-sm" onClick={() => setShowMeetingScheduleForm(false)}>Cancel</button>
@@ -326,7 +431,6 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
             )}
           </div>
         )}
-
         {request.meetingSchedule && request.meetingSchedule.date && (
           <div className="section">
             <h4>📅 Scheduled Meeting</h4>
@@ -342,34 +446,36 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
             {request.meetingCompleted && <p>✅ Meeting completed</p>}
           </div>
         )}
-
         <div className="section">
-          <h4>💳 Payment Information (Provide bank details for sponsor)</h4>
+          <h4>💳 Payment Information</h4>
           {editingInstructions ? (
             <form onSubmit={handleSaveInstructions}>
-              <input placeholder="Bank Name" value={instructions.bankName || ''} onChange={e => setInstructions({...instructions, bankName: e.target.value})} />
-              <input placeholder="Account Name" value={instructions.accountName || ''} onChange={e => setInstructions({...instructions, accountName: e.target.value})} />
-              <input placeholder="Account Number" value={instructions.accountNumber || ''} onChange={e => setInstructions({...instructions, accountNumber: e.target.value})} />
-              <input type="date" placeholder="Payment Deadline" value={instructions.deadline?.slice(0,10) || ''} onChange={e => setInstructions({...instructions, deadline: e.target.value})} />
+              <input type="text" placeholder="Bank Name" value={instructions.bankName || ''} onChange={e => setInstructions({...instructions, bankName: e.target.value})} />
+              <input type="text" placeholder="Account Name" value={instructions.accountName || ''} onChange={e => setInstructions({...instructions, accountName: e.target.value})} />
+              <input type="text" placeholder="Account Number" value={instructions.accountNumber || ''} onChange={e => setInstructions({...instructions, accountNumber: e.target.value})} />
+              <input type="date" placeholder="Payment Deadline" value={instructions.deadline ? instructions.deadline.slice(0,10) : ''} onChange={e => setInstructions({...instructions, deadline: e.target.value})} />
               <textarea placeholder="Other Details" value={instructions.otherDetails || ''} onChange={e => setInstructions({...instructions, otherDetails: e.target.value})} rows="2" />
               <div className="actions">
-                <button type="submit" className="btn-sm btn-sm-success" disabled={actionLoading}>Save</button>
+                <button type="submit" className="btn-sm btn-sm-success" disabled={actionLoading}>Save Instructions</button>
                 <button type="button" className="btn-sm" onClick={() => setEditingInstructions(false)}>Cancel</button>
               </div>
             </form>
           ) : (
             <div>
-              {request.paymentInstructions?.bankName && <p><strong>Bank:</strong> {request.paymentInstructions.bankName}</p>}
-              {request.paymentInstructions?.accountName && <p><strong>Account Name:</strong> {request.paymentInstructions.accountName}</p>}
-              {request.paymentInstructions?.accountNumber && <p><strong>Account Number:</strong> {request.paymentInstructions.accountNumber}</p>}
-              {request.paymentInstructions?.deadline && <p><strong>Payment Deadline:</strong> {new Date(request.paymentInstructions.deadline).toLocaleDateString()}</p>}
-              {request.paymentInstructions?.otherDetails && <p><strong>Other Details:</strong> {request.paymentInstructions.otherDetails}</p>}
+              {request.paymentInstructions?.bankName && (
+                <>
+                  <p><strong>Bank:</strong> {request.paymentInstructions.bankName}</p>
+                  <p><strong>Account Name:</strong> {request.paymentInstructions.accountName}</p>
+                  <p><strong>Account Number:</strong> {request.paymentInstructions.accountNumber}</p>
+                  {request.paymentInstructions.deadline && <p><strong>Deadline:</strong> {new Date(request.paymentInstructions.deadline).toLocaleDateString()}</p>}
+                  {request.paymentInstructions.otherDetails && <p><strong>Other:</strong> {request.paymentInstructions.otherDetails}</p>}
+                </>
+              )}
               {(!request.paymentInstructions || Object.keys(request.paymentInstructions).length === 0) && <p>No payment instructions provided yet.</p>}
-              <button className="btn-sm" onClick={() => setEditingInstructions(true)}>Edit Instructions</button>
+              <button className="btn-sm" onClick={() => setEditingInstructions(true)}>✏️ Edit Instructions</button>
             </div>
           )}
         </div>
-
         <div className="section"><h4>📢 Promotion Plan</h4><p>{request.promotionPlan ? JSON.stringify(request.promotionPlan) : 'Not yet filled'}</p></div>
         <div className="section"><h4>📅 Event Day Checklist</h4><p>{request.eventDayChecklist ? JSON.stringify(request.eventDayChecklist) : 'Not yet filled'}</p></div>
         <div className="section"><h4>📸 Post‑Event Report</h4><p>{request.postEventReport ? JSON.stringify(request.postEventReport) : 'After event'}</p></div>
@@ -377,21 +483,67 @@ const SponsorshipDetail = ({ request, onRefresh, userRole }) => {
     );
   };
 
+  const showChat = ['accepted', 'meeting_scheduled', 'meeting_requested', 'agreement_signed', 'countered'].includes(request.status);
+  const showRating = userRole === 'sponsor' && !alreadyRated;
+
   return (
     <div className="sponsorship-detail-card">
       <div className="card-header">
-        <h3>{request.event?.title || 'Event'}</h3>
+        <h3>
+          {request.event?.title || 'Event'}
+          {clubAvgRating > 0 && (
+            <span className="avg-rating">
+              ⭐ {clubAvgRating.toFixed(1)} / 5 ({clubRatingCount} {clubRatingCount === 1 ? 'review' : 'reviews'})
+            </span>
+          )}
+        </h3>
         <span className={`badge status-${request.status}`}>{request.status}</span>
       </div>
       <div className="detail-tabs">
         <button className={activeTab === 'proposal' ? 'active' : ''} onClick={() => setActiveTab('proposal')}>Proposal</button>
-        {(request.status === 'accepted' || request.status === 'meeting_scheduled' || request.status === 'meeting_requested') && (
+        {(request.status === 'accepted' || request.status === 'meeting_scheduled' || request.status === 'meeting_requested' || request.status === 'countered') && (
           <button className={activeTab === 'coordination' ? 'active' : ''} onClick={() => setActiveTab('coordination')}>Coordination</button>
+        )}
+        {showChat && (
+          <button className={activeTab === 'chat' ? 'active' : ''} onClick={() => setActiveTab('chat')}>
+            💬 Chat {unreadMessages > 0 && <span className="unread-badge">{unreadMessages}</span>}
+          </button>
+        )}
+        {showRating && (
+          <button className={activeTab === 'rate' ? 'active' : ''} onClick={() => setActiveTab('rate')}>⭐ Rate Club</button>
         )}
       </div>
       <div className="tab-content">
         {activeTab === 'proposal' && renderProposal()}
         {activeTab === 'coordination' && renderCoordination()}
+        {activeTab === 'chat' && showChat && (
+          <Chat requestId={request._id} userRole={userRole} />
+        )}
+        {activeTab === 'rate' && showRating && (
+          <div className="rating-section">
+            <h4>Rate your experience with the club</h4>
+            <div className="rating-select-wrapper">
+              <select
+                value={ratingValue}
+                onChange={(e) => setRatingValue(parseInt(e.target.value))}
+                className="rating-select"
+              >
+                <option value="1">⭐ 1 – Poor</option>
+                <option value="2">⭐⭐ 2 – Fair</option>
+                <option value="3">⭐⭐⭐ 3 – Good</option>
+                <option value="4">⭐⭐⭐⭐ 4 – Very Good</option>
+                <option value="5">⭐⭐⭐⭐⭐ 5 – Excellent</option>
+              </select>
+            </div>
+            <textarea
+              placeholder="Leave a review (optional)"
+              value={reviewText}
+              onChange={(e) => setReviewText(e.target.value)}
+              rows="3"
+            />
+            <button className="btn-primary" onClick={submitRating}>Submit Rating</button>
+          </div>
+        )}
       </div>
     </div>
   );

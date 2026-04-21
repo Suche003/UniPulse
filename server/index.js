@@ -21,32 +21,36 @@ import studentRoutes from "./routes/studentRoutes.js";
 import vendorRoutes from "./routes/vendorRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import eventRoutes from "./routes/eventRoutes.js";
-import sponsorRoutes from "./routes/sponsorRoutes.js";
-import adminRoutes from "./routes/adminRoutes.js";
-import packageRoutes from "./routes/packageRoutes.js";
-import sponsorshipRoutes from "./routes/sponsorshipRoutes.js";
-import paymentRoutes from "./routes/paymentRoutes.js";
-import offeringRoutes from "./routes/offeringRoutes.js";
-import analyticsRoutes from "./routes/analyticsRoutes.js";
-import paymentGatewayRoutes from "./routes/paymentGatewayRoutes.js";
-import notificationRoutes from "./routes/notificationRoutes.js";
+import sponsorRoutes from './routes/sponsorRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
+import packageRoutes from './routes/packageRoutes.js';
+import sponsorshipRoutes from './routes/sponsorshipRoutes.js';
+import paymentRoutes from './routes/paymentRoutes.js';
+import offeringRoutes from './routes/offeringRoutes.js';
+import analyticsRoutes from './routes/analyticsRoutes.js';
+import paymentGatewayRoutes from './routes/paymentGatewayRoutes.js';
+import notificationRoutes from './routes/notificationRoutes.js';
 import clubRoutes from "./routes/clubRoute.js";
-
 import stallRoutes from "./routes/stallRoutes.js";
 import bookingStallRoutes from "./routes/bookingStallRoutes.js";
 import stallPaymentRoutes from "./routes/stallPaymentRoutes.js";
+import messageRoutes from './routes/messageRoutes.js';
+import ratingRoutes from './routes/ratingRoutes.js';
+import studentProfileRoutes from "./routes/studentProfileRoutes.js";
+
 import { errorHandler } from "./middleware/errorHandler.js";
 import { handleStripeWebhook } from "./controllers/paymentGatewayController.js";
 
 // Import models to ensure they are registered
-import "./models/Sponsor.js";
-import "./models/Event.js";
-import "./models/SponsorshipPackage.js";
-import "./models/SponsorshipRequest.js";
-import "./models/Payment.js";
-import "./models/SponsorOffering.js";
-import "./models/Notification.js";
-
+import './models/Sponsor.js';
+import './models/Event.js';
+import './models/SponsorshipPackage.js';
+import './models/SponsorshipRequest.js';
+import './models/Payment.js';
+import './models/SponsorOffering.js';
+import './models/Notification.js';
+import './models/Message.js';
+import './models/Rating.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -57,7 +61,9 @@ const app = express();
 
 app.use(cors({ origin: "http://localhost:5173" }));
 
-// Body parsers
+// Stripe webhook endpoint must use raw body
+app.post('/api/payment-gateway/webhook', express.raw({ type: 'application/json' }), handleStripeWebhook);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -157,6 +163,9 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Clubs
 app.use("/api/clubs", clubRoutes);
+app.use("/api/students", studentProfileRoutes);
+app.use('/api/messages', messageRoutes);
+app.use('/api/ratings', ratingRoutes);
 
 app.use(errorHandler);
 
