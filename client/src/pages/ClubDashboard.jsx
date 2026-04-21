@@ -171,14 +171,23 @@ const ClubDashboard = () => {
                 Update Event
               </Link>
             </>
-          ) : type === "approved" ? (
-            <Link
-              to={`/events/view/${eventId}`}
-              className="club-action-btn"
-            >
-              View Event
-            </Link>
-          ) : type === "rejected" ? ( // ✅ NEW
+) : type === "approved" ? (
+  <>
+    <Link
+      to={`/events/view/${eventId}`}
+      className="club-action-btn secondary"
+    >
+      View Event
+    </Link>
+
+    <Link
+      to={`/stalls/${event.eventid}`}
+      className="club-action-btn"
+    >
+      Stall Management
+    </Link>
+  </>
+) : type === "rejected" ?  ( // ✅ NEW
             <>
               <Link
                 to={`/events/view/${eventId}`}
