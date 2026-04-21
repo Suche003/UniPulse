@@ -91,7 +91,7 @@ test('Invalid title format', async ({ page }) => {
 
   await page.goto('http://localhost:5173/club/clubrequest');
 
-  await page.locator('input[name="title"]').fill('###$$$');
+  await page.locator('input[name="title"]').fill('HI..#');
   await page.locator('textarea[name="description"]').fill('IT event');
   await page.locator('input[name="location"]').fill('Colombo');
   await page.locator('input[name="date"]').fill('2026-12-31T12:00');
@@ -265,7 +265,7 @@ test('Approve event', async ({ page }) => {
   await expect(page.locator('text=approved')).toBeVisible();
 });
 
-test('Reject event', async ({ page }) => {
+test('Reject event with reason', async ({ page }) => {
   await page.goto('http://localhost:5173/login');
 
   await page.getByPlaceholder('Enter username or email')
@@ -284,5 +284,47 @@ test('Reject event', async ({ page }) => {
 
   await page.click('text=Reject');
 
+  // 👉 ENTER REASON (IMPORTANT PART)
+  await page.fill('textarea', 'Event not suitable for university policy');
+
+  // OR if input has placeholder:
+  // await page.getByPlaceholder('Enter reason').fill('Not suitable');
+
+  await page.click('text=submit');
+
   await expect(page.locator('text=rejected')).toBeVisible();
+});
+
+test('Update event successfully', async ({ page }) => {
+  // login
+  await page.goto('http://localhost:5173/login');
+
+  await page.getByPlaceholder('Enter username or email')
+    .fill('umesha@gmail.com');
+
+  await page.getByPlaceholder('Enter password')
+    .fill('123Umesha');
+
+  await page.getByRole('button', { name: /login/i }).click();
+
+  await page.waitForURL('**/club/**');
+
+  // go to events list
+  await page.goto('http://localhost:5173/club/dashboard');
+
+  // click edit (AUTO GET ID)
+  await page.getByRole('button', { name: /Update Event/i }).first().click();
+
+  await page.waitForURL('**/events/update/**');
+
+  // update fields
+  await page.locator('input[name="title"]').fill('Updated Event');
+  await page.locator('textarea[name="description"]').fill('Updated desc');
+  await page.locator('input[name="location"]').fill('Colombo');
+
+  // submit
+  await page.getByRole('button', { name: /update/i }).click();
+
+  // success check
+  await expect(page.locator('text=success|updated')).toBeVisible();
 });

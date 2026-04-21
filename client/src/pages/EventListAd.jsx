@@ -206,7 +206,7 @@ const EventList = () => {
           <input
             type="text"
             className="admin-events-search-input"
-            placeholder="Search by title, location..."
+            placeholder="Search by title, location,date..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />

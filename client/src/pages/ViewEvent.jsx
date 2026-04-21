@@ -21,8 +21,8 @@ export default function ViewEvent() {
       });
   }, [id]);
 
-  if (loading) return <p>Loading event details...</p>;
-  if (!eventData) return <p>Event not found</p>;
+  if (loading) return <p style={{ color: "#fff" }}>Loading event details...</p>;
+  if (!eventData) return <p style={{ color: "#fff" }}>Event not found</p>;
 
   const imageUrl =
     eventData?.image && eventData.image.trim() !== ""
@@ -34,156 +34,166 @@ export default function ViewEvent() {
       ? `http://localhost:5000/uploads/${eventData.pdf}`
       : null;
 
-  // ✅ Gradient Button Style
-  const buttonStyle = {
-    background: "linear-gradient(90deg, #ff2d75, #7b2ff7)",
-    color: "#fff",
-    borderRadius: "25px",
-    padding: "12px 22px",
-    fontWeight: "bold",
-    textDecoration: "none",
-    display: "inline-block",
-    transition: "all 0.3s ease",
-    boxShadow: "0 4px 10px rgba(0,0,0,0.3)",
-    border: "none",
-  };
-
-  // ✅ Hover Effects
-  const buttonHover = (e) => {
-    e.target.style.transform = "translateY(-2px)";
-    e.target.style.boxShadow = "0 6px 15px rgba(0,0,0,0.4)";
-  };
-
-  const buttonLeave = (e) => {
-    e.target.style.transform = "translateY(0)";
-    e.target.style.boxShadow = "0 4px 10px rgba(0,0,0,0.3)";
-  };
-
   return (
-    <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
-      
+    <div
+      style={{
+        minHeight: "100vh",
+        padding: "30px",
+        fontFamily: "Arial",
+        color: "#fff",
+        background:
+          "radial-gradient(circle at top left, rgba(255, 0, 102, 0.14), transparent 25%)," +
+          "radial-gradient(circle at top right, rgba(139, 92, 246, 0.15), transparent 30%)," +
+          "linear-gradient(135deg, #0b0b14 0%, #111827 45%, #1a1030 100%)",
+      }}
+    >
       {/* BACK BUTTON */}
-      <div style={{ marginBottom: "15px" }}>
+      <div style={{ marginBottom: "20px" }}>
         <Link
           to="/club/dashboard"
-          style={buttonStyle}
-          onMouseEnter={buttonHover}
-          onMouseLeave={buttonLeave}
+          style={{
+            background: "linear-gradient(90deg, #ec4899, #8b5cf6)",
+            padding: "10px 18px",
+            borderRadius: "14px",
+            color: "#fff",
+            textDecoration: "none",
+            fontWeight: "bold",
+          }}
         >
           ← Back to Dashboard
         </Link>
       </div>
 
-      {/* TITLE & DESCRIPTION */}
-      <h1 style={{ fontSize: "1.8rem", marginBottom: "8px", color: "#fff" }}>
-        {eventData.title}
-      </h1>
-
-      <p style={{ fontSize: "1rem", marginBottom: "15px", color: "#fff" }}>
-        {eventData.description}
-      </p>
-
-      {/* EVENT CARD */}
-      <div
-        style={{
-          display: "flex",
-          gap: "15px",
-          padding: "15px",
-          border: "1px solid #ccc",
-          borderRadius: "8px",
-          alignItems: "flex-start",
-          boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-        }}
-      >
-        {/* IMAGE + PDF */}
-        <div style={{ flex: "0 0 300px" }}>
-          {imageUrl ? (
-            <img
-              src={imageUrl}
-              alt="Event"
-              style={{
-                width: "300px",
-                height: "200px",
-                objectFit: "cover",
-                borderRadius: "4px",
-                marginBottom: "5px",
-              }}
-              onError={(e) =>
-                (e.target.src =
-                  "https://via.placeholder.com/300x200?text=No+Image")
-              }
-            />
-          ) : (
-            <div
-              style={{
-                width: "300px",
-                height: "200px",
-                background: "#eee",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#888",
-                marginBottom: "5px",
-                borderRadius: "4px",
-              }}
-            >
-              No Image uploaded
-            </div>
-          )}
-
-          {/* PDF BUTTON */}
-          <div style={{ marginTop: "5px" }}>
-            {pdfUrl ? (
-              <a
-                href={pdfUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={buttonStyle}
-                onMouseEnter={buttonHover}
-                onMouseLeave={buttonLeave}
-              >
-                View PDF
-              </a>
-            ) : (
-              <span style={{ fontSize: "0.85rem", color: "#888" }}>
-                No PDF uploaded
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* DETAILS */}
+      {/* CENTER WRAPPER */}
+      <div style={{ display: "flex", justifyContent: "center" }}>
+        {/* MAIN CARD */}
         <div
           style={{
-            flex: 1,
-            display: "flex",
-            flexDirection: "column",
-            gap: "6px",
-            color: "#fff",
+            width: "100%",
+            maxWidth: "900px",
+            borderRadius: "24px",
+            padding: "25px",
+            background: "rgba(255,255,255,0.08)",
+            backdropFilter: "blur(18px)",
+            border: "1px solid rgba(255,255,255,0.12)",
+            boxShadow: "0 15px 40px rgba(0,0,0,0.35)",
           }}
         >
-          <div>
-            <strong>Date:</strong>{" "}
-            {new Date(eventData.date).toLocaleDateString()}{" "}
-            {new Date(eventData.date).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-          </div>
+          {/* TITLE ONLY */}
+          <h1
+            style={{
+              fontSize: "2rem",
+              fontWeight: "800",
+              textAlign: "center",
+            }}
+          >
+            {eventData.title}
+          </h1>
 
-          <div>
-            <strong>Location:</strong> {eventData.location}
-          </div>
+          {/* DESCRIPTION */}
+          <p style={{ color: "#cbd5e1", textAlign: "center" }}>
+            {eventData.description}
+          </p>
 
-          <div>
-            <strong>Paid Event:</strong> {eventData.ispaid ? "Yes" : "No"}
-          </div>
+          {/* CONTENT */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: "20px",
+              marginTop: "20px",
+            }}
+          >
+            {/* IMAGE */}
+            {imageUrl ? (
+              <img
+                src={imageUrl}
+                alt="Event"
+                style={{
+                  width: "100%",
+                  maxWidth: "500px",
+                  height: "280px",
+                  objectFit: "cover",
+                  borderRadius: "16px",
+                }}
+              />
+            ) : (
+              <div
+                style={{
+                  width: "100%",
+                  maxWidth: "500px",
+                  height: "280px",
+                  background: "rgba(255,255,255,0.05)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderRadius: "16px",
+                  color: "#888",
+                }}
+              >
+                No Image uploaded
+              </div>
+            )}
 
-          {eventData.ispaid && (
-            <div>
-              <strong>Ticket Price:</strong> {eventData.ticketPrice}
+            {/* DETAILS (BOTTOM SECTION) */}
+            <div
+              style={{
+                width: "100%",
+                marginTop: "10px",
+                paddingTop: "15px",
+                borderTop: "1px solid rgba(255,255,255,0.15)",
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "12px",
+                color: "#fff",
+              }}
+            >
+              <div>
+                <strong>Date:</strong>{" "}
+                {new Date(eventData.date).toLocaleString()}
+              </div>
+
+              <div>
+                <strong>Location:</strong> {eventData.location}
+              </div>
+
+              <div>
+                <strong>Paid Event:</strong>{" "}
+                {eventData.ispaid ? "Yes" : "No"}
+              </div>
+
+              {eventData.ispaid && (
+                <div>
+                  <strong>Ticket Price:</strong> {eventData.ticketPrice}
+                </div>
+              )}
             </div>
-          )}
+
+            {/* PDF */}
+            <div style={{ marginTop: "10px" }}>
+              {pdfUrl ? (
+                <a
+                  href={pdfUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    background: "linear-gradient(90deg, #ec4899, #8b5cf6)",
+                    padding: "10px 16px",
+                    borderRadius: "12px",
+                    color: "#fff",
+                    textDecoration: "none",
+                    fontWeight: "bold",
+                    display: "inline-block",
+                  }}
+                >
+                  View PDF
+                </a>
+              ) : (
+                <span style={{ color: "#888" }}>No PDF uploaded</span>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
