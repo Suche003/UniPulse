@@ -6,7 +6,7 @@ import Notification from '../models/Notification.js';
 import Payment from '../models/Payment.js';
 import { sendEmail } from '../utils/email.js';
 
-// ==================== Basic Request Functions ====================
+//  Basic Request Functions 
 export const createRequest = async (req, res) => {
   try {
     const { eventId, sponsorId, proposedAmount, message } = req.body;
