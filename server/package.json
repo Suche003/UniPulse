@@ -9,7 +9,13 @@
   "scripts": {
     "dev": "nodemon index.js",
     "start": "node index.js",
-    "seed:superadmin": "node scripts/seedSuperAdmin.js"
+    "seed:superadmin": "node scripts/seedSuperAdmin.js",
+    "test": "mocha tests/server/**/*.test.js --exit",
+    "test:watch": "mocha tests/server/**/*.test.js --watch",
+    "test:student": "mocha tests/server/studentController.test.js tests/server/studentRoutes.integration.test.js --exit",
+    "test:event": "mocha tests/server/eventController.test.js tests/server/eventRoutes.integration.test.js --exit",
+    "test:stall": "mocha tests/server/stallController.test.js tests/server/stallRoutes.integration.test.js --exit",
+    "test:sponsorship": "mocha tests/server/sponsorshipController.test.js tests/server/sponsorshipRoutes.integration.test.js --exit"
   },
   "keywords": [],
   "dependencies": {
@@ -25,6 +31,10 @@
     "stripe": "^22.0.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14"
+    "chai": "^4.3.10",
+    "mocha": "^10.2.0",
+    "nodemon": "^3.1.14",
+    "sinon": "^17.0.1",
+    "supertest": "^6.3.3"
   }
 }
