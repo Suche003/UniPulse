@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
+import "./ViewEvent.css";
 
 export default function ViewEvent() {
   const { id } = useParams();
@@ -21,8 +22,27 @@ export default function ViewEvent() {
       });
   }, [id]);
 
-  if (loading) return <p>Loading event details...</p>;
-  if (!eventData) return <p>Event not found</p>;
+  if (loading) {
+    return (
+      <div className="view-event-page">
+        <div className="view-event-container">
+          <div className="view-event-message">Loading event details...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!eventData) {
+    return (
+      <div className="view-event-page">
+        <div className="view-event-container">
+          <div className="view-event-message view-event-message--error">
+            Event not found
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const imageUrl =
     eventData?.image && eventData.image.trim() !== ""
@@ -34,157 +54,136 @@ export default function ViewEvent() {
       ? `http://localhost:5000/uploads/${eventData.pdf}`
       : null;
 
-  // ✅ Gradient Button Style
-  const buttonStyle = {
-    background: "linear-gradient(90deg, #ff2d75, #7b2ff7)",
-    color: "#fff",
-    borderRadius: "25px",
-    padding: "12px 22px",
-    fontWeight: "bold",
-    textDecoration: "none",
-    display: "inline-block",
-    transition: "all 0.3s ease",
-    boxShadow: "0 4px 10px rgba(0,0,0,0.3)",
-    border: "none",
-  };
+  const formattedDate = eventData?.date
+    ? new Date(eventData.date).toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      })
+    : "N/A";
 
-  // ✅ Hover Effects
-  const buttonHover = (e) => {
-    e.target.style.transform = "translateY(-2px)";
-    e.target.style.boxShadow = "0 6px 15px rgba(0,0,0,0.4)";
-  };
-
-  const buttonLeave = (e) => {
-    e.target.style.transform = "translateY(0)";
-    e.target.style.boxShadow = "0 4px 10px rgba(0,0,0,0.3)";
-  };
+  const formattedTime = eventData?.date
+    ? new Date(eventData.date).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "N/A";
 
   return (
-    <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
-      
-      {/* BACK BUTTON */}
-      <div style={{ marginBottom: "15px" }}>
-        <Link
-          to="/club/dashboard"
-          style={buttonStyle}
-          onMouseEnter={buttonHover}
-          onMouseLeave={buttonLeave}
-        >
-          ← Back to Dashboard
-        </Link>
-      </div>
+    <div className="view-event-page">
+      <div className="view-event-container">
+        <div className="view-event-topbar">
+          <Link to="/club/dashboard" className="view-event-back-btn">
+            <span>&#8617;</span> Go Back to Dashboard
+          </Link>
+        </div>
 
-      {/* TITLE & DESCRIPTION */}
-      <h1 style={{ fontSize: "1.8rem", marginBottom: "8px", color: "#fff" }}>
-        {eventData.title}
-      </h1>
+        <section className="view-event-hero">
+          <div className="view-event-hero__content">
+            <span className="view-event-badge">
+              {eventData.status || "Event"}
+            </span>
+            <h1 className="view-event-title">{eventData.title}</h1>
+            <p className="view-event-description">
+              {eventData.description || "No description available."}
+            </p>
+          </div>
+          <div className="view-event-hero__glow"></div>
+        </section>
 
-      <p style={{ fontSize: "1rem", marginBottom: "15px", color: "#fff" }}>
-        {eventData.description}
-      </p>
+        <section className="view-event-card">
+          <div className="view-event-media">
+            {imageUrl ? (
+              <img
+                src={imageUrl}
+                alt={eventData.title || "Event"}
+                className="view-event-image"
+                onError={(e) => {
+                  e.target.style.display = "none";
+                  const fallback = e.target.nextElementSibling;
+                  if (fallback) fallback.style.display = "flex";
+                }}
+              />
+            ) : null}
 
-      {/* EVENT CARD */}
-      <div
-        style={{
-          display: "flex",
-          gap: "15px",
-          padding: "15px",
-          border: "1px solid #ccc",
-          borderRadius: "8px",
-          alignItems: "flex-start",
-          boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-        }}
-      >
-        {/* IMAGE + PDF */}
-        <div style={{ flex: "0 0 300px" }}>
-          {imageUrl ? (
-            <img
-              src={imageUrl}
-              alt="Event"
-              style={{
-                width: "300px",
-                height: "200px",
-                objectFit: "cover",
-                borderRadius: "4px",
-                marginBottom: "5px",
-              }}
-              onError={(e) =>
-                (e.target.src =
-                  "https://via.placeholder.com/300x200?text=No+Image")
-              }
-            />
-          ) : (
             <div
-              style={{
-                width: "300px",
-                height: "200px",
-                background: "#eee",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#888",
-                marginBottom: "5px",
-                borderRadius: "4px",
-              }}
+              className="view-event-image-placeholder"
+              style={{ display: imageUrl ? "none" : "flex" }}
             >
-              No Image uploaded
+              No Image Uploaded
             </div>
-          )}
 
-          {/* PDF BUTTON */}
-          <div style={{ marginTop: "5px" }}>
-            {pdfUrl ? (
-              <a
-                href={pdfUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={buttonStyle}
-                onMouseEnter={buttonHover}
-                onMouseLeave={buttonLeave}
-              >
-                View PDF
-              </a>
-            ) : (
-              <span style={{ fontSize: "0.85rem", color: "#888" }}>
-                No PDF uploaded
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* DETAILS */}
-        <div
-          style={{
-            flex: 1,
-            display: "flex",
-            flexDirection: "column",
-            gap: "6px",
-            color: "#fff",
-          }}
-        >
-          <div>
-            <strong>Date:</strong>{" "}
-            {new Date(eventData.date).toLocaleDateString()}{" "}
-            {new Date(eventData.date).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-          </div>
-
-          <div>
-            <strong>Location:</strong> {eventData.location}
-          </div>
-
-          <div>
-            <strong>Paid Event:</strong> {eventData.ispaid ? "Yes" : "No"}
-          </div>
-
-          {eventData.ispaid && (
-            <div>
-              <strong>Ticket Price:</strong> {eventData.ticketPrice}
+            <div className="view-event-pdf-wrap">
+              {pdfUrl ? (
+                <a
+                  href={pdfUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="view-event-btn"
+                >
+                  View PDF
+                </a>
+              ) : (
+                <span className="view-event-empty-text">No PDF uploaded</span>
+              )}
             </div>
-          )}
-        </div>
+          </div>
+
+          <div className="view-event-details">
+            <div className="view-event-details-header">
+              <h2>Event Details</h2>
+            </div>
+
+            <div className="view-event-details-grid">
+              <div className="view-event-detail-item">
+                <span className="view-event-detail-label">Event ID</span>
+                <span className="view-event-detail-value">
+                  {eventData.eventid || "N/A"}
+                </span>
+              </div>
+
+              <div className="view-event-detail-item">
+                <span className="view-event-detail-label">Date</span>
+                <span className="view-event-detail-value">{formattedDate}</span>
+              </div>
+
+              <div className="view-event-detail-item">
+                <span className="view-event-detail-label">Time</span>
+                <span className="view-event-detail-value">{formattedTime}</span>
+              </div>
+
+              <div className="view-event-detail-item">
+                <span className="view-event-detail-label">Location</span>
+                <span className="view-event-detail-value">
+                  {eventData.location || "Not specified"}
+                </span>
+              </div>
+
+              <div className="view-event-detail-item">
+                <span className="view-event-detail-label">Paid Event</span>
+                <span className="view-event-detail-value">
+                  {eventData.ispaid ? "Yes" : "No"}
+                </span>
+              </div>
+
+              {eventData.ispaid && (
+                <div className="view-event-detail-item">
+                  <span className="view-event-detail-label">Ticket Price</span>
+                  <span className="view-event-detail-value">
+                    Rs. {eventData.ticketPrice}
+                  </span>
+                </div>
+              )}
+
+              <div className="view-event-detail-item">
+                <span className="view-event-detail-label">Status</span>
+                <span className="view-event-detail-value status-text">
+                  {eventData.status || "N/A"}
+                </span>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   );
