@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 
 import SuperAdminPanel from "./pages/SuperAdminPanel";
+import TicketPurchase from "./pages/TicketPurchase";
 
 import Home from "./pages/Home";
 import Signup from "./pages/Signup";
@@ -46,6 +47,7 @@ import StudentDashboard from "./pages/StudentDashboard";
 import Profile from "./pages/Profile";
 import Payment from "./pages/Payment";
 import EventDetails from "./pages/EventDetails";
+import FeedbackPage from "./pages/FeedbakPage";
 
 // Super Admin pages
 import AllVendors from "./pages/AllVendors";
@@ -97,6 +99,8 @@ export default function App() {
             <Route path="/student/profile" element={<Profile />} />
             <Route path="/student/events/:id" element={<EventDetails />} />
             <Route path="/student/payment/:id" element={<Payment />} />
+            <Route path="/student/ticket/:eventId" element={<TicketPurchase />} />
+            <Route path="/student/feedback/:id" element={<FeedbackPage />} />
           </Route>
 
           {/* Club only */}
