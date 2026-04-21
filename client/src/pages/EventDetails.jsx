@@ -1,147 +1,169 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
+import axios from "axios";
 import Navbar from "../components/Navbar";
+import "./EventDetails.css";
 
-const events = [
-  {
-    id: "1",
-    title: "Hackathon 2026",
-    club: "IEEE Student Branch",
-    date: "28 March 2026",
-    time: "9:00 AM",
-    venue: "Main Auditorium",
-    isFree: true,
-    category: "Technology",
-    description:
-      "Hackathon 2026 is a full-day innovation challenge where students collaborate, build ideas, and present solutions to real-world problems. It is a great opportunity to improve teamwork, coding, and presentation skills.",
-    organizer: "IEEE Student Branch",
-    contact: "ieee@sliit.lk",
-    dressCode: "Casual / Smart Casual",
-  },
-  {
-    id: "2",
-    title: "Music Night",
-    club: "Music Club",
-    date: "30 March 2026",
-    time: "6:00 PM",
-    venue: "Open Air Theater",
-    isFree: false,
-    price: 1500,
-    category: "Entertainment",
-    description:
-      "Music Night brings students together for a memorable evening with live performances, band sessions, and special acts. This is a ticketed event with limited seats.",
-    organizer: "Music Club",
-    contact: "musicclub@sliit.lk",
-    dressCode: "Casual",
-  },
-  {
-    id: "3",
-    title: "Career Fair",
-    club: "Career Guidance Unit",
-    date: "02 April 2026",
-    time: "10:00 AM",
-    venue: "Faculty Lobby",
-    isFree: true,
-    category: "Career",
-    description:
-      "Career Fair connects students with companies, recruiters, and internship opportunities. Students can network, hand over CVs, and learn about current industry expectations.",
-    organizer: "Career Guidance Unit",
-    contact: "careers@sliit.lk",
-    dressCode: "Formal / Office Wear",
-  },
-  {
-    id: "4",
-    title: "DJ Night 2026",
-    club: "Entertainment Society",
-    date: "08 April 2026",
-    time: "7:00 PM",
-    venue: "Open Grounds",
-    isFree: false,
-    price: 2000,
-    category: "Entertainment",
-    description:
-      "DJ Night 2026 is a high-energy student party event with music, live performances, and a vibrant night atmosphere. Tickets are required for entry.",
-    organizer: "Entertainment Society",
-    contact: "entertainment@sliit.lk",
-    dressCode: "Casual / Party Wear",
-  },
-];
+function formatDate(dateString) {
+  const date = new Date(dateString);
+
+  return date.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+}
+
+function formatTime(dateString) {
+  const date = new Date(dateString);
+
+  return date.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
 
 export default function EventDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [joined, setJoined] = useState(false);
 
-  const storedUser = localStorage.getItem("unipulse_user");
-  const student = storedUser ? JSON.parse(storedUser) : null;
-  const studentId = student?.id || "guest";
-
-  const goingKey = `unipulse_going_events_${studentId}`;
-  const paymentKey = `unipulse_payments_${studentId}`;
-
-  const event = useMemo(() => {
-    return events.find((item) => item.id === id);
-  }, [id]);
+  const [event, setEvent] = useState(null);
+  const [studentStatus, setStudentStatus] = useState(null);
+  const [existingTicket, setExistingTicket] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem(goingKey) || "[]");
-    setJoined(stored.some((item) => item.id === id));
-  }, [id, goingKey]);
-
-  function handleJoin() {
-    if (!event) return;
-
-    const stored = JSON.parse(localStorage.getItem(goingKey) || "[]");
-    const alreadyExists = stored.some((item) => item.id === event.id);
-
-    if (!alreadyExists) {
-      const updated = [
-        ...stored,
-        {
-          id: event.id,
-          title: event.title,
-          date: event.date,
-          time: event.time,
-          venue: event.venue,
-          club: event.club,
-          category: event.category,
-        },
-      ];
-
-      localStorage.setItem(goingKey, JSON.stringify(updated));
+    fetchEventDetails();
+    if (id) {
+      fetchTicketState();
     }
+  }, [id]);
 
-    setJoined(true);
+  async function fetchEventDetails() {
+    try {
+      setLoading(true);
+      setError("");
 
-    // return to dashboard so the student can immediately see the update
-    setTimeout(() => {
-      navigate("/student/dashboard");
-    }, 500);
+      const token = localStorage.getItem("unipulse_token");
+
+      const res = await axios.get(
+        `http://localhost:5000/api/student/events/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setEvent(res.data.event || null);
+      setStudentStatus(res.data.studentStatus || null);
+    } catch (err) {
+      console.error("Error loading event details:", err);
+      setError(err.response?.data?.message || "Failed to load event details.");
+    } finally {
+      setLoading(false);
+    }
   }
 
-  function handleRemove() {
-    if (!event) return;
+  async function fetchTicketState() {
+    try {
+      const token = localStorage.getItem("unipulse_token");
 
-    const stored = JSON.parse(localStorage.getItem(goingKey) || "[]");
-    const updated = stored.filter((item) => item.id !== event.id);
+      const res = await axios.get(
+        `http://localhost:5000/api/student/tickets/purchase/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-    localStorage.setItem(goingKey, JSON.stringify(updated));
-    setJoined(false);
+      setExistingTicket(res.data.existingTicket || null);
+    } catch (err) {
+      console.error("Error loading ticket state:", err);
+    }
   }
 
-  const payments = JSON.parse(localStorage.getItem(paymentKey) || "[]");
-  const paymentSubmitted = payments.some((item) => item.eventId === id);
+  async function handleGoing() {
+    try {
+      setActionLoading(true);
+      setMessage("");
+      setError("");
 
-  if (!event) {
+      const token = localStorage.getItem("unipulse_token");
+
+      const res = await axios.post(
+        `http://localhost:5000/api/student/events/${id}/go`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setMessage(res.data.message || "Successfully joined the event.");
+      await fetchEventDetails();
+    } catch (err) {
+      console.error("Error joining event:", err);
+      setError(err.response?.data?.message || "Failed to join event.");
+    } finally {
+      setActionLoading(false);
+    }
+  }
+
+  async function handleRemoveGoing() {
+    try {
+      setActionLoading(true);
+      setMessage("");
+      setError("");
+
+      const token = localStorage.getItem("unipulse_token");
+
+      const res = await axios.delete(
+        `http://localhost:5000/api/student/events/${id}/go`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setMessage(res.data.message || "Removed from going list.");
+      await fetchEventDetails();
+    } catch (err) {
+      console.error("Error removing going event:", err);
+      setError(err.response?.data?.message || "Failed to remove event.");
+    } finally {
+      setActionLoading(false);
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="page">
+        <Navbar />
+        <main className="container">
+          <section className="eventDetailsCard">
+            <h1>Loading...</h1>
+          </section>
+        </main>
+      </div>
+    );
+  }
+
+  if (error && !event) {
     return (
       <div className="page">
         <Navbar />
         <main className="container">
           <section className="eventDetailsCard">
             <h1>Event Not Found</h1>
-            <p className="eventMuted">
-              The event you are trying to view does not exist.
-            </p>
+            <p className="eventMuted">{error}</p>
             <Link to="/student/dashboard" className="btn btn--ghost">
               Back to Dashboard
             </Link>
@@ -159,19 +181,23 @@ export default function EventDetails() {
         <section className="eventHero">
           <div className="eventHero__content">
             <div className="eventHero__top">
-              <span className="eventCategory">{event.category}</span>
-              <span className={event.isFree ? "freeBadge" : "paidBadge"}>
-                {event.isFree ? "Free Event" : `Paid Event • Rs. ${event.price}`}
+              <span className="eventCategory">{event.eventid}</span>
+
+              <span className={event.ispaid ? "paidBadge" : "freeBadge"}>
+                {event.ispaid
+                  ? `Paid Event • Rs. ${event.ticketPrice || 0}`
+                  : "Free Event"}
               </span>
             </div>
 
             <h1 className="eventHero__title">{event.title}</h1>
-            <p className="eventHero__club">Organized by {event.club}</p>
+
+            <p className="eventHero__club">UniPulse Event Experience</p>
 
             <div className="eventHero__meta">
-              <span>📅 {event.date}</span>
-              <span>⏰ {event.time}</span>
-              <span>📍 {event.venue}</span>
+              <span>📅 {formatDate(event.date)}</span>
+              <span>⏰ {formatTime(event.date)}</span>
+              <span>📍 {event.location}</span>
             </div>
           </div>
         </section>
@@ -179,55 +205,74 @@ export default function EventDetails() {
         <section className="eventDetailsGrid">
           <div className="eventDetailsCard">
             <h2>About This Event</h2>
-            <p className="eventDescription">{event.description}</p>
+
+            <p className="eventDescription">
+              {event.description || "No description available."}
+            </p>
 
             <div className="eventActionBox">
-              {event.isFree ? (
+              {!event.ispaid ? (
                 <>
-                  {!joined ? (
-                    <button className="btn btn--primary" onClick={handleJoin}>
-                      I Am Going
-                    </button>
-                  ) : (
+                  {studentStatus?.status === "going" ? (
                     <div className="eventActionButtons">
                       <button className="btn btn--primary" disabled>
                         You're Going ✅
                       </button>
 
-                      <button className="btn btn--danger" onClick={handleRemove}>
-                        Remove from Going
+                      <button
+                        className="btn btn--danger"
+                        onClick={handleRemoveGoing}
+                        disabled={actionLoading}
+                      >
+                        {actionLoading ? "Removing..." : "Remove from Going"}
                       </button>
                     </div>
-                  )}
-
-                  {joined && (
-                    <p className="successText">
-                      You have successfully joined this event.
-                    </p>
+                  ) : (
+                    <button
+                      className="btn btn--primary"
+                      onClick={handleGoing}
+                      disabled={actionLoading}
+                    >
+                      {actionLoading ? "Joining..." : "I Am Going"}
+                    </button>
                   )}
                 </>
               ) : (
                 <>
-                  {!paymentSubmitted ? (
-                    <Link
-                      to={`/student/payment/${event.id}`}
-                      className="btn btn--primary"
-                    >
-                      Buy Ticket
-                    </Link>
-                  ) : (
-                    <button className="btn btn--primary" disabled>
-                      Payment Submitted ✅
-                    </button>
-                  )}
+                  <div className="eventActionButtons">
+                    {existingTicket?.status === "paid" ? (
+                      <button className="btn btn--primary" disabled>
+                        Purchased ✅
+                      </button>
+                    ) : existingTicket ? (
+                      <button
+                        className="btn btn--primary"
+                        onClick={() => navigate(`/student/payment/${existingTicket._id}`)}
+                      >
+                        Continue Payment
+                      </button>
+                    ) : (
+                      <button
+                        className="btn btn--primary"
+                        onClick={() => navigate(`/student/ticket/${id}`)}
+                      >
+                        Purchase Ticket
+                      </button>
+                    )}
+                  </div>
 
                   <p className="eventMuted">
-                    {paymentSubmitted
-                      ? "Your payment request has already been submitted."
-                      : "Ticket purchase flow can be connected next."}
+                    {existingTicket?.status === "paid"
+                      ? "You have already purchased this ticket."
+                      : existingTicket
+                      ? "Your ticket record is already created. Continue payment."
+                      : "Secure your place for this event by continuing to the demo ticket purchase flow."}
                   </p>
                 </>
               )}
+
+              {message && <p className="successText">{message}</p>}
+              {error && event && <p className="errorText">{error}</p>}
             </div>
           </div>
 
@@ -236,34 +281,36 @@ export default function EventDetails() {
 
             <div className="infoList">
               <div className="infoRow">
+                <span>Event ID</span>
+                <strong>{event.eventid}</strong>
+              </div>
+
+              <div className="infoRow">
                 <span>Date</span>
-                <strong>{event.date}</strong>
+                <strong>{formatDate(event.date)}</strong>
               </div>
 
               <div className="infoRow">
                 <span>Time</span>
-                <strong>{event.time}</strong>
+                <strong>{formatTime(event.date)}</strong>
               </div>
 
               <div className="infoRow">
                 <span>Venue</span>
-                <strong>{event.venue}</strong>
+                <strong>{event.location}</strong>
               </div>
 
               <div className="infoRow">
-                <span>Organizer</span>
-                <strong>{event.organizer}</strong>
+                <span>Entry Type</span>
+                <strong>{event.ispaid ? "Paid" : "Free"}</strong>
               </div>
 
-              <div className="infoRow">
-                <span>Contact</span>
-                <strong>{event.contact}</strong>
-              </div>
-
-              <div className="infoRow">
-                <span>Dress Code</span>
-                <strong>{event.dressCode}</strong>
-              </div>
+              {event.ispaid && (
+                <div className="infoRow">
+                  <span>Ticket Price</span>
+                  <strong>Rs. {event.ticketPrice || 0}</strong>
+                </div>
+              )}
             </div>
 
             <div className="eventDetailsButtons">

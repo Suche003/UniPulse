@@ -1,24 +1,22 @@
-.sponsor-page {
+.sponsor-signup-page {
   min-height: 100vh;
   position: relative;
   overflow: hidden;
-  background:
-    radial-gradient(circle at top left, rgba(255, 0, 102, 0.16), transparent 24%),
-    radial-gradient(circle at top right, rgba(139, 92, 246, 0.16), transparent 28%),
-    linear-gradient(135deg, #090212 0%, #050814 45%, #120a24 100%);
+  background: radial-gradient(circle at top left, rgba(255, 0, 102, 0.16), transparent 24%),
+              radial-gradient(circle at top right, rgba(139, 92, 246, 0.16), transparent 28%),
+              linear-gradient(135deg, #090212 0%, #050814 45%, #120a24 100%);
   color: #f5f7ff;
 }
 
-.sponsor-page__bg {
+.sponsor-signup-bg {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background:
-    radial-gradient(circle at 20% 25%, rgba(255, 47, 146, 0.08), transparent 20%),
-    radial-gradient(circle at 80% 20%, rgba(124, 58, 237, 0.1), transparent 22%);
+  background: radial-gradient(circle at 20% 25%, rgba(255, 47, 146, 0.08), transparent 20%),
+              radial-gradient(circle at 80% 20%, rgba(124, 58, 237, 0.1), transparent 22%);
 }
 
-.sponsor-page__topbar {
+.sponsor-signup-topbar {
   position: relative;
   z-index: 2;
   width: min(1350px, calc(100% - 40px));
@@ -29,14 +27,12 @@
 .sponsor-home-btn {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
   gap: 8px;
   padding: 14px 22px;
   border-radius: 16px;
   text-decoration: none;
   font-weight: 700;
   font-size: 0.95rem;
-  letter-spacing: 0.02em;
   color: #ffffff;
   background: linear-gradient(90deg, #ff2f92 0%, #8b3dff 100%);
   box-shadow: 0 12px 30px rgba(168, 85, 247, 0.28);
@@ -48,32 +44,34 @@
   box-shadow: 0 18px 38px rgba(168, 85, 247, 0.4);
 }
 
-.sponsor-layout {
+/* Two-column layout */
+.sponsor-signup-layout {
   position: relative;
   z-index: 2;
   width: min(1350px, calc(100% - 40px));
   margin: 0 auto;
-  padding: 28px 0 48px;
+  padding: 28px 0 60px;
   display: grid;
-  grid-template-columns: 1.05fr 0.95fr;
-  gap: 5px;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
   align-items: start;
 }
 
-.sponsor-info {
-  padding: 0px 20px 20px 0;
+/* Left column – feature cards */
+.sponsor-signup-left {
+  padding: 20px 20px 20px 0;
 }
 
-.sponsor-info__title {
-  margin: 0 0 20px;
-  font-size: clamp(2.2rem, 4vw, 4rem);
-  line-height: 1.08;
-  font-weight: 850;
-  letter-spacing: -0.03em;
+.left-title {
+  margin: 0 0 32px;
+  font-size: clamp(2rem, 3.5vw, 3.2rem);
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -0.02em;
   color: #ffffff;
 }
 
-.sponsor-info__title span {
+.left-title span {
   background: linear-gradient(90deg, #ff2f92 0%, #c026ff 50%, #7c3aed 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -81,278 +79,264 @@
   color: transparent;
 }
 
-.sponsor-info__text {
-  max-width: 620px;
-  margin: 0 0 28px;
-  color: rgba(232, 236, 255, 0.82);
-  font-size: 1.02rem;
-  line-height: 1.8;
-}
-
-.sponsor-feature-grid {
+.features-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
 }
 
-.sponsor-feature-card {
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.08),
-    rgba(255, 255, 255, 0.04)
-  );
+.feature-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 22px;
-  padding: 22px 20px;
-  backdrop-filter: blur(12px);
-  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.22);
+  border-radius: 24px;
+  padding: 24px 20px;
+  backdrop-filter: blur(10px);
   transition: transform 0.25s ease, border-color 0.25s ease;
 }
 
-.sponsor-feature-card:hover {
+.feature-card:hover {
   transform: translateY(-4px);
-  border-color: rgba(255, 255, 255, 0.18);
+  border-color: rgba(139, 92, 246, 0.5);
 }
 
-.sponsor-header-left h1 {
-
-  margin: 0;
-  font-size: clamp(2.2rem, 4vw, 3rem);
-  line-height: 1;
-  font-weight: 800;
-  letter-spacing: -0.04em;
-  color: #ffffff;
-
-}
-.sponsor-feature-card__icon {
-  width: 52px;
-  height: 52px;
-  margin-bottom: 14px;
-  display: grid;
-  place-items: center;
-  border-radius: 16px;
-  font-size: 1.35rem;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 47, 146, 0.24),
-    rgba(124, 58, 237, 0.24)
-  );
+.feature-icon {
+  font-size: 2.2rem;
+  margin-bottom: 16px;
+  display: inline-block;
+  background: linear-gradient(135deg, rgba(255, 47, 146, 0.2), rgba(124, 58, 237, 0.2));
+  padding: 12px;
+  border-radius: 18px;
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.sponsor-feature-card h3 {
+.feature-card h3 {
   margin: 0 0 10px;
-  font-size: 1.1rem;
-  color: #ffffff;
-  font-weight: 800;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
 }
 
-.sponsor-feature-card p {
+.feature-card p {
   margin: 0;
   color: rgba(232, 236, 255, 0.78);
-  line-height: 1.7;
-  font-size: 0.96rem;
+  line-height: 1.6;
+  font-size: 0.9rem;
+}
+
+/* Right column – clean form */
+.sponsor-signup-right {
+  width: 100%;
 }
 
 .sponsor-form-card {
-  background: linear-gradient(
-    180deg,
-    rgba(18, 24, 45, 0.9),
-    rgba(12, 16, 30, 0.92)
-  );
+  background: linear-gradient(180deg, rgba(18, 24, 45, 0.92), rgba(12, 16, 30, 0.96));
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 28px;
-  padding: 30px 26px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+  border-radius: 32px;
+  padding: 32px 28px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(16px);
-  align-items: center;
 }
 
-.sponsor-form-card__header {
-  margin-bottom: 22px;
+.form-header {
+  margin-bottom: 24px;
+  text-align: center;
 }
 
-.sponsor-form-card__header h2 {
+.form-header h2 {
   margin: 0 0 8px;
   font-size: 1.9rem;
-  color: #ffffff;
-  font-weight: 850;
+  font-weight: 800;
+  color: #fff;
 }
 
-.sponsor-form-card__header p {
+.form-header p {
   margin: 0;
-  color: rgba(232, 236, 255, 0.72);
-  line-height: 1.7;
+  color: rgba(232, 236, 255, 0.7);
 }
 
-.sponsor-form {
-  display: grid;
-  gap: 16px;
-}
-
-.sponsor-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-
-.sponsor-field {
+.sponsor-signup-form {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 20px;
 }
 
-.sponsor-field label {
-  color: #f8fafc;
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-field.full-width {
+  grid-column: span 2;
+}
+
+.form-field label {
   font-weight: 700;
-  font-size: 0.96rem;
+  font-size: 0.9rem;
+  color: #f8fafc;
+  margin-bottom: 4px;
 }
 
-.sponsor-field input,
-.sponsor-field textarea,
-.sponsor-field select {
+/* Inputs, textarea, select – base styles */
+.form-field input,
+.form-field textarea,
+.form-field select {
   width: 100%;
-  padding: 14px 15px;
+  padding: 12px 14px;
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.05);
   color: #ffffff;
+  font-size: 0.95rem;
   outline: none;
-  font-size: 0.98rem;
-  transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
-  box-sizing: border-box;
+  transition: all 0.2s;
 }
 
-.sponsor-field input::placeholder,
-.sponsor-field textarea::placeholder {
-  color: rgba(232, 236, 255, 0.45);
+/* Select specific – custom arrow and option styling */
+.form-field select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='white'><path d='M7 10l5 5 5-5z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
 }
 
-.sponsor-field textarea {
-  resize: vertical;
-  min-height: 96px;
+/* Dropdown options – ensure visibility */
+.form-field select option {
+  background: #1e1e2f;
+  color: #ffffff;
+  padding: 10px;
 }
 
-.sponsor-field input:focus,
-.sponsor-field textarea:focus,
-.sponsor-field select:focus {
+.form-field select option:hover {
+  background: #2d2d3f;
+}
+
+.form-field input:focus,
+.form-field textarea:focus,
+.form-field select:focus {
   border-color: rgba(192, 38, 255, 0.7);
-  box-shadow: 0 0 0 4px rgba(192, 38, 255, 0.14);
-  background: rgba(255, 255, 255, 0.07);
+  box-shadow: 0 0 0 3px rgba(192, 38, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
 }
 
-.sponsor-field select option {
-  color: #111827;
+.form-field textarea {
+  resize: vertical;
+  min-height: 90px;
 }
 
-.sponsor-error {
-  margin: 0;
+.field-hint {
+  font-size: 0.7rem;
+  color: rgba(232, 236, 255, 0.55);
+  margin-top: 4px;
+}
+
+.char-counter {
+  font-size: 0.7rem;
+  text-align: right;
+  color: rgba(232, 236, 255, 0.6);
+  margin-top: 4px;
+}
+
+.field-error {
+  margin: 4px 0 0;
   color: #fda4af;
-  font-size: 0.9rem;
-  line-height: 1.4;
+  font-size: 0.75rem;
 }
 
 .sponsor-alert {
-  margin-bottom: 16px;
-  padding: 14px 16px;
-  border-radius: 14px;
-  background: rgba(239, 68, 68, 0.14);
-  border: 1px solid rgba(239, 68, 68, 0.28);
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 16px;
+  padding: 12px;
+  margin-bottom: 20px;
   color: #fecaca;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
 }
 
-.sponsor-counter {
-  text-align: right;
-  color: rgba(232, 236, 255, 0.55);
-  font-size: 0.85rem;
-  margin-top: -2px;
-}
-
-.sponsor-help {
-  color: rgba(232, 236, 255, 0.58);
-  font-size: 0.85rem;
-}
-
-.sponsor-loading {
-  padding: 6px 0;
-}
-
-.sponsor-submit-btn {
+.register-btn {
   margin-top: 10px;
   width: 100%;
+  padding: 14px;
+  border-radius: 30px;
   border: none;
-  border-radius: 18px;
-  padding: 15px 18px;
-  font-size: 1rem;
+  background: linear-gradient(90deg, #ff2f92, #8b3dff);
+  color: white;
   font-weight: 800;
-  color: #ffffff;
-  background: linear-gradient(90deg, #ff2f92 0%, #8b3dff 100%);
-  box-shadow: 0 14px 32px rgba(168, 85, 247, 0.28);
+  font-size: 1rem;
   cursor: pointer;
-  transition: transform 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease;
+  transition: all 0.25s ease;
+  box-shadow: 0 12px 25px rgba(168, 85, 247, 0.3);
 }
 
-.sponsor-submit-btn:hover {
+.register-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 18px 38px rgba(168, 85, 247, 0.38);
+  box-shadow: 0 18px 35px rgba(168, 85, 247, 0.4);
 }
 
-.sponsor-submit-btn:disabled {
-  opacity: 0.72;
+.register-btn:disabled {
+  opacity: 0.7;
   cursor: not-allowed;
-  transform: none;
 }
 
-.sponsor-footer {
-  margin: 10px 0 0;
+.login-footer {
   text-align: center;
-  color: rgba(232, 236, 255, 0.72);
-  font-size: 0.95rem;
+  margin-top: 16px;
+  color: rgba(232, 236, 255, 0.7);
+  font-size: 0.9rem;
 }
 
-.sponsor-footer a {
-  color: #ffffff;
+.login-footer a {
+  color: #ff8ed0;
   font-weight: 700;
   text-decoration: none;
 }
 
-.sponsor-footer a:hover {
+.login-footer a:hover {
   text-decoration: underline;
 }
 
+/* Responsive */
 @media (max-width: 1024px) {
-  .sponsor-layout {
+  .sponsor-signup-layout {
     grid-template-columns: 1fr;
+    gap: 32px;
   }
-
-  .sponsor-info {
+  .sponsor-signup-left {
     padding-right: 0;
+  }
+  .features-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 768px) {
-  .sponsor-layout,
-  .sponsor-page__topbar {
-    width: min(100% - 24px, 100%);
+  .sponsor-signup-layout {
+    width: calc(100% - 24px);
   }
-
-  .sponsor-layout {
-    padding-top: 20px;
-    gap: 22px;
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
-
+  .form-field.full-width {
+    grid-column: span 1;
+  }
   .sponsor-form-card {
     padding: 24px 18px;
-    border-radius: 22px;
   }
-
-  .sponsor-feature-grid,
-  .sponsor-row {
+  .form-header h2 {
+    font-size: 1.6rem;
+  }
+  .features-grid {
     grid-template-columns: 1fr;
   }
-
-  .sponsor-info__title {
-    font-size: clamp(1.9rem, 8vw, 2.7rem);
+  .left-title {
+    text-align: center;
   }
 }

@@ -32,10 +32,6 @@ export default function Navbar({ superAdminMinimal = false }) {
     }
   };
 
-  const storedUser = localStorage.getItem("unipulse_user");
-  const user = storedUser ? JSON.parse(storedUser) : null;
-  const userName = user?.name || "";
-
   const pathname = location.pathname;
 
   const dashboardPath =
@@ -183,28 +179,24 @@ export default function Navbar({ superAdminMinimal = false }) {
 
     return (
       <>
-        <button
-          className="btn btn--ghost"
-          onClick={() => setShowNotifications(!showNotifications)}
-          style={{ position: "relative" }}
-        >
-          🔔
-          {unreadCount > 0 && (
-            <span className="notification-badge">{unreadCount}</span>
-          )}
-        </button>
 
-        {role !== "sponsor" && role !== "club" && role !== "superadmin" && (
-          <Link className="btn btn--ghost" to={dashboardPath}>
-            Dashboard
-          </Link>
-        )}
+        {role !== "student" &&
+          role !== "sponsor" &&
+          role !== "club" &&
+          role !== "superadmin" && (
+            <Link className="btn btn--ghost" to={dashboardPath}>
+              Dashboard
+            </Link>
+          )}
 
         {role === "student" && (
           <>
-            <Link className="btn btn--ghost" to="/student/dashboard">
-              Dashboard
-            </Link>
+            {pathname !== "/student/dashboard" && (
+              <Link className="btn btn--ghost" to="/student/dashboard">
+                Dashboard
+              </Link>
+            )}
+
             <Link className="btn btn--ghost" to="/student/profile">
               My Profile
             </Link>
