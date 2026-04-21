@@ -149,17 +149,14 @@ export const updateEvent = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Find existing event
     const event = await Event.findById(id);
     if (!event) return res.status(404).json({ message: "Event not found" });
 
-    // Update fields
     event.title = req.body.title || event.title;
     event.description = req.body.description || event.description;
     event.date = req.body.date || event.date;
     event.location = req.body.location || event.location;
 
-    // FormData sends booleans as string
     if (req.body.ispaid !== undefined) {
       event.ispaid = req.body.ispaid === "true" || req.body.ispaid === true;
     }
@@ -168,11 +165,15 @@ export const updateEvent = async (req, res) => {
       event.ticketPrice = Number(req.body.ticketPrice);
     }
 
-    // Only update files if uploaded
-    if (req.files?.pdf) event.pdf = req.files.pdf[0].path;
-    if (req.files?.image) event.image = req.files.image[0].path;
+    // ✅ FIX: use filename (same as createEvent)
+    if (req.files?.pdf) {
+      event.pdf = req.files.pdf[0].filename;
+    }
 
-    // Save the updated event
+    if (req.files?.image) {
+      event.image = req.files.image[0].filename;
+    }
+
     const updatedEvent = await event.save();
 
     res.status(200).json({
