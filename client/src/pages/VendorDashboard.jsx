@@ -115,7 +115,7 @@ export default function VendorDashboard() {
   if (!vendor) return <p>Loading...</p>;
 
   return (
-    <div className="vendor-dashboard page container">
+    <div className="vendor-dashboard">
 
       {/* NAVBAR */}
       <header className="vendor-dashboard-navbar">
