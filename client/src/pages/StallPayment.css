@@ -1,15 +1,15 @@
-/* -------------------- Variables -------------------- */
 :root {
   --bg: #0b0b12;
   --card: rgba(255, 255, 255, 0.06);
-  --text: #eaeaf2;
-  --muted: rgba(234, 234, 242, 0.7);
   --border: rgba(255, 255, 255, 0.12);
+  --text: #eaeaf2;
+  --muted: rgba(234, 234, 242, 0.72);
   --accent: #7c2cff;
   --accent2: #ff2b6a;
+  --shadow: 0 20px 50px rgba(0, 0, 0, 0.28);
 }
 
-/* -------------------- Stall Payment Card  -------------------- */
+/*  Stall Payment Card   */
 .stall-payment-card {
   background: var(--card);
   padding: 22px 25px;
@@ -18,8 +18,8 @@
   backdrop-filter: blur(10px);
   box-shadow: 0 12px 30px rgba(0,0,0,0.4);
   width: 100%;
-  max-width: 450px;
-  margin: 30px auto;
+  max-width: 600px;
+  margin: 50px auto;
 }
 
 /* Title */
@@ -27,8 +27,8 @@
   margin-top: 0;
   text-align: center;
   color: var(--text);
-  margin-bottom: 25px;
-  font-size: 24px;
+  margin-bottom: 30px;
+  font-size: 30px;
   font-weight: 700;
 }
 
@@ -39,12 +39,12 @@
   margin: 6px 0;
 }
 
-/* -------------------- Payment Form -------------------- */
+/*  Payment Form  */
 .payment-form {
   margin-top: 18px;
   display: flex;
   flex-direction: column;
-  gap: 15px; 
+  gap: 24px; 
 }
 
 /* Spacing to non-radio labels */
@@ -52,12 +52,12 @@
   display: flex;
   flex-direction: column; 
   gap: 6px;               
-  font-size: 13px;
+  font-size: 15px;
   color: rgba(234,234,242,0.8);
   font-weight: 600;
 }
 
-/* -------------------- Card Type -------------------- */
+/*  Card Type  */
 .card-type-group.horizontal {
   display: flex;
   justify-content: center;
@@ -82,7 +82,7 @@
   height: auto;
 }
 
-/* -------------------- Inputs -------------------- */
+/*  Inputs  */
 .payment-form input {
   width: 100%;
   padding: 12px;
@@ -99,7 +99,7 @@
   border-color: var(--accent);
 }
 
-/* -------------------- Expiry + CVV -------------------- */
+/*  Expiry + CVV  */
 .card-row {
   display: flex;
   gap: 12px;
@@ -112,7 +112,7 @@
   gap: 6px;
 }
 
-/* -------------------- Buttons -------------------- */
+/*  Buttons  */
 .pay-btn {
   background: linear-gradient(90deg, var(--accent2), var(--accent));
   color: #fff;
@@ -156,7 +156,7 @@
   flex: 1;
 }
 
-/* -------------------- Error & Info -------------------- */
+/*  Error & Info  */
 .error-text,
 .info-text {
   text-align: center;

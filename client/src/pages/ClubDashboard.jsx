@@ -448,7 +448,27 @@ const ClubDashboard = () => {
               )}
             </section>
 
-            {/* SPONSORSHIP */}
+            {/* VENDOR STALL MANAGEMENT */}
+            <section className="club-dashboard-section">
+              <div className="club-section-header">
+                <h2>Vendor Stall Management</h2>
+              </div>
+
+              <div className="club-sponsorship-grid">
+                <div className="club-sponsorship-card">
+                  <div className="club-sponsorship-card__icon">📋</div>
+                  <h3>Stall Requests</h3>
+                  <p>
+                    View and manage stall requests submitted by vendors for your events.
+                  </p>
+                  <Link to="/club/stall-requests" className="club-action-btn">
+                    View Requests
+                  </Link>
+                </div>
+              </div>
+            </section>
+
+            {/* SPONSORSHIP MANAGEMENT */}
             <section className="club-dashboard-section">
               <div className="club-section-header">
                 <h2>Sponsorship Management</h2>

@@ -1,220 +1,187 @@
-:root {
-  --bg: #0b0b12;
-  --card: rgba(255, 255, 255, 0.06);
-  --text: #eaeaf2;
-  --muted: rgba(234, 234, 242, 0.7);
-  --border: rgba(255, 255, 255, 0.12);
-  --accent: #7c2cff;
-  --accent2: #ff2b6a;
+/* PAGE */
+.stalls-page {
+  position: relative;
+  min-height: 100vh;
+  padding: 32px 20px 50px;
+  background:
+    radial-gradient(circle at top left, rgba(255, 0, 102, 0.14), transparent 25%),
+    radial-gradient(circle at top right, rgba(139, 92, 246, 0.15), transparent 30%),
+    linear-gradient(135deg, #0b0b14 0%, #111827 45%, #1a1030 100%);
+  color: #f8fafc;
 }
 
-/* Main container */
-.stalls-container {
-  width: 90%;
-  max-width: 1600px;
-  margin: 20px auto;
-  padding: 40px;
-  border-radius: 12px;
-  min-height: 1500px;
-  background: var(--card);
-  color: var(--text);
-  font-family: 'Poppins', sans-serif;
-  box-sizing: border-box;
-}
-
-/* Heading */
-.event-stalls-heading {
-  font-size: 32px !important;
-  margin-bottom: 30px;
-  text-align: center;
-  color: var(--text);
-}
-
-/* Add Stall Button */
-.add-stall-btn {
-  display: block;
-  margin: 10px auto 40px auto;
-  background: linear-gradient(90deg, var(--accent2), var(--accent));
-  color: white;
-  padding: 8px 16px;
-  font-size: 16px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.add-stall-btn:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
-}
-
-/* Stalls Grid */
+/* GRID */
 .stalls-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
-  justify-content: center; 
-  align-items: stretch;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 340px));
+  gap: 60px;
+  justify-content: center;
+  margin-top: 60px;
 }
 
-/* Stall Card */
-.stall-card {
-  display: flex;              
-  flex-direction: column;   
-  justify-content: space-between;
-  background: var(--card);   
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 16px;
-  width: 100%;
-  max-width: 350px;
-  min-height: 350px;
-  box-sizing: border-box;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+/* CARD */
+.stalls-card {
+  border-radius: 22px;
+  overflow: hidden;
+  transition: 0.3s ease;
 }
 
-.stall-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+.stalls-card:hover {
+  transform: translateY(-5px);
 }
 
-/* Vertical layout */
-.stall-horizontal {
-  display: flex;
-  flex-direction: column; 
-  gap: 12px;
-  align-items: stretch;
-  height: auto;
+/* IMAGE */
+.stalls-card__image-wrap {
+  position: relative;
+  height: 220px;
+  overflow: hidden;
 }
 
-/* Image container */
-.stall-image-container {
-  width: 100%;
-  height: 200px;
-  flex-shrink: 0;
-}
-
-.stall-image {
+.stalls-card__image {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 8px;
 }
 
-/* Details container */
-.stall-details {
-  width: 100%;
-  flex-shrink: 0;
+.stalls-status {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #ec4899, #8b5cf6);
+  color: white;
+}
+
+
+/* STALL DETAILS */
+
+.stalls-card__body {
+  padding: 20px;
+
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
+  align-items: center;
+  text-align: center;
 }
 
-/* Field Name Bold */
-.field-name {
+.stalls-card__body h3 {
+  margin: 0 0 12px;
+  font-size: 1.25rem;
   font-weight: 800;
-  margin-right: 4px;
 }
 
-/* Stall Text */
-.stall-details p {
+/* META */
+.stalls-meta p {
   margin: 4px 0;
-  font-size: 16px;
-  color: var(--text);
-  font-weight: 600;
+  color: #e5e7eb;
+  font-size: 0.95rem;
 }
 
-.stall-actions {
+/* DESCRIPTION */
+.stalls-description {
+  margin: 10px 0 16px;
+  color: #cbd5e1;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+
+/* ACTION BUTTONS */
+
+.stalls-actions {
   display: flex;
   gap: 14px;
-  width: 50%;
-  margin: 12px auto 0 auto;
-  align-items: center;
   justify-content: center;
 }
 
-.stall-actions .action-btn {
-  flex: 1;
-  height: 30px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+/* BUTTONS */
+.stalls-edit-btn,
+.stalls-delete-btn {
+  width: 40px;    
+  height: 40px;   
+  border-radius: 16px;
   border: none;
-  border-radius: 5px;
-  color: white;
-  font-weight: 600;
-  font-size: 14px;
-  width: 100%;
-  padding: 0;
-  margin: 12px 0;
-  line-height: 0;
-  box-sizing: border-box;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s ease;
 }
 
-.stall-actions .icon {
+/* ICON SIZE */
+.stalls-edit-btn svg,
+.stalls-delete-btn svg {
+  color: #fefdfd;
   width: 18px;
   height: 18px;
-  display: block;
 }
 
-.stall-actions .action-btn svg {
-  vertical-align: middle;
+/* COLORS */
+.stalls-edit-btn {
+  background: linear-gradient(135deg, #ff2b6a, #7c2cff);
 }
 
-.stall-actions .edit-btn {
-  background-color: #28a745;
+.stalls-delete-btn {
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
 }
 
-.stall-actions .edit-btn:hover {
-  background-color: #1e7e34;
+.stalls-edit-btn:hover,
+.stalls-delete-btn:hover {
+  transform: scale(1.1);
 }
 
-.stall-actions .delete-btn {
-  background-color: #dc3545;
+
+/* STATS ROW  */
+
+.stalls-stats-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 22px;
+  margin-bottom: 18px;
 }
 
-.stall-actions .delete-btn:hover {
-  background-color: #b02a37;
+/* TOTAL STALLS */
+.stalls-stats-row span {
+  font-size: 1.15rem;   
+  font-weight: 700;
+  color: #cbd5e1;
 }
 
-/* No stalls message */
-.stalls-container p {
-  text-align: center;
-  font-size: 13px;
-  color: var(--muted);
-  margin-top: 20px;
+.stalls-stats-row h2 {
+  font-size: 20px;    
+  font-weight: 900;
+  color: #ffffff;
 }
 
-/* Responsive adjustments */
+/* CREATE BUTTON */
+.stalls-create-btn {
+  padding: 12px 18px;
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+  font-weight: 800;
+  color: white;
+  background: linear-gradient(135deg, #ec4899, #8b5cf6);
+  transition: 0.25s ease;
+}
+
+.stalls-create-btn:hover {
+  transform: translateY(-2px);
+}
+
+/* RESPONSIVE */
 @media (max-width: 768px) {
   .stalls-grid {
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-template-columns: 1fr;
   }
 
-  .stall-card {
-    font-size: 13px;
-    padding: 12px;
-    height: 100%;
-  }
-}
-
-@media (max-width: 600px) {
-  .stall-image-container {
-    height: 180px;
-  }
-}
-
-@media (max-width: 480px) {
-  .stalls-container {
-    width: 95%;
-    margin: 15px auto;
-  }
-
-  .add-stall-btn {
-    padding: 6px 12px;
-    font-size: 12px;
+  .stalls-stats-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
   }
 }

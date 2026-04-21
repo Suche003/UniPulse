@@ -5,7 +5,10 @@ import "./BookingForm.css";
 const BookingForm = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { stall } = location.state || {};
+
+  // FALLBACK
+  const { stall = null } = location.state || {};
+
   const { eventid: paramEventid } = useParams();
 
   const [eventName, setEventName] = useState("");
@@ -22,7 +25,6 @@ const BookingForm = () => {
     type: "",
   });
 
-  // patterns
   const phonePattern = /^[0-9]{10}$/;
   const stallTypePattern = /^[A-Za-z\s]+$/;
 
@@ -39,8 +41,9 @@ const BookingForm = () => {
     }
 
     if (stall) {
-      setEventName(stall.title || "");
+      setEventName(stall.eventTitle || "");
       setStallCategory(stall.category || "");
+
       setFormData((prev) => ({
         ...prev,
         type: stall.type || "",
@@ -48,16 +51,11 @@ const BookingForm = () => {
     }
   }, [stall]);
 
-  // handle change
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // phone validation
     if (name === "phone") {
       setErrors((prev) => ({
         ...prev,
@@ -70,7 +68,6 @@ const BookingForm = () => {
       }));
     }
 
-    // stall type validation
     if (name === "type") {
       setErrors((prev) => ({
         ...prev,
@@ -84,25 +81,20 @@ const BookingForm = () => {
     }
   };
 
-  // submit
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const validationErrors = {};
 
-    // phone
-    if (!formData.phone.trim()) {
+    if (!formData.phone.trim())
       validationErrors.phone = "Phone Number is required";
-    } else if (!phonePattern.test(formData.phone)) {
+    else if (!phonePattern.test(formData.phone))
       validationErrors.phone = "Phone must be exactly 10 digits";
-    }
 
-    // stall type
-    if (!formData.type.trim()) {
+    if (!formData.type.trim())
       validationErrors.type = "Stall Type is required";
-    } else if (!stallTypePattern.test(formData.type)) {
+    else if (!stallTypePattern.test(formData.type))
       validationErrors.type = "Stall Type must contain only letters";
-    }
 
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
@@ -127,21 +119,14 @@ const BookingForm = () => {
         type: formData.type,
       };
 
-      console.log("Submitting payload:", payload);
-
       const res = await fetch("http://localhost:5000/api/bookings", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
       const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || "Failed to submit booking");
-      }
+      if (!res.ok) throw new Error(data.message || "Failed to submit booking");
 
       alert(`Booking submitted successfully! Booking ID: ${data.bookingId}`);
       navigate("/vendor-stalls");
@@ -167,38 +152,35 @@ const BookingForm = () => {
         </label>
 
         <label>
-          Vendor Email
+          Email
           <input type="email" value={email} disabled />
         </label>
 
-        <label>
-          Phone Number*
+        <div className="floating-label">
           <input
             type="tel"
             name="phone"
             value={formData.phone}
             onChange={handleChange}
-            placeholder="0771234567"
+            placeholder=" "
           />
+          <span className="label-text">Phone Number*</span>
           {errors.phone && <span className="error">{errors.phone}</span>}
-        </label>
+        </div>
 
-        <label>
-          Stall Type*
+        <div className="floating-label">
           <input
             type="text"
             name="type"
             value={formData.type}
             onChange={handleChange}
-            placeholder=""
+            placeholder=" "
           />
+          <span className="label-text">Stall Type*</span>
           {errors.type && <span className="error">{errors.type}</span>}
-        </label>
+        </div>
 
-        <button
-          type="submit"
-          disabled={errors.phone || errors.type}
-        >
+        <button type="submit" disabled={errors.phone || errors.type}>
           Confirm Booking
         </button>
       </form>

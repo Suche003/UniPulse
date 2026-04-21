@@ -1,6 +1,7 @@
 import BookingStall from "../models/BookingStall.js";
 import Stall from "../models/Stall.js";
 import Event from "../models/Event.js";
+import Club from "../models/Club.js";
 
 // Helper to generate bookingId like 001, 002
 const generateBookingId = async () => {
@@ -15,28 +16,24 @@ export const createBookingStall = async (req, res) => {
   try {
     const { eventid, stallId, phone, type } = req.body;
 
-    // Validate required fields
     if (!eventid || !stallId || !phone || !type) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    // Get vendor email
     const email = req.user?.email || req.body.email;
     if (!email) return res.status(400).json({ message: "Vendor email is required" });
 
-    // Fetch event and stall
     const event = await Event.findOne({ eventid });
     if (!event) return res.status(404).json({ message: "Event not found" });
 
     const stall = await Stall.findOne({ stallId, eventid });
     if (!stall) return res.status(404).json({ message: "Stall not found" });
 
-    // Generate bookingId
     const bookingId = await generateBookingId();
 
-    // Create booking as pending 
     const newBooking = new BookingStall({
       bookingId,
+      clubid: event.clubid,  
       eventid,
       title: event.title,
       stallId,
@@ -44,7 +41,7 @@ export const createBookingStall = async (req, res) => {
       email,
       phone,
       type,
-      status: "pending", 
+      status: "pending",
     });
 
     const savedBooking = await newBooking.save();
@@ -69,7 +66,7 @@ export const getAllBookingStalls = async (req, res) => {
 // Update booking status
 export const updateBookingStatus = async (req, res) => {
   try {
-    const { id } = req.params; // bookingId
+    const { id } = req.params;
     const { status } = req.body;
 
     if (!status) return res.status(400).json({ message: "Status is required" });
@@ -77,7 +74,6 @@ export const updateBookingStatus = async (req, res) => {
     const booking = await BookingStall.findOne({ bookingId: id });
     if (!booking) return res.status(404).json({ message: "Booking not found" });
 
-    // Booked -> reduce availableStalls
     if (status === "booked") {
       const stall = await Stall.findOne({ eventid: booking.eventid, stallId: booking.stallId });
       if (!stall) return res.status(404).json({ message: "Stall not found" });
@@ -99,7 +95,6 @@ export const updateBookingStatus = async (req, res) => {
       });
     }
 
-    // For approved, pending, rejected — just update status
     booking.status = status;
     const updatedBooking = await booking.save();
     res.json({ message: `Booking status updated to ${status}`, updatedBooking });
@@ -163,5 +158,48 @@ export const getVendorBookings = async (req, res) => {
       message: "Failed to fetch vendor bookings",
       error: err.message
     });
+  }
+};
+
+// Get bookings for a specific club 
+export const getClubEventBookings = async (req, res) => {
+  try {
+    const { clubid } = req.query; 
+    if (!clubid) return res.status(400).json({ message: "Club ID is required" });
+
+    let club = null;
+
+    // Check if clubid is a valid Mongo ObjectId
+    if (/^[0-9a-fA-F]{24}$/.test(clubid)) {
+      club = await Club.findById(clubid);
+    }
+
+    // Fallback: search by club code
+    if (!club) {
+      club = await Club.findOne({ clubid }); 
+    }
+
+    if (!club) return res.status(404).json({ message: "Club not found" });
+
+    const bookings = await BookingStall.find({ clubid: club._id }).sort({ createdAt: -1 });
+
+    const bookingsWithDetails = await Promise.all(
+      bookings.map(async (booking) => {
+        const event = await Event.findOne({ eventid: booking.eventid });
+        const stall = await Stall.findOne({ eventid: booking.eventid, stallId: booking.stallId });
+
+        return {
+          ...booking.toObject(),
+          eventTitle: event?.title || "Event Name",
+          eventDate: event?.date || null,
+          price: stall?.price || 0,
+        };
+      })
+    );
+
+    res.json(bookingsWithDetails);
+  } catch (err) {
+    console.error("Failed to fetch club bookings:", err);
+    res.status(500).json({ message: "Failed to fetch club bookings", error: err.message });
   }
 };

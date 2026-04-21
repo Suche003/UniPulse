@@ -1,132 +1,237 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 import "./Requests.css";
 
 const Requests = () => {
   const [bookings, setBookings] = useState([]);
-  const [payments, setPayments] = useState([]); 
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
+
+  const navigate = useNavigate();
+
+  const club = JSON.parse(localStorage.getItem("unipulse_user")) || {};
+  const clubId = club.clubid || club._id;
 
   useEffect(() => {
-    fetchBookings();
-    fetchPayments(); 
+    fetchClubBookings();
   }, []);
 
-  const fetchBookings = async () => {
+  const fetchClubBookings = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/bookings");
+      if (!clubId) {
+        setError("Club ID not found. Please log in.");
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+      setError("");
+
+      const res = await axios.get(
+        `http://localhost:5000/api/bookings/club?clubid=${clubId}`
+      );
+
       setBookings(res.data);
     } catch (err) {
-      console.error("Error fetching bookings:", err);
+      setError("Failed to fetch bookings.");
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchPayments = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/api/stall-payments");
-      setPayments(res.data);
-    } catch (err) {
-      console.error("Error fetching payments:", err);
-    }
+  const handleRefresh = () => {
+    setSearchTerm("");
+    setStatusFilter("All");
+    fetchClubBookings();
   };
 
-  // APPROVE
-  const approveBooking = async (bookingId) => {
+  const updateStatus = async (bookingId, status) => {
     try {
-      await axios.patch(`http://localhost:5000/api/bookings/${bookingId}/status`, { status: "approved" });
-      setBookings(prev =>
-        prev.map(b => (b.bookingId === bookingId ? { ...b, status: "approved" } : b))
+      const res = await axios.patch(
+        `http://localhost:5000/api/bookings/${bookingId}/status`,
+        { status }
       );
+
+      toast.success(res.data.message);
+      fetchClubBookings();
     } catch (err) {
-      console.error("Error approving booking:", err);
-      alert("Failed to approve booking");
+      toast.error("Failed to update status");
     }
   };
 
-  // REJECT
-  const rejectBooking = async (bookingId) => {
-    const confirmReject = window.confirm("Are you sure you want to reject this booking?");
-    if (!confirmReject) return;
+  const filteredBookings = bookings.filter((b) => {
+    const matchesSearch =
+      b.bookingId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (b.title || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (b.category || "").toLowerCase().includes(searchTerm.toLowerCase());
 
-    try {
-      await axios.patch(`http://localhost:5000/api/bookings/${bookingId}/status`, { status: "rejected" });
-      
-      // Update the booking status in the state instead of removing it
-      setBookings(prev =>
-        prev.map(b => (b.bookingId === bookingId ? { ...b, status: "rejected" } : b))
-      );
-    } catch (err) {
-      console.error("Error rejecting booking:", err);
-      alert("Failed to reject booking");
-    }
-  };
+    const matchesStatus =
+      statusFilter === "All"
+        ? true
+        : b.status === statusFilter.toLowerCase();
 
-  // Check if booking is paid
-  const isPaid = (bookingId) => {
-    return payments.some(
-      p => p.stallId === bookingId && p.status === "success"
-    );
-  };
-
-  if (loading) return <p>Loading booking requests...</p>;
+    return matchesSearch && matchesStatus;
+  });
 
   return (
-    <div className="requests-container">
-      <h1>Booking Requests</h1>
+    <div className="requests-page">
+      <div className="admin-events-container">
 
-      {bookings.length === 0 ? (
-        <p>No booking requests yet.</p>
-      ) : (
-        <div className="table-wrapper">
-          <table className="prof-table">
-            <thead>
-              <tr>
-                <th>Event ID</th>
-                <th>Category</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Stall Type</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {bookings.map(b => {
-                const paid = isPaid(b.bookingId); 
+        {/* HEADER */}
+        <section className="admin-events-header glass-card-events">
+          <h1>Stall Booking Requests</h1>
 
-                return (
-                  <tr key={b.bookingId}>
-                    <td data-label="Event ID">{b.eventid}</td>
-                    <td data-label="Category">{b.category}</td>
-                    <td data-label="Email">{b.email}</td>
-                    <td data-label="Phone">{b.phone}</td>
-                    <td data-label="Stall Type">{b.type}</td>
-                    <td data-label="Status">
-                      {paid ? (
-                        <span className="approved">Booked</span> 
-                      ) : b.status === "pending" ? (
-                        <>
-                          <button className="approve" onClick={() => approveBooking(b.bookingId)}>Approve</button>
-                          <button className="reject" onClick={() => rejectBooking(b.bookingId)}>Reject</button>
-                        </>
-                      ) : (
-                        <span className={
-                          b.status === "approved" || b.status === "booked" 
-                            ? "approved" 
-                            : "rejected"
-                        }>
-                          {b.status === "booked" ? "Booked" : b.status}
-                        </span>
-                      )}
-                    </td>
+          <button
+            className="admin-events-back-btn"
+            onClick={() => navigate("/club/dashboard")}
+          >
+            &#8617; Go Back
+          </button>
+        </section>
+
+        {/* TOOLBAR */}
+        <section className="admin-events-toolbar glass-card-events">
+
+          <div className="toolbar-left">
+
+            <div className="google-search">
+              <svg className="google-search-icon" viewBox="0 0 24 24">
+                <path
+                  fill="currentColor"
+                  d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5
+                  6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59
+                  4.23-1.57l.27.28v.79L20 21.5 21.5 20l-6-6z"
+                />
+              </svg>
+
+              <input
+                type="text"
+                placeholder="Search Booking ID, Event, Stall..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+
+            <button
+              className="admin-events-refresh-btn"
+              onClick={handleRefresh}
+            >
+              Refresh
+            </button>
+
+          </div>
+
+          <div className="status-dropdown-wrapper">
+            <select
+              className="status-dropdown"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option>All</option>
+              <option>Pending</option>
+              <option>Approved</option>
+              <option>Rejected</option>
+              <option>Booked</option>
+            </select>
+          </div>
+
+          <button
+            className="stalls-create-btn big-report-btn"
+            onClick={() => navigate("/report")}
+          >
+            Report
+          </button>
+
+        </section>
+
+        {/* TABLE */}
+        <section className="glass-card-events table-box">
+
+          {loading ? (
+            <div className="admin-events-message">Loading...</div>
+          ) : error ? (
+            <div className="admin-events-message">{error}</div>
+          ) : filteredBookings.length === 0 ? (
+            <div className="admin-events-message">No bookings found</div>
+          ) : (
+            <div className="table-wrapper">
+              <table className="prof-table">
+                <thead>
+                  <tr>
+                    <th>Booking ID</th>
+                    <th>Event</th>
+                    <th>Stall</th>
+                    <th>Vendor</th>
+                    <th>Phone</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Actions</th>
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
+                </thead>
+
+                <tbody>
+                  {filteredBookings.map((b) => (
+                    <tr key={b._id}>
+                      <td>{b.bookingId}</td>
+                      <td>{b.title}</td>
+                      <td>{b.stallId} ({b.category})</td>
+                      <td>{b.email}</td>
+                      <td>{b.phone}</td>
+                      <td>{b.type}</td>
+
+                      <td>
+                        <span className={`status-badge ${b.status}`}>
+                          {b.status}
+                        </span>
+                      </td>
+
+                
+                      <td className="action-buttons">
+
+                        {b.status === "pending" && (
+                          <>
+                            <button
+                              className="approve"
+                              onClick={() => updateStatus(b.bookingId, "approved")}
+                            >
+                              Approve
+                            </button>
+
+                            <button
+                              className="reject"
+                              onClick={() => updateStatus(b.bookingId, "rejected")}
+                            >
+                              Reject
+                            </button>
+                          </>
+                        )}
+
+                        {b.status === "approved" && (
+                          <button
+                            className="reject"
+                            onClick={() => updateStatus(b.bookingId, "rejected")}
+                          >
+                            Reject
+                          </button>
+                        )}
+
+                      </td>
+
+                    </tr>
+                  ))}
+                </tbody>
+
+              </table>
+            </div>
+          )}
+
+        </section>
+
+      </div>
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import "./AddStall.css";
 
@@ -35,12 +35,12 @@ export default function AddStall() {
   }, [eventid]);
 
   const fillDemoData = () => {
-    setStallId("V003");
+    setStallId("T003");
     setCategory("Food");
-    setPrice(6000);
+    setPrice(8000);
     setLocation("Ground Floor");
-    setAvailable(6);
-    setImage("https://i.postimg.cc/851J3ypB/indian-street-food-stall.jpg");
+    setAvailable(1);
+    setImage("https://i.postimg.cc/rpshHMrd/vibrant-food-stall-stockcake.webp");
     setDescription("Freshly baked snacks.");
   };
 
@@ -53,29 +53,23 @@ export default function AddStall() {
         else if (!/^[A-Za-z]\d{3}$/.test(value))
           message = "Stall ID must be 1 letter followed by 3 digits (e.g., A123)";
         break;
-
       case "category":
         if (!value) message = "Category required";
         break;
-
       case "price":
         if (!value || value <= 0) message = "Price must be > 0";
         else if (value < 5000) message = "Price must be at least Rs. 5000";
         break;
-
       case "location":
         if (!value) message = "Location required";
         break;
-
       case "available":
         if (!value || value <= 0) message = "Available stalls must be > 0";
         break;
-
       case "description":
         if (value.length > 30)
           message = "Description cannot exceed 30 characters";
         break;
-
       default:
         break;
     }
@@ -155,115 +149,139 @@ export default function AddStall() {
   };
 
   return (
-    <div className="stall-container">
-      <h2>{eventTitle} Event Stall </h2>
-      <form className="stall-form" onSubmit={(e) => e.preventDefault()}>
+    <div className="stall-form-page">
+  <div className="stall-form-container">
+    <div className="stall-form-header">
+      <Link to="/club/dashboard" className="stall-form-back-btn">
+        ← Back
+      </Link>
+      <div className="stall-form-hero">
+        <h1>{eventTitle} Event Stall</h1>
+        <p>
+          Add a new stall for your event. Fill in the details below to submit for approval.
+        </p>
+      </div>
+    </div>
 
+    <form className="stall-form-card" onSubmit={(e) => e.preventDefault()}>
+      <div className="stall-form-grid">
         {/* Stall ID */}
-        <div className="form-group">
+        <div className="stall-form-group full-width">
+          <label>Stall ID*</label>
           <input
             type="text"
             value={stallId}
-            placeholder=" "
+            placeholder="Enter Stall ID"
             onChange={(e) => handleChange("stallId", e.target.value)}
             onBlur={() => handleBlur("stallId")}
           />
-          <label>Stall ID*</label>
-          {touched.stallId && errors.stallId && <div className="error">{errors.stallId}</div>}
+          {touched.stallId && errors.stallId && (
+            <div className="error">{errors.stallId}</div>
+          )}
         </div>
 
         {/* Category */}
-        <div className={`form-group select-group ${category ? "has-value" : ""}`}>
+        <div className="stall-form-group">
+          <label>Category*</label>
           <select
             value={category}
             onChange={(e) => handleChange("category", e.target.value)}
             onBlur={() => handleBlur("category")}
           >
-            <option value="" ></option>
+            <option value="" disabled hidden>Select Stall Category</option>
             <option value="Food">Food</option>
             <option value="Merchandise">Merchandise</option>
             <option value="Games">Games</option>
             <option value="Service">Service</option>
             <option value="Other">Other</option>
           </select>
-          <label>Category*</label>
-          {touched.category && errors.category && <div className="error">{errors.category}</div>}
+          {touched.category && errors.category && (
+            <div className="error">{errors.category}</div>
+          )}
         </div>
 
         {/* Price */}
-        <div className="form-group">
+        <div className="stall-form-group">
+          <label>Price (Rs.)*</label>
           <input
             type="number"
             value={price}
-            placeholder=" "
+            placeholder="Enter Price"
             onChange={(e) => handleChange("price", e.target.value)}
             onBlur={() => handleBlur("price")}
           />
-          <label>Price (Rs.)*</label>
-          {touched.price && errors.price && <div className="error">{errors.price}</div>}
+          {touched.price && errors.price && (
+            <div className="error">{errors.price}</div>
+          )}
         </div>
 
         {/* Location */}
-        <div className="form-group">
+        <div className="stall-form-group">
+          <label>Location*</label>
           <input
             type="text"
             value={location}
-            placeholder=" "
+            placeholder="Enter Location"
             onChange={(e) => handleChange("location", e.target.value)}
             onBlur={() => handleBlur("location")}
           />
-          <label>Location*</label>
-          {touched.location && errors.location && <div className="error">{errors.location}</div>}
+          {touched.location && errors.location && (
+            <div className="error">{errors.location}</div>
+          )}
         </div>
 
-        {/* Available Stalls */}
-        <div className="form-group">
+        {/* Available */}
+        <div className="stall-form-group">
+          <label>Available Stalls*</label>
           <input
             type="number"
             value={available}
-            placeholder=" "
+            placeholder="Enter Available Stalls"
             onChange={(e) => handleChange("available", e.target.value)}
             onBlur={() => handleBlur("available")}
           />
-          <label>Available Stalls*</label>
-          {touched.available && errors.available && <div className="error">{errors.available}</div>}
+          {touched.available && errors.available && (
+            <div className="error">{errors.available}</div>
+          )}
         </div>
 
-        {/* Image URL */}
-        <div className="form-group">
+        {/* Image */}
+        <div className="stall-form-group full-width">
+          <label>Image URL</label>
           <input
             type="text"
             value={image}
-            placeholder=" "
+            placeholder="Enter Image URL"
             onChange={(e) => handleChange("image", e.target.value)}
           />
-          <label>Image URL</label>
         </div>
 
         {/* Description */}
-        <div className="form-group">
+        <div className="stall-form-group full-width">
+          <label>Description</label>
           <textarea
             value={description}
-            placeholder=" "
+            placeholder="Enter Description"
+            rows={3}
             onChange={(e) => handleChange("description", e.target.value)}
             onBlur={() => handleBlur("description")}
-            rows={3}
           />
-          <label>Description</label>
-          {touched.description && errors.description && <div className="error">{errors.description}</div>}
+          {touched.description && errors.description && (
+            <div className="error">{errors.description}</div>
+          )}
         </div>
+      </div>
 
-        {/* Buttons */}
-        <div style={{ display: "flex", gap: "10px" }}>
-          <button type="button" className="demo-btn" onClick={fillDemoData}>
-            Demo
-          </button>
-
-          <button type="button" className="create-btn" onClick={handleCreateStall}>
-            Create
-          </button>
-        </div>
-      </form>
-    </div>
+      <div className="stall-form-actions">
+        <button type="button" className="stall-form-secondary-btn" onClick={fillDemoData}>
+          Demo
+        </button>
+        <button type="button" className="stall-form-primary-btn" onClick={handleCreateStall}>
+          Create
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
   );
 }

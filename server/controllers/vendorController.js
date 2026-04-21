@@ -3,7 +3,7 @@ import { validationResult } from "express-validator";
 import Vendor from "../models/Vendor.js";
 import jwt from "jsonwebtoken";
 
-// ---------------- Vendor Registration ----------------
+//  Vendor Registration 
 export async function registerVendor(req, res) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -72,7 +72,7 @@ export async function registerVendor(req, res) {
   }
 }
 
-// ---------------- Vendor Login ----------------
+//  Vendor Login 
 export async function loginVendor(req, res) {
   let { email, password } = req.body;
 
@@ -129,7 +129,7 @@ export async function loginVendor(req, res) {
   }
 }
 
-// ---------------- Admin: Get All Vendors ----------------
+//  Admin: Get All Vendors 
 export async function getAllVendors(req, res) {
   try {
     const { status } = req.query;
@@ -146,7 +146,7 @@ export async function getAllVendors(req, res) {
   }
 }
 
-// ---------------- Admin: Get Vendor By ID ----------------
+//  Admin: Get Vendor By ID 
 export async function getVendorById(req, res) {
   const { id } = req.params;
 
@@ -164,7 +164,7 @@ export async function getVendorById(req, res) {
   }
 }
 
-// ---------------- Admin: Delete Vendor ----------------
+//  Admin: Delete Vendor 
 export async function deleteVendor(req, res) {
   const { id } = req.params;
 
@@ -184,7 +184,7 @@ export async function deleteVendor(req, res) {
   }
 }
 
-// ---------------- Admin: Approve Vendor ----------------
+//  Admin: Approve Vendor 
 export async function approveVendor(req, res) {
   const { id } = req.params;
 
@@ -206,7 +206,7 @@ export async function approveVendor(req, res) {
   }
 }
 
-// ---------------- Admin: Reject Vendor ----------------
+//  Admin: Reject Vendor 
 export async function rejectVendor(req, res) {
   const { id } = req.params;
 
@@ -224,6 +224,58 @@ export async function rejectVendor(req, res) {
     return res.json({ message: "Vendor rejected successfully", vendor });
   } catch (err) {
     console.error("Reject vendor error:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+}
+
+export async function updateVendor(req, res) {
+  const { id } = req.params;
+
+  try {
+    const vendor = await Vendor.findById(id);
+
+    if (!vendor) {
+      return res.status(404).json({ message: "Vendor not found" });
+    }
+
+    // update only provided fields
+    if (req.body.companyName) {
+      vendor.companyName = req.body.companyName.trim();
+    }
+
+    if (req.body.contact) {
+      vendor.contact = req.body.contact.trim();
+    }
+
+    if (req.body.address) {
+      vendor.address = req.body.address.trim();
+    }
+
+    if (req.body.email) {
+      vendor.email = req.body.email.trim().toLowerCase();
+    }
+
+    if (req.body.stallType) {
+      vendor.stallType = req.body.stallType;
+    }
+
+    await vendor.save();
+
+    return res.json({
+      message: "Vendor updated successfully",
+      vendor: {
+        id: vendor._id,
+        companyName: vendor.companyName,
+        contact: vendor.contact,
+        address: vendor.address,
+        email: vendor.email,
+        stallType: vendor.stallType,
+        status: vendor.status
+      }
+    });
+
+  } catch (err) {
+    console.error("Update vendor error:", err);
     return res.status(500).json({ message: "Server error" });
   }
 }
