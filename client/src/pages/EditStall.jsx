@@ -59,7 +59,7 @@ const EditStall = () => {
 
   return (
     <div className="edit-stall-container">
-      <h2 className="edit-stall-title">{eventTitle} Stall</h2>
+      <h2 className="edit-stall-title">{eventTitle} Event Stall</h2>
       <form className="edit-stall-form-new" onSubmit={handleSubmit}>
 
         <div className="field-group">

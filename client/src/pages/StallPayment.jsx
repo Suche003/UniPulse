@@ -103,6 +103,7 @@ const StallPayment = () => {
   };
 
   return (
+
     <div className="stall-payment-card">
       <h2 className="form-title">Stall Payment</h2>
 
@@ -220,7 +221,7 @@ const StallPayment = () => {
         </div>
       </form>
     </div>
-  );
+);
 };
 
 export default StallPayment;

@@ -12,7 +12,6 @@ const ClubDashboard = () => {
   const [error, setError] = useState("");
 
   const navigate = useNavigate();
-
   const user = JSON.parse(localStorage.getItem("unipulse_user")) || {};
   const clubName = user?.clubName || user?.name || "Club";
   const loggedInClubId = user?._id || user?.id || user?.clubid || "";
@@ -99,7 +98,10 @@ const ClubDashboard = () => {
           </div>
 
           <div className="club-dashboard-navbar__right">
-            <Link to="/club/profile" className="club-nav-btn club-nav-btn--profile">
+            <Link
+              to="/club/profile"
+              className="club-nav-btn club-nav-btn--profile"
+            >
               Profile
             </Link>
             <button
@@ -161,6 +163,7 @@ const ClubDashboard = () => {
 
         {!loading && !error && (
           <>
+            {/* UPCOMING EVENTS */}
             <section className="club-dashboard-section">
               <div className="club-section-header">
                 <h2>Upcoming Events</h2>
@@ -197,9 +200,16 @@ const ClubDashboard = () => {
                       <div className="club-event-card__actions">
                         <Link
                           to={`/events/${event._id}`}
-                          className="club-action-btn"
+                          className="club-action-btn secondary"
                         >
                           View Event
+                        </Link>
+
+                        <Link
+                          to={`/stalls/${event.eventid}`}
+                          className="club-action-btn"
+                        >
+                          Stall Management
                         </Link>
                       </div>
                     </div>
@@ -208,6 +218,7 @@ const ClubDashboard = () => {
               )}
             </section>
 
+            {/* PENDING EVENT REQUESTS */}
             <section className="club-dashboard-section">
               <div className="club-section-header">
                 <h2>Upcoming Event Requests</h2>
@@ -255,6 +266,7 @@ const ClubDashboard = () => {
               )}
             </section>
 
+            {/* PAST EVENTS */}
             <section className="club-dashboard-section">
               <div className="club-section-header">
                 <h2>Past Events</h2>
@@ -294,6 +306,27 @@ const ClubDashboard = () => {
               )}
             </section>
 
+            {/* VENDOR STALL MANAGEMENT */}
+            <section className="club-dashboard-section">
+              <div className="club-section-header">
+                <h2>Vendor Stall Management</h2>
+              </div>
+
+              <div className="club-sponsorship-grid">
+                <div className="club-sponsorship-card">
+                  <div className="club-sponsorship-card__icon">📋</div>
+                  <h3>Stall Requests</h3>
+                  <p>
+                    View and manage stall requests submitted by vendors for your events.
+                  </p>
+                  <Link to="/club/stall-requests" className="club-action-btn">
+                    View Requests
+                  </Link>
+                </div>
+              </div>
+            </section>
+
+            {/* SPONSORSHIP MANAGEMENT */}
             <section className="club-dashboard-section">
               <div className="club-section-header">
                 <h2>Sponsorship Management</h2>

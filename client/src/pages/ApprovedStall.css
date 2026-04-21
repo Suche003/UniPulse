@@ -1,119 +1,273 @@
-/* Wrapper */
-.approved-stalls-wrapper {
-  width: min(1100px, 92%);
-  margin: 40px auto;
-  padding: 30px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  backdrop-filter: blur(12px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+:root {
+  --glass: rgba(255, 255, 255, 0.08);
+  --border: rgba(255, 255, 255, 0.12);
+  --text: #f8fafc;
+  --muted: #cbd5e1;
+  --accent1: #ec4899;
+  --accent2: #8b5cf6;
+
+  --card-bg: rgba(139, 92, 246, 0.12);
+  --card-border: rgba(139, 92, 246, 0.25);
 }
 
-/* Title */
-.approved-stalls-title {
-  text-align: center;
-  margin-bottom: 30px;
-  font-size: 28px;
+/* PAGE */
+.admin-events-page {
+  min-height: 100vh;
+  padding: 32px 20px;
+  background:
+    radial-gradient(circle at top left, rgba(236,72,153,0.14), transparent 30%),
+    radial-gradient(circle at top right, rgba(139,92,246,0.14), transparent 30%),
+    linear-gradient(135deg, #0b0b14, #111827);
   color: var(--text);
 }
 
-/* List */
-.approved-stalls-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 18px;
-  justify-content: center;
+/* CONTAINER */
+.admin-events-container {
+  max-width: 1280px;
+  margin: 0 auto;
 }
 
-/* Stall Card */
-.approved-stall-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 18px;
-  min-width: 240px;
-  min-height: 240px;
+/* HEADER */
+.admin-events-header {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  gap: 10px;
-  text-align: center;
-  transition: 0.2s ease;
-  backdrop-filter: blur(10px);
+  padding: 28px;
+  margin-bottom: 40px;
 }
 
-.approved-stall-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 25px rgba(124, 44, 255, 0.25);
-  border-color: rgba(124,44,255,0.5);
-}
-
-/* Event title */
-.approved-stall-event-title {
-  font-size: 18px;
-  color: var(--text);
+.admin-events-header h1 {
   margin: 0;
+  font-size: 2.2rem;
+  font-weight: 800;
+  background: linear-gradient(90deg, #ffffff, #f9a8d4, #c084fc);
+  -webkit-background-clip: text;
+  color: transparent;
 }
 
-/* Details */
-.approved-stall-event-date,
-.approved-stall-type,
-.approved-stall-price {
-  color: var(--muted);
-  font-size: 14px;
-  margin: 4px 0;
-}
-
-/* Payment button */
-.approved-payment-btn {
-  margin-top: 10px;
-  padding: 10px 16px;
+/* BACK BUTTON */
+.admin-events-back-btn {
+  padding: 10px 14px;
   border-radius: 12px;
   border: none;
-  font-weight: 600;
   cursor: pointer;
-  background: linear-gradient(90deg, var(--accent2), var(--accent));
-  color: white;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent1), var(--accent2));
+}
+
+/* FILTER BOX */
+.filter-box {
+  display: flex;
+  flex-wrap: nowrap;   
+  align-items: center;
+  gap: 12px;
+  justify-content: center;
+
+  margin: 0 auto 25px auto;
+  padding: 16px;
+
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+
+  width: 1280px;
+  max-width: 100%;
+  overflow-x: auto; 
+}
+
+/* INPUTS */
+.filter-box input {
+  padding: 10px 14px;
+  border-radius: 12px;
+
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  background: rgba(139, 92, 246, 0.10);
+
+  color: var(--text);
+  outline: none;
+  min-width: 180px;
+
   transition: 0.2s ease;
 }
 
-.approved-payment-btn:hover {
+/* FOCUS */
+.filter-box input:focus {
+  border-color: var(--accent2);
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.25);
   transform: translateY(-1px);
-  opacity: 0.95;
 }
 
-/* Booked state */
-.approved-payment-btn.approved-booked {
-  background: rgba(0, 255, 140, 0.2);
-  border: 1px solid rgba(0, 255, 140, 0.4);
-  color: #8affc1;
+/* CLEAR BUTTON */
+.clear-btn {
+  padding: 10px 14px;
+  border-radius: 12px;
+
+  border: 1px solid rgba(236, 72, 153, 0.4);
+  background: rgba(236, 72, 153, 0.15);
+
+  color: var(--text);
+  font-weight: 700;
+
+  cursor: pointer;
+  transition: 0.2s ease;
+
+  white-space: nowrap; /* keeps text in one line */
+}
+
+.clear-btn:hover {
+  background: rgba(236, 72, 153, 0.25);
+  transform: translateY(-2px);
+}
+
+.clear-btn:active {
+  transform: scale(0.97);
+}
+
+/* (rest unchanged) */
+.section-title {
+  width: 100%;
+  padding: 16px 20px;
+  margin: 30px 0 18px;
+
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #ffffff;
+
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 18px;
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  position: relative;
+  overflow: hidden;
+}
+
+.section-title::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+
+  width: 6px;
+  height: 100%;
+
+  background: #8b5cf6;
+  border-radius: 0 10px 10px 0;
+}
+
+/* GRID */
+.stall-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 20px;
+  min-height: 260px;
+}
+
+/* CARD */
+.stall-card {
+  padding: 18px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 22px;
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  box-shadow: 0 10px 30px rgba(0,0,0,0.28);
+  transition: 0.3s ease;
+}
+
+.stall-card:hover {
+  transform: translateY(-5px);
+}
+
+/* CARD BODY */
+.stall-card-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* TITLE */
+.stall-card-body h3 {
+  margin: 10px 0;
+  color: #fff;
+}
+
+/* META */
+.stall-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+  align-items: center;
+}
+
+.stall-meta p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* ACTIONS */
+.stall-actions {
+  margin-top: 14px;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+/* BUTTON */
+.approved-btn {
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: none;
+
+  font-weight: 700;
+  cursor: pointer;
+
+  color: white;
+  background: linear-gradient(135deg, var(--accent1), var(--accent2));
+
+  transition: 0.2s ease;
+}
+
+.approved-btn:hover {
+  transform: translateY(-2px);
+}
+
+/* BOOKED BUTTON */
+.approved-btn.booked {
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+  border: 1px solid rgba(34, 197, 94, 0.4);
   cursor: default;
 }
 
-.approved-payment-btn.approved-booked:hover {
+.approved-btn.booked:hover {
   transform: none;
-  opacity: 1;
 }
 
-/* Info text */
-.approved-info-text {
+/* MESSAGE */
+.stall-message {
+  padding: 18px;
+  margin-top: 20px;
   text-align: center;
-  font-size: 15px;
   color: var(--muted);
-}
 
-/* Error text */
-.approved-error-text {
-  text-align: center;
-  font-size: 15px;
-  color: #ff9aa9;
-}
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 16px;
 
-/* Remove bold strong */
-.approved-stall-card strong {
-  font-weight: normal;
-  color: var(--muted);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }

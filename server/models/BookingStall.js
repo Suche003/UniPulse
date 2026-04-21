@@ -2,7 +2,8 @@ import mongoose from "mongoose";
 
 const bookingStallSchema = new mongoose.Schema(
   {
-    bookingId: { type: String, required: true, unique: true }, 
+    bookingId: { type: String, required: true, unique: true },
+    clubid: { type: String, required: true }, 
     eventid: { type: String, required: true },
     title: { type: String, required: true },
     stallId: { type: String, required: true },

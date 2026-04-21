@@ -8,11 +8,12 @@ import {
   approveVendor,
   rejectVendor,
   loginVendor,
+  updateVendor
 } from "../controllers/vendorController.js";
 
 const router = Router();
 
-// ================= Vendor Registration =================
+//  Vendor Registration 
 router.post(
   "/register",
   [
@@ -57,17 +58,18 @@ router.post(
   registerVendor
 );
 
-// ================= Vendor Login =================
+//  Vendor Login 
 router.post("/login", loginVendor);
 
-// ================= Admin Request Management =================
+//  Admin Request Management 
 router.get("/requests", getAllVendors);
 router.patch("/approve/:id", approveVendor);
 router.patch("/reject/:id", rejectVendor);
 
-// ================= Vendor List / Single / Delete =================
+//  Vendor List / Single / Delete / Update
 router.get("/", getAllVendors);
 router.get("/:id", getVendorById);
 router.delete("/:id", deleteVendor);
+router.put("/:id", updateVendor);
 
 export default router;

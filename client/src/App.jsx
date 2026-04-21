@@ -35,6 +35,7 @@ import EditStall from "./pages/EditStall";
 import VendorStalls from "./pages/VendorStalls";
 import BookingForm from "./pages/BookingForm";
 import Requests from "./pages/Requests";
+import StallReport from "./pages/StallReport";
 import Vendor from "./pages/Vendors";
 import ApprovedStall from "./pages/ApprovedStall";
 import StallPayment from "./pages/StallPayment";
@@ -110,6 +111,13 @@ export default function App() {
             <Route path="/club/marketplace" element={<SponsorMarketplace />} />
             <Route path="/club/requests" element={<ClubRequests />} />
             <Route path="/club/payments" element={<ClubPayments />} />
+
+            {/* Stall management routes for clubs */}
+            <Route path="/stalls/:eventid" element={<Stalls />} />
+            <Route path="/stalls/:eventid/add" element={<AddStall />} />
+            <Route path="/stalls/:eventid/edit/:stallId" element={<EditStall />} />
+            <Route path="/club/stall-requests" element={<Requests />} />
+            <Route path="/report" element={<StallReport />} />
           </Route>
 
           {/* Sponsor only */}
@@ -141,20 +149,11 @@ export default function App() {
               path="/superadmin/pendingevents"
               element={<PendingEvents />}
             />
-            <Route
-              path="/superadmin/vendor-requests"
-              element={<Vendor />}
-            />
-            <Route
-              path="/superadmin/sponsor-requests"
-              element={<SponsorList />}
-            />
+            <Route path="/superadmin/vendor-requests" element={<Vendor />} />
+            <Route path="/superadmin/sponsor-requests" element={<SponsorList />} />
 
             {/* All data pages */}
-            <Route
-              path="/superadmin/alleventsadmin"
-              element={<EventListAdmin />}
-            />
+            <Route path="/superadmin/alleventsadmin" element={<EventListAdmin />} />
             <Route path="/superadmin/vendors" element={<AllVendors />} />
             <Route path="/superadmin/sponsors" element={<AllSponsors />} />
             <Route path="/superadmin/students" element={<AllStudents />} />
@@ -162,17 +161,7 @@ export default function App() {
             {/* Club management */}
             <Route path="/superadmin/createclub" element={<ClubForm />} />
             <Route path="/superadmin/viewallclubs" element={<AllClubs />} />
-
-            {/* Old requests route kept if used elsewhere */}
-            <Route path="/superadmin/requests" element={<Requests />} />
-
-            {/* Stall management routes */}
-            <Route path="/stalls/:eventid" element={<Stalls />} />
-            <Route path="/stalls/:eventid/add" element={<AddStall />} />
-            <Route
-              path="/stalls/:eventid/edit/:stallId"
-              element={<EditStall />}
-            />
+            
           </Route>
         </Route>
 

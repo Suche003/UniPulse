@@ -5,7 +5,7 @@ import {
   getStallById,
   updateStall,
   deleteStall,
-  getAllStalls 
+  getAllStalls
 } from "../controllers/stallController.js";
 
 const router = express.Router();
