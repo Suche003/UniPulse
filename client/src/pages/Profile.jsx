@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 
+const API = "http://localhost:5000";
+
 export default function Profile() {
   const token = localStorage.getItem("unipulse_token");
 
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const [form, setForm] = useState({
     name: "",
@@ -19,8 +23,16 @@ export default function Profile() {
   async function loadProfile() {
     try {
       setLoading(true);
+      setError("");
+      setSuccess("");
 
-      const res = await fetch("http://localhost:5000/api/students/me", {
+      if (!token) {
+        setError("You are not logged in.");
+        setLoading(false);
+        return;
+      }
+
+      const res = await fetch(`${API}/api/students/me`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -29,7 +41,7 @@ export default function Profile() {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.message || "Failed to load profile");
+        setError(data.message || "Failed to fetch student");
         return;
       }
 
@@ -41,10 +53,10 @@ export default function Profile() {
         address: data.address || "",
       });
 
-      // keep localStorage synced with latest backend data
       localStorage.setItem("unipulse_user", JSON.stringify(data));
     } catch (err) {
-      alert("Failed to connect to server");
+      console.error("Profile load error:", err);
+      setError("Failed to connect to server");
     } finally {
       setLoading(false);
     }
@@ -62,13 +74,15 @@ export default function Profile() {
   async function handleSave() {
     try {
       setSaving(true);
+      setError("");
+      setSuccess("");
 
       const payload = {
         contact: form.contact,
         address: form.address,
       };
 
-      const res = await fetch("http://localhost:5000/api/students/me", {
+      const res = await fetch(`${API}/api/students/me`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -83,7 +97,8 @@ export default function Profile() {
         const msg = data?.errors
           ? data.errors.map((x) => `• ${x.msg}`).join("\n")
           : data.message || "Failed to update profile";
-        alert(msg);
+
+        setError(msg);
         return;
       }
 
@@ -98,9 +113,10 @@ export default function Profile() {
       });
 
       setIsEditing(false);
-      alert("Profile updated successfully!");
+      setSuccess("Profile updated successfully!");
     } catch (err) {
-      alert("Server error while updating profile");
+      console.error("Profile update error:", err);
+      setError("Server error while updating profile");
     } finally {
       setSaving(false);
     }
@@ -108,6 +124,8 @@ export default function Profile() {
 
   function handleCancel() {
     setIsEditing(false);
+    setError("");
+    setSuccess("");
     loadProfile();
   }
 
@@ -123,6 +141,36 @@ export default function Profile() {
             View and manage your personal information registered in UniPulse.
           </p>
         </section>
+
+        {error && (
+          <div
+            style={{
+              marginBottom: "18px",
+              padding: "14px 16px",
+              borderRadius: "14px",
+              background: "rgba(255, 93, 115, 0.12)",
+              border: "1px solid rgba(255, 93, 115, 0.34)",
+              color: "#ffd2d8",
+            }}
+          >
+            {error}
+          </div>
+        )}
+
+        {success && (
+          <div
+            style={{
+              marginBottom: "18px",
+              padding: "14px 16px",
+              borderRadius: "14px",
+              background: "rgba(35, 196, 131, 0.14)",
+              border: "1px solid rgba(35, 196, 131, 0.35)",
+              color: "#bff3dd",
+            }}
+          >
+            {success}
+          </div>
+        )}
 
         <section className="profileGrid">
           <div className="profileCard">
