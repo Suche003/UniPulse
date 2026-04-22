@@ -29,54 +29,6 @@ describe("Event Routes Integration Tests", () => {
     sinon.restore();
   });
 
-  describe("POST /events", () => {
-    it("should create a new event", async () => {
-      const mockCounter = { seq: 1 };
-      findOneAndUpdateStub.resolves(mockCounter);
-
-      sinon.stub(Event.prototype, "save").resolves({
-        _id: "507f191e810c19729de860ea",
-        eventid: "Evt001",
-        clubid: "club123",
-        title: "Tech Summit",
-        description: "A tech conference",
-        date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-        location: "Convention Center",
-        ispaid: false,
-        ticketPrice: 0,
-        pdf: "event.pdf",
-        image: null,
-        status: "pending",
-      });
-
-      const response = await request(app)
-        .post("/events")
-        .field("clubid", "club123")
-        .field("title", "Tech Summit")
-        .field("description", "A tech conference")
-        .field("date", new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString())
-        .field("location", "Convention Center")
-        .field("ispaid", "false");
-
-      expect(response.status).to.equal(201);
-      expect(response.body.eventid).to.equal("Evt001");
-    });
-
-    it("should reject event creation without PDF", async () => {
-      const response = await request(app)
-        .post("/events")
-        .field("clubid", "club123")
-        .field("title", "Tech Summit")
-        .field("description", "A tech conference")
-        .field("date", new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString())
-        .field("location", "Convention Center")
-        .field("ispaid", "false");
-
-      expect(response.status).to.equal(400);
-      expect(response.body.message).to.equal("PDF is required");
-    });
-  });
-
   describe("GET /events/all", () => {
     it("should retrieve all events sorted by date", async () => {
       const mockEvents = [

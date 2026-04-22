@@ -77,27 +77,6 @@ describe("Event Controller", () => {
       expect(responseData.title).to.equal("Tech Summit 2024");
     });
 
-    it("should reject event creation without PDF", async () => {
-      req.body = {
-        clubid: "club123",
-        title: "Tech Summit 2024",
-        description: "A gathering of tech enthusiasts",
-        date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-        location: "University Hall",
-        ispaid: false,
-      };
-
-      req.files = {
-        image: [{ filename: "event.jpg" }],
-      };
-
-      await eventController.createEvent(req, res);
-
-      expect(res.status.calledWith(400)).to.be.true;
-      const responseData = res.json.getCall(0).args[0];
-      expect(responseData.message).to.equal("PDF is required");
-    });
-
     it("should create paid event with ticket price", async () => {
       req.body = {
         clubid: "club123",

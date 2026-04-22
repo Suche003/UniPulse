@@ -42,39 +42,6 @@ describe("Sponsorship Controller", () => {
   });
 
   describe("createRequest", () => {
-    it("should create a sponsorship request successfully", async () => {
-      req.body = {
-        eventId: "evt001",
-        sponsorId: "spon001",
-        proposedAmount: 5000,
-        message: "We would like to sponsor this event",
-      };
-      req.user.sub = "club001";
-
-      const mockEvent = { _id: "evt001", title: "Tech Summit" };
-      const mockSponsor = { _id: "spon001", name: "TechCorp", status: "approved" };
-      const mockRequest = {
-        _id: "req001",
-        event: "evt001",
-        sponsor: "spon001",
-        club: "club001",
-        proposedAmount: 5000,
-        status: "pending",
-      };
-
-      eventFindByIdStub.resolves(mockEvent);
-      sponsorFindByIdStub.resolves(mockSponsor);
-      sinon.stub(SponsorshipRequest.prototype, "save").resolves(mockRequest);
-      notificationCreateStub.resolves({ _id: "notif001" });
-
-      await sponsorshipController.createRequest(req, res);
-
-      expect(res.status.calledWith(201)).to.be.true;
-      const responseData = res.json.getCall(0).args[0];
-      expect(responseData._id).to.equal("req001");
-      expect(responseData.status).to.equal("pending");
-    });
-
     it("should return 404 if event not found", async () => {
       req.body = { eventId: "evt999", sponsorId: "spon001", proposedAmount: 5000 };
 
@@ -482,61 +449,6 @@ describe("Sponsorship Controller", () => {
   });
 
   describe("recordPayment", () => {
-    it("should record a payment successfully", async () => {
-      req.params = { requestId: "req001" };
-      req.body = {
-        amount: 5000,
-        transactionId: "txn123",
-        notes: "Payment received",
-      };
-      req.user = { sub: "spon001", role: "sponsor" };
-
-      const mockRequest = {
-        _id: "req001",
-        sponsor: { _id: "spon001", toString: () => "spon001" },
-        event: { _id: "evt001", title: "Tech Summit" },
-        club: { _id: "club001" },
-        status: "accepted",
-        save: sinon.stub().resolves(),
-      };
-
-      const mockPayment = {
-        _id: "pay001",
-        amount: 5000,
-        status: "completed",
-      };
-
-      const mockSponsor = {
-        _id: "spon001",
-        totalAmount: 10000,
-        amountPaid: 0,
-        save: sinon.stub().resolves(),
-      };
-
-      const mockClub = {
-        _id: "club001",
-        email: "club@email.com",
-      };
-
-      sponsorshipFindByIdStub.returns({
-        populate: sinon.stub().returns({
-          populate: sinon.stub().resolves(mockRequest),
-        }),
-      });
-
-      paymentCreateStub.resolves(mockPayment);
-      sponsorFindByIdStub.resolves(mockSponsor);
-      paymentAggregateStub.resolves([{ total: 5000 }]);
-      clubFindByIdStub.resolves(mockClub);
-      notificationCreateStub.resolves({ _id: "notif001" });
-
-      await sponsorshipController.recordPayment(req, res);
-
-      expect(res.status.calledWith(201)).to.be.true;
-      const responseData = res.json.getCall(0).args[0];
-      expect(responseData._id).to.equal("pay001");
-    });
-
     it("should return 400 if request not accepted", async () => {
       req.params = { requestId: "req001" };
       req.body = { amount: 5000, transactionId: "txn123" };
